@@ -1,0 +1,31 @@
+form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+
+    width: 100%;
+
+    .form-header {
+        >p {
+            text-align: center;
+            font-size: 16px;
+            font-style: oblique;
+        }
+    }
+
+    >div[class*='form-item'] {
+        width: 100%;
+
+        .ant-select {
+            >span {
+                top: 30%;
+                /* bottom: 30%; */
+            }
+        }
+    }
+    
+    & button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,47 @@
+#header {
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    background-color: var(--color-primary);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    height: 55px;
+    /* max-height: 300px; */
+    padding-inline: 40px;
+    padding-block: 5px;
+
+    z-index: 1000;
+
+    .logo-main-container {
+        height: 100%;
+        min-width: fit-content;
+
+        /* aspect-ratio: 2/1; */
+        /* justify-self: left; */
+        
+    
+        overflow: hidden;
+    
+        >img {
+            height: 100%;
+            object-fit: contain;
+        }
+    }
+    
+    .header-right-container {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+
+        flex-basis: 200px;
+        height: 100%;
+
+        .tooltip {
+            background-color: red;
+        }
+    }
+}

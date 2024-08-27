@@ -1,0 +1,37 @@
+#dashboard-page {
+    padding:8px 12px;
+    position: relative;
+
+    height: var(--main-height);
+
+    .add-txn-button {
+        width: 50px;
+        height: 50px;
+        background-color: var(--color-primary);
+        >span {
+            color: var(--white)
+        }
+
+        position: absolute;
+        bottom: 24px;
+        right: 12px;
+
+        box-shadow: 0 15px 15px -5px var(--shadow-dark-accent);
+        border: none;
+        
+        transition: transform 0.25s;
+    }
+    .add-txn-button:hover {
+        transform: scale(1.15)
+    }
+    .add-txn-button.discard {
+        transform: rotate(90deg)
+    }
+}
+
+.card-details-skeleton {
+    & h3 {
+        height: 100% !important;
+        background-color: #ffffff55 !important;
+    }
+}

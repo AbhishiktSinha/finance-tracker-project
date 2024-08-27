@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
+
+.dashboard-card {
+    width: 100%;
+    border-radius: 12px;
+    padding: 8px 12px;
+    max-width: 1020px;
+}
+
+#balance_card {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+
+    padding-bottom: 12px;
+
+    background-image: linear-gradient(to bottom right,
+        var(--color-primary) 50%,
+        var(--accent-color)
+    ); 
+
+    box-shadow: 0 10px 20px -10px var(--color-primary);
+
+    .card-header {
+        font-family: 'Noto Sans Mono' !important;
+        text-transform: uppercase;
+        color: var(--white) !important
+    }
+
+    .balance-details {
+
+        display: flex;
+        column-gap: 16px;
+        padding: 0 12px;
+        justify-content: space-between;
+
+        position: relative;
+
+        .defaultCurrency-skeleton{
+            height: 30px;
+            width: 60px;
+        }
+        .amount-skeleton {
+            height: 80px;
+        }
+        .insights-skeleton {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            top: -35px;
+            right: 10px;
+        }
+    }
+}

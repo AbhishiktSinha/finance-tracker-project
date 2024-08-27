@@ -1,0 +1,66 @@
+* {
+  padding: 0;
+  margin: 0 !important;
+
+  box-sizing: border-box;
+  font-family: 'Roboto' !important;
+}
+
+html {
+  background-color: var(--bg-light);
+}
+p, span, div, button, input::placeholder {
+  color: var(--text-dark);  
+}
+h1, h2, h3, h4 {
+  color: var(--black);
+  font-weight: 500;
+}
+
+:root {
+  --bg-light: #F6F8FC;
+
+  --bg-dark: #000321;
+
+
+  --color-primary: #335dda;
+  --color-secondary: #2f4379;
+
+  --accent-color: #547bef;
+
+  --shadow-black: #0202022e;
+  --shadow-dark-accent: #001e6f86;
+  --shadow-white: #ffffffbb;
+
+  --black: #222;
+  --text-dark: #313131;
+  --white: #fff;
+
+
+  --main-height: calc(100vh - 55px)
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);  
+}
+
+div, p, h1, h2, h3, label {
+  color: var(--text-dark) !important;
+}
+.ant-tooltip-inner {
+  color: #fff !important;
+}
+
+button[class*='primary'] {
+  background-color: var(--color-primary);
+  >span {
+    color: var(--white) ;
+  }
+}
+button:hover {
+  background-color: var(--accent-color) !important;
+  >span {
+    color: var(--white) !important
+  }
+}
