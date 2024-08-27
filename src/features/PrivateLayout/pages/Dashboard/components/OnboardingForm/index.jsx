@@ -3,12 +3,12 @@ import { useContext, useMemo, useRef } from 'react'
 import {Form, Button, Input, Select} from 'antd'
 import currencyToSymbolMap from 'currency-symbol-map/map'
 
-import ActionButton from '../../../../components_common/ActionButton';
-import privateContext from '../../../PrivateLayout/context';
-import { FirestoreCRUD } from '../../../../firebase/firestore';
+import ActionButton from '../../../../../../components_common/ActionButton';
+import privateContext from '../../../../context';
+import { FirestoreCRUD } from '../../../../../../firebase/firestore';
 
 import './styles.css'
-import { consoleError } from '../../../../console_styles';
+import { consoleError } from '../../../../../../console_styles';
 
 export default function OnboardingForm({modalRef}) {
     

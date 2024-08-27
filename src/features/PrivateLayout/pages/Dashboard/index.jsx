@@ -1,17 +1,20 @@
 import { useEffect, useRef, useContext } from 'react';
 
+import { useSelector } from 'react-redux';
+
 import { Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons';
 
-import ModalWrapper from '../../components_common/ModalWrapper'
+import ModalWrapper from '../../../../components_common/ModalWrapper/index.jsx'
 
-import privateContext from '../PrivateLayout/context';
+import privateContext from '../../context/index.jsx';
 
 import OnboardingForm from './components/OnboardingForm/index.jsx'
 import BalanceCard from './components/BalanceCard/index.jsx'
 
-import { getUserDoc } from './firebase';
-import { consoleDebug, consoleError } from '../../console_styles';
+import { getUserDoc } from './firebase.js';
+import {defaultCurrencySelector} from './redux/selectors.js'
+import { consoleDebug, consoleError } from '../../../../console_styles/index.js';
 
 import './stlyes.css';
 
@@ -24,32 +27,23 @@ export default function Dashboard() {
     const handleButtonClick= (e)=> {
         transactionModalRef.current.openModal();
     }
+
+    const defaultCurrency = useSelector(defaultCurrencySelector)
     
     /*  ONBOARDING MODAL
         The onboardingModal is to be shown if the user has not
         selected the defaultCurrency (i.e not done the initial setup yet)
-
-        To check that, we have to retrieve user details from the user's doc, 
-        which is an asynchronous operation, so we'll perform that in a
-        useEffect
     */
     const onboardingModalRef = useRef();
-    useEffect(()=>{
-        (
-            async function() {
-                const userDoc = await getUserDoc(user.uid);
-                
-                const { settings: {defaultCurrency} } = userDoc;
-
-                if (!Boolean(defaultCurrency)) {
-                    consoleError('DEFAULT CURRENCY NOT SET');
-                    onboardingModalRef.current.openModal();
-                }
-                else {
-                    consoleDebug(`Default Currency: ${defaultCurrency}`);
-                }
-            }
-        )()
+    useEffect(()=>{        
+        
+        if (!Boolean(defaultCurrency)) {
+            consoleError('DEFAULT CURRENCY NOT SET');
+            onboardingModalRef.current.openModal();
+        }
+        else {
+            consoleDebug(`Default Currency: ${defaultCurrency}`);
+        }
 
     }, [])
 

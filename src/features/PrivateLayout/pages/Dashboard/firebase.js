@@ -1,4 +1,4 @@
-import { FirestoreCRUD } from "../../firebase/firestore"
+import { FirestoreCRUD } from "../../../../firebase/firestore"
 
 export const getUserDoc = async(uid)=>{
 

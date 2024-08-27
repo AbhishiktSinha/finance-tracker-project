@@ -75,20 +75,16 @@ export class FirestoreCRUD {
      * GetDocData: -> get current data in the document
      */
     async getDocData(docPath) {
-        try {
-            const docRef = this.#getDocRef(docPath);
+        const docRef = this.#getDocRef(docPath);
 
-            const docSnap = await getDoc(docRef);
+        const docSnap = await getDoc(docRef);
 
-            if (!docSnap.exists) {
-                throw new Error('Invalid Document:', docPath)
-            }
-
-            return docSnap.data();
+        if (!docSnap.exists) {
+            throw new Error('Invalid Document:', docPath)
         }
-        catch(e) {
-            consoleError(e)
-        }
+
+        return docSnap.data();
+
     }
 
     

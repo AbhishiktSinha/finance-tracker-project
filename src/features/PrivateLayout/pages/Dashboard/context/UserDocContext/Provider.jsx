@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from 'react'
 
-import { FirestoreCRUD } from '../../../../firebase/firestore'
-import privateContext from '../../../PrivateLayout/context';
+import { FirestoreCRUD } from '../../../../../../firebase/firestore'
+import privateContext from '../../../../context';
 import userDocContext from '.';
-import { consoleDebug, consoleError } from '../../../../console_styles';
+import { consoleDebug, consoleError } from '../../../../../../console_styles';
 
 export default function Provider({children}) {
 
