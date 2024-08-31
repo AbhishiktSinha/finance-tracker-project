@@ -1,9 +1,8 @@
-
-
 import { useEffect, useState } from 'react'
-import './styles.css'
-import { Skeleton } from 'antd';
+
+
 import CardDetailsSkeleton from '../CardDetailsSkeleton';
+import './styles.css'
 /**
  * TODO: 
  *      What do we envision for the BalanceCard ? 

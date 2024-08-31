@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import SignupLogin from "./features/SignupLogin";
-import Dashboard from './features/Dashboard'
+import Dashboard from './features/PrivateLayout/pages/Dashboard'
 import PrivateLayout from './features/PrivateLayout'
 import SignupForm from "./features/SignupLogin/components/SignupForm";
 

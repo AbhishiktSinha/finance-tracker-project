@@ -1,5 +1,8 @@
-export const defaultCurrencySelector = ({userDoc})=>{
-    const {settings: {defaultCurrency}} = {userDoc};
+export const selectDefaultCurrency = ({userDoc})=>{
+    
+    return userDoc.data?.settings?.defaultCurrency;
+}
 
-    return defaultCurrency;
+export const selectStatus = ({userDoc})=> {
+    return userDoc.status;
 }

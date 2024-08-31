@@ -7,7 +7,7 @@ import privateContext from './context'
 
 export default function PrivateLayout() {
 
-    const { authStatus, user } = useIsLoggedIn();   
+    const { authStatus, user } = useIsLoggedIn();
 
     // user is not signed in
     if ( authStatus == 'false' ) {
