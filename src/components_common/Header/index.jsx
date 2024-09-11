@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 
+import { Skeleton } from 'antd';
+
 import AvatarComponent from '../AvatarComponent';
+import QuickActionsIsland from './components/QuickActionsIsland'
 
 import Logo_main from '../../assets/logo-main.png'
 import Logo_small from '../../assets/logo-small.png'
@@ -8,7 +11,7 @@ import { consoleInfo } from '../../console_styles';
 
 import './styles.css'
 
-export default function Header({userDetails}) {    
+export default function Header({userAuthDetails}) {    
 
     // to make header icon dynamically respond to change in width
     const [smallThreshold, setSmallThreshold] = useState(()=>{
@@ -47,21 +50,54 @@ export default function Header({userDetails}) {
                     />
             </div>
             {
-                Boolean(userDetails) && (
+                Boolean(userAuthDetails) && (
                     (() => {
-                        const { displayName, email, photoUrl } = userDetails;
 
                         return (
 
                             <div className="header-right-container">
 
-                                <AvatarComponent
-                                    shape='circle'
-                                    size='default'
-                                    displayName={displayName}
-                                    photoUrl={photoUrl}
-                                    email={email}
-                                />
+                                {/* quick actions island */}
+                                {
+                                    (userAuthDetails == 'loading') ?
+                                        (
+                                            /* quickActions island skeleton */
+                                            <Skeleton
+                                                paragraph={false}
+                                                title={true}
+                                                round={true}
+                                                rootClassName='quick-actions-island-skeleton'
+                                                active
+                                            />
+                                        ) :
+                                        (
+                                            <QuickActionsIsland/>
+                                        )
+                                }
+                                {/* avatar  */}
+                                {
+                                    (userAuthDetails == 'loading') ? 
+                                        (
+                                            <Skeleton
+                                                paragraph={false}
+                                                title={false}
+                                                avatar={true} 
+                                                round
+                                                active
+                                                rootClassName='avatar-skeleton'
+                                            />
+                                        ) : 
+                                        (
+                                            <AvatarComponent
+                                                shape='circle'
+                                                size={'default'}
+                                                displayName={userAuthDetails.displayName}
+                                                photoUrl={userAuthDetails.photoUrl}
+                                                email={userAuthDetails.email}
+                                            />
+                                        )
+                                }
+                                
                             </div>
                         )
                     }

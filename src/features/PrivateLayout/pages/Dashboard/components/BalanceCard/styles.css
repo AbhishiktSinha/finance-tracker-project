@@ -1,19 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
-
-.dashboard-card {
-    width: 100%;
-    border-radius: 12px;
-    padding: 8px 12px;
-    max-width: 1020px;
-}
-
 #balance_card {
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 20px;
-
-    padding-bottom: 12px;
+    max-width: 640px;
+    height: 250px;
 
     background-image: linear-gradient(to bottom right,
         var(--color-primary) 50%,
@@ -22,34 +9,92 @@
 
     box-shadow: 0 10px 20px -10px var(--color-primary);
 
+    align-items: center;
+
     .card-header {
-        font-family: 'Noto Sans Mono' !important;
-        text-transform: uppercase;
-        color: var(--white) !important
+        align-self: flex-start;
     }
 
-    .balance-details {
+    padding: 12px;
 
-        display: flex;
-        column-gap: 16px;
-        padding: 0 12px;
-        justify-content: space-between;
-
+    .card-details {
+        justify-content: center;
+        align-items: center;
+        width: fit-content;
         position: relative;
 
-        .defaultCurrency-skeleton{
-            height: 30px;
-            width: 60px;
+        .defaultCurrency {
+            /* padding-right: 14px; */
+            padding-top: 20px;
+
+            font-size: 36px;
+            >span {
+                font-weight: 100;
+                color: var(--white);
+            }
+
+            align-self: first baseline;
         }
-        .amount-skeleton {
-            height: 80px;
+        .amount {
+            color: var(--white) !important;
+            font-size: 112px;
+
+            animation: slideUp 0.1s ease 1
         }
-        .insights-skeleton {
-            position: absolute;
-            width: 60px;
-            height: 30px;
-            top: -35px;
-            right: 10px;
+    }
+}
+.balance-card:hover {
+    box-shadow: 0 10px 50px -7px var(--color-primary) !important;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 50%;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 100%;
+    }
+}
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0%;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 100%;
+    }
+}
+
+@media screen and (width < 540px) {
+    
+    #balance_card {
+        .card-details {
+            .amount {
+                font-size: 100px !important;
+            }
+
+            .defaultCurrency {
+                padding-right: 0 !important;
+            }
+        }
+    }
+}
+@media screen and (width < 420px) {
+    
+    #balance_card {
+        .card-details {
+            column-gap: 4px !important;
+
+            .amount {
+                font-size: 84px !important;
+            }
+
+            .defaultCurrency {
+                padding-right: 0 !important;
+            }
         }
     }
 }

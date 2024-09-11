@@ -37,11 +37,28 @@
         align-items: center;
         justify-content: end;
 
+        column-gap: 12px;
+
         flex-basis: 200px;
         height: 100%;
 
-        .tooltip {
-            background-color: red;
+        .quick-actions-island-skeleton {
+            display: flex;
+            height: 90%;
+            & h3 {
+                height: 100%;
+                background-color: var(--skeleton-white);
+            }
+        }
+        .avatar-skeleton {
+            display: flex;
+            width: fit-content;
+            > div {
+                padding: 0 !important;
+            }
+            & span {
+                background-color: var(--skeleton-white);
+            }
         }
     }
 }

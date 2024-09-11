@@ -4,6 +4,12 @@
 
     height: var(--main-height);
 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    row-gap: 24px;
+
     .add-txn-button {
         width: 50px;
         height: 50px;
@@ -32,6 +38,6 @@
 .card-details-skeleton {
     & h3 {
         height: 100% !important;
-        background-color: #ffffff55 !important;
+        background-color: var(--skeleton-white) !important;
     }
 }

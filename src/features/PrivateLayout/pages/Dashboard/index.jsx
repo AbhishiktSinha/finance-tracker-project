@@ -12,35 +12,41 @@ import privateContext from '../../context/index.jsx';
 import OnboardingForm from './components/OnboardingForm/index.jsx'
 import BalanceCard from './components/BalanceCard/index.jsx'
 
-import { selectDefaultCurrency, selectStatus } from './redux/selectors.js'
+import { selectIsDefaultCurrencySet, selectStatus } from './redux/selectors.js'
 import { consoleDebug, consoleError } from '../../../../console_styles/index.js';
 
 import Skeleton from './components/Skeleton/index.jsx';
-import { fetchUserDocThunk } from '../../redux/thunk.js';
+import { fetchUserDocThunk, updateExchangeRateThunk } from '../../redux/thunk.js';
 
 import './stlyes.css';
+
 
 export default function Dashboard() {
 
     const { user } = useContext(privateContext)
 
+    /* TRANSACTION MODAL */
     const transactionModalRef = useRef();
+    /*  ONBOARDING MODAL
+    The onboardingModal is to be shown if the user has not
+    selected the isDefaultCurrencySet (i.e not done the initial setup yet)
+    */
+    const onboardingModalRef = useRef();
+
+
     const handleButtonClick = (e) => {
         transactionModalRef.current.openModal();
     }
 
+    // SELECTORS: Application State dependency
     const status = useSelector(selectStatus)
-    const defaultCurrency = useSelector(selectDefaultCurrency)
+    const isDefaultCurrencySet = useSelector(selectIsDefaultCurrencySet)
 
-    consoleDebug(`[DASHBOARD] | ${status} | ${defaultCurrency}`)
+    
+    consoleDebug(`[DASHBOARD] | ${status} | defaultCurrency Set : ${isDefaultCurrencySet}`);
 
     const dispatch = useDispatch();
-
-    /*  ONBOARDING MODAL
-    The onboardingModal is to be shown if the user has not
-    selected the defaultCurrency (i.e not done the initial setup yet)
-    */
-    const onboardingModalRef = useRef();
+    
     useEffect(() => {
         // fetch userDOC from firestore post initial render
         if (status == 'initial') {
@@ -49,12 +55,18 @@ export default function Dashboard() {
         // check necessity of onborading modal on success
         else if (status == 'success') {
 
-            if (!Boolean(defaultCurrency)) {
+            if (!Boolean(isDefaultCurrencySet)) {
                 consoleError('DEFAULT CURRENCY NOT SET');
                 onboardingModalRef.current.openModal();
             }
             else {
-                consoleDebug(`Default Currency: ${defaultCurrency}`);
+                consoleDebug(`Default Currency Set`);
+                consoleDebug(`updating EXCHANGERATE from DASHBOARD post render | isDefaultCurrencySet ${isDefaultCurrencySet}`)
+                
+                // perform the update of exchange rate in the thunk 
+                // to avoid direct defaultCurrency dependency
+                // this thunk does not update the application state
+                dispatch(updateExchangeRateThunk())
             }
         }
 

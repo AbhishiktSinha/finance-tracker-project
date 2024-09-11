@@ -1,5 +1,5 @@
 import { consoleDebug } from "../../../console_styles";
-import { FETCH } from "./actions"; 
+import { FETCH, UPDATE } from "./actions"; 
 
 const initialState = {
     status: 'initial', // initial | loading | success | failure
@@ -8,6 +8,7 @@ const initialState = {
 }
 
 const { FETCH_DATA_REQUEST, FETCH_DATA_SUCCESS, FETCH_DATA_ERROR } = FETCH;
+const { UPDATE_USER_DATA } = UPDATE;
 
 export default function userDocReducer(state = initialState, action) {
 
@@ -23,7 +24,7 @@ export default function userDocReducer(state = initialState, action) {
                 error: ''
             }
         }
-        case FETCH_DATA_SUCCESS: {
+        case FETCH_DATA_SUCCESS: {  
             return {
                 ...state,
                 status: 'success',
@@ -38,6 +39,17 @@ export default function userDocReducer(state = initialState, action) {
                 error: payload.error
             }
         }
+
+        case UPDATE_USER_DATA: {
+            return {
+                ...state, 
+                data: {
+                    ...state.data,
+                    ...payload
+                }
+            }
+        }
+        
         
         default: 
             return state;

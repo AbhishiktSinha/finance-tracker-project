@@ -4,3 +4,7 @@ export const FETCH = {
     FETCH_DATA_SUCCESS: 'FETCH_DATA_SUCCESS',
     FETCH_DATA_ERROR: "FETCH_DATA_ERROR",
 }
+
+export const UPDATE = {
+    UPDATE_USER_DATA : 'UPDATE_USER_DATA',
+}

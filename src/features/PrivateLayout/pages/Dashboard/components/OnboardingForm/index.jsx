@@ -1,16 +1,21 @@
 import { useContext, useMemo, useRef } from 'react'
 
-import {Form, Button, Input, Select} from 'antd'
+import {Form, Input, Select} from 'antd'
 import currencyToSymbolMap from 'currency-symbol-map/map'
 
 import ActionButton from '../../../../../../components_common/ActionButton';
 import privateContext from '../../../../context';
-import { FirestoreCRUD } from '../../../../../../firebase/firestore';
+
+import { consoleError } from '../../../../../../console_styles';
+import { updateExchangeRate } from '../../utils';
+import { updateOnboardingDataThunk } from '../../../../redux/thunk';
 
 import './styles.css'
-import { consoleError } from '../../../../../../console_styles';
+import { useDispatch } from 'react-redux';
 
 export default function OnboardingForm({modalRef}) {
+
+    const dispatch = useDispatch();
     
     const saveButtonRef = useRef();
     const {user: {uid}} = useContext(privateContext)
@@ -26,19 +31,17 @@ export default function OnboardingForm({modalRef}) {
 
     async function onFinish(values) {
 
-        const {defaultCurrency, balance} = values;
+        const {defaultCurrency} = values;
+        console.log('ONBOARDINGfORM DEFAULTcURRENCY', defaultCurrency);
 
         saveButtonRef.current.setButtonLoading();
         
         try {
-            await new FirestoreCRUD()
-                .updateDocData(
-                    `users/${uid}`,
-                    {
-                        'balance': balance,
-                        'settings.defaultCurrency': defaultCurrency
-                    }
-                )
+            
+            await updateExchangeRate(defaultCurrency);
+            
+            dispatch(updateOnboardingDataThunk(uid, values));
+            
             modalRef.current.closeModal();            
         }
         catch(e) {

@@ -37,6 +37,8 @@ h1, h2, h3, h4 {
   --white: #fff;
 
 
+  --skeleton-white: #ffffff55;
+
   --main-height: calc(100vh - 55px)
 }
 

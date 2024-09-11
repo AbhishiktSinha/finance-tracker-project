@@ -11,9 +11,11 @@ const style = {
     ].join(";"), 
 
     error: [
-        "color: #ff5555",
+        "color: #fff",
+        "background-color: #b5513e",
         "font-weight: 500",
-        "font-size: 14px"
+        "font-size: 14px",
+        "padding: 0 5px"
     ].join(";"),
 
     success: [

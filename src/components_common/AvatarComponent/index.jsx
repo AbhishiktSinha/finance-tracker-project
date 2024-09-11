@@ -61,8 +61,8 @@ export default function AvatarComponent({ size, shape, displayName, photoUrl, em
                 arrow={false}                
             >
                 <Avatar
-                    shape="cirlce"
-                    size='default'
+                    shape={shape}
+                    size={size}
                     style={{
                         cursor: 'pointer',
                         ...style,
