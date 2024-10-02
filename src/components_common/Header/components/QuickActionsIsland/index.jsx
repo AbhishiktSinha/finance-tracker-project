@@ -10,8 +10,9 @@ export default function QuickActionsIsland() {
 
 
     const defaultCurrency = useSelector(selectDefaultCurrency);
+    const symbol = defaultCurrency?.symbol;
+    const code = defaultCurrency?.code;
 
-    const defaultCurrencyCode = getSymbolFromCurrency(defaultCurrency);
     // const defaultCurrency = undefined;
 
     return (
@@ -21,14 +22,14 @@ export default function QuickActionsIsland() {
                 defaultCurrency ?
                     (
                         <Tooltip
-                            title={defaultCurrency}
+                            title={code}
                         >
                             <Button
                                 rootClassName="quick-action-button"
                                 shape="circle"
                                 size="default"
                             >
-                                {defaultCurrencyCode}
+                                {symbol}
                             </Button>
                         </Tooltip>
                     ) : 

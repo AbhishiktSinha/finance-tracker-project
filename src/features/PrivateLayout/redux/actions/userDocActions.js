@@ -1,5 +1,5 @@
 
-export const FETCH = {
+export const FETCH_USERDOC = {
     FETCH_DATA_REQUEST: 'FETCH_DATA_REQUEST',
     FETCH_DATA_SUCCESS: 'FETCH_DATA_SUCCESS',
     FETCH_DATA_ERROR: "FETCH_DATA_ERROR",
@@ -8,3 +8,4 @@ export const FETCH = {
 export const UPDATE = {
     UPDATE_USER_DATA : 'UPDATE_USER_DATA',
 }
+

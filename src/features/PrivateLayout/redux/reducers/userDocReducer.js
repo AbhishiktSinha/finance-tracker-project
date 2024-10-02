@@ -1,5 +1,5 @@
-import { consoleDebug } from "../../../console_styles";
-import { FETCH, UPDATE } from "./actions"; 
+import { consoleDebug } from "../../../../console_styles";
+import { FETCH_USERDOC as FETCH, UPDATE } from "../actions/userDocActions"; 
 
 const initialState = {
     status: 'initial', // initial | loading | success | failure

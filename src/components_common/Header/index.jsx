@@ -10,8 +10,9 @@ import Logo_small from '../../assets/logo-small.png'
 import { consoleInfo } from '../../console_styles';
 
 import './styles.css'
+import { asyncStatus } from '../../enums';
 
-export default function Header({userAuthDetails}) {    
+export default function Header({userAuthDetails: {status, user, error}}) {    
 
     // to make header icon dynamically respond to change in width
     const [smallThreshold, setSmallThreshold] = useState(()=>{
@@ -50,7 +51,7 @@ export default function Header({userAuthDetails}) {
                     />
             </div>
             {
-                Boolean(userAuthDetails) && (
+                Boolean(status != asyncStatus.ERROR) && (
                     (() => {
 
                         return (
@@ -59,7 +60,7 @@ export default function Header({userAuthDetails}) {
 
                                 {/* quick actions island */}
                                 {
-                                    (userAuthDetails == 'loading') ?
+                                    (status == asyncStatus.LOADING || status == asyncStatus.INITIAL) ?
                                         (
                                             /* quickActions island skeleton */
                                             <Skeleton
@@ -76,7 +77,7 @@ export default function Header({userAuthDetails}) {
                                 }
                                 {/* avatar  */}
                                 {
-                                    (userAuthDetails == 'loading') ? 
+                                    (status == asyncStatus.LOADING || status == asyncStatus.INITIAL) ? 
                                         (
                                             <Skeleton
                                                 paragraph={false}
@@ -91,9 +92,9 @@ export default function Header({userAuthDetails}) {
                                             <AvatarComponent
                                                 shape='circle'
                                                 size={'default'}
-                                                displayName={userAuthDetails.displayName}
-                                                photoUrl={userAuthDetails.photoUrl}
-                                                email={userAuthDetails.email}
+                                                displayName={user.displayName}
+                                                photoUrl={user.photoUrl}
+                                                email={user.email}
                                             />
                                         )
                                 }

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import SignupLogin from "./features/SignupLogin";
@@ -6,9 +5,13 @@ import Dashboard from './features/PrivateLayout/pages/Dashboard'
 import PrivateLayout from './features/PrivateLayout'
 import SignupForm from "./features/SignupLogin/components/SignupForm";
 
+import LoginForm from "./features/SignupLogin/components/LoginForm";
+import Settings from "./features/PrivateLayout/pages/Settings";
+import Balance from "./features/PrivateLayout/pages/Balance";
+import Transactions from "./features/PrivateLayout/pages/Transactions";
+import Budget from "./features/PrivateLayout/pages/Budget";
 
 import './App.css'
-import LoginForm from "./features/SignupLogin/components/LoginForm";
 
 export default function App() {
 
@@ -23,6 +26,10 @@ export default function App() {
                 
                 <Route path="" element={<Dashboard/>}/>
                 <Route path="dashboard" element={<Dashboard/>}/>
+                <Route path='settings' element={<Settings />}/>
+                <Route path='balance' element={<Balance />}/>
+                <Route path='transactions' element={<Transactions />}/>
+                <Route path='budget' element={<Budget />}/>
             </Route>
         </Routes>
     )

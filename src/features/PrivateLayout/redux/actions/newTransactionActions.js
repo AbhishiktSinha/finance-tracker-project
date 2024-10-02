@@ -1,0 +1,3 @@
+export const UPDATE = {
+    UPDATE_NEW_TRANSACTION : 'UPDATE_NEW_TRANSACTION',
+}

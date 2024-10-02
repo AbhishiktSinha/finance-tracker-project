@@ -1,17 +1,17 @@
 import { useContext, useMemo, useRef } from 'react'
 
 import {Form, Input, Select} from 'antd'
-import currencyToSymbolMap from 'currency-symbol-map/map'
 
 import ActionButton from '../../../../../../components_common/ActionButton';
 import privateContext from '../../../../context';
 
-import { consoleError } from '../../../../../../console_styles';
-import { updateExchangeRate } from '../../utils';
+import { consoleDebug, consoleError } from '../../../../../../console_styles';
 import { updateOnboardingDataThunk } from '../../../../redux/thunk';
 
-import './styles.css'
 import { useDispatch } from 'react-redux';
+import { getAllCurrencyCodeDropdownOptions} from '../../../../utils';
+
+import './styles.css'
 
 export default function OnboardingForm({modalRef}) {
 
@@ -20,34 +20,30 @@ export default function OnboardingForm({modalRef}) {
     const saveButtonRef = useRef();
     const {user: {uid}} = useContext(privateContext)
 
+    // currency dropdown options
     const options = useMemo(()=>{
-        return Object.keys(currencyToSymbolMap).map(code => {
-            return {
-                label: code, 
-                value: code
-            }
-        })
+        return getAllCurrencyCodeDropdownOptions()
     }, [])
 
     async function onFinish(values) {
 
         const {defaultCurrency} = values;
-        console.log('ONBOARDINGfORM DEFAULTcURRENCY', defaultCurrency);
+        console.log('ONBOARDINGfORM Submit --- DEFAULTcURRENCY', defaultCurrency);
 
         saveButtonRef.current.setButtonLoading();
         
         try {
+            consoleDebug('FORM SUBMIT ACTION: dispatch( updateOnboardingDataThunk(uid, values) )');
+            await dispatch(updateOnboardingDataThunk(uid, values));
+            consoleDebug('DONE DISPATCH');
             
-            await updateExchangeRate(defaultCurrency);
-            
-            dispatch(updateOnboardingDataThunk(uid, values));
             
             modalRef.current.closeModal();            
         }
         catch(e) {
             consoleError(e.message);
             saveButtonRef.current.setButtonActive();
-
+            
         }
     }
     

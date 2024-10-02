@@ -4,58 +4,46 @@ import { useIsLoggedIn } from "../../custom_hooks";
 import Header from "../../components_common/Header";
 
 import privateContext from './context'
+import StateInitializer from "./components/StateInitializer";
+import OnboardingAction from "./components/OnboardingAction";
+import { Spin } from "antd";
+import { asyncStatus } from "../../enums";
 
-export default function PrivateLayout() {
+export default function PrivateContextProviderLayout() {
 
-    const { authStatus, user } = useIsLoggedIn();
+    const { status, data: user, error } = useIsLoggedIn();
 
     // user is not signed in
-    if ( authStatus == 'false' ) {
+    if ( status == asyncStatus.ERROR ) {
         return <Navigate to={'../auth.financly/login'}/>
     }
+
     else {
         return (
             <privateContext.Provider value={{user}}>
-
-                {
-                    /*
-                    <div id="app-container">
-                        {authStatus=='loading' && (
-                            <h2>Loading...</h2>
-                        )}
-                        {
-                            authStatus=='true' && (
-                                <div className="app-page">
-                                    <Header
-                                        userDetails={user}
-                                    />
-    
-                                    <div className="main">
-                                        <Outlet />
-                                    </div>
-                                </div>                        
-                            )
-                        }
-                    </div> 
-                    */
-                }
-                
-                {/* FIXME: StateInitializer component to fetch app state common for all private routes */}
+                                
                 <div id="app-container">
                     <div className="app-page">
 
                         <Header
-                            userAuthDetails={authStatus == 'loading' ? 'loading' : user}
+                            userAuthDetails={{status, user, error}}
                         />
 
                         <div className="main">
                             {
-                                authStatus == 'loading' ? 
+                                (status == asyncStatus.INITIAL || status == asyncStatus.LOADING) ? 
                                 (
-                                    <h2>Loading...</h2>
-                                ) : (
+                                    <h2>{`<PrivateContextProviderLayout />:`}<Spin/></h2>
+                                ) : 
+                                (
 
-                                    <Outlet />
+                                    <StateInitializer>
+                                        <OnboardingAction>
+                                            
+                                            <Outlet />
+                                            
+                                        </OnboardingAction>
+                                    </StateInitializer>
                                 )
                             }
                         </div>
