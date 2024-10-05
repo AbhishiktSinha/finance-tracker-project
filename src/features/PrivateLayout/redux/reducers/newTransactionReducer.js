@@ -4,7 +4,7 @@ const {UPDATE_NEW_TRANSACTION} = UPDATE;
 
 const initialState = { data: undefined };
 
-export default function newTransactionReducer(state, action) {
+export default function newTransactionReducer(state=initialState, action) {
     const {type, payload} = action;
 
     if (type == UPDATE_NEW_TRANSACTION) {

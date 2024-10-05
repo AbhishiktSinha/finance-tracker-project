@@ -1,5 +1,5 @@
-import { timeframe } from "../../../../../enums";
-import { FETCH, UDPATE } from "./actions";
+import { asyncStatus, timeframe } from "../../../../../enums";
+import { FETCH_DASHBOARD_TRANSACTIONS as FETCH, UDPATE_DASHBOARD_TRANSACTIONS as UDPATE } from "./actions";
 
 const { 
     FETCH_DASHBOARD_TRANSACTIONS_REQUEST : FETCH_REQUEST,
@@ -14,13 +14,9 @@ const {
 
 
 const initialState = {
-    timeframe: 'week', // week | month
+    timeframe: timeframe.MONTH, // week | month | year
 
-    status: {
-        // initial | loading | success | error
-        [timeframe.WEEK] : 'iniitial',
-        [timeframe.MONTH] : 'initial',
-    }, 
+    status: asyncStatus.INITIAL, 
     data: undefined,
     error: '',
 }
@@ -33,14 +29,11 @@ export default function dashboardTransactionsReducer(state = initialState, actio
         
         case FETCH_REQUEST : {
             /*The status of the selected timeframe
-            becomes 'loading'
+            becomes asyncStatus.INITIAL
             */    
             return {
                 ...state,
-                status: {
-                    ...state.status,
-                    [state.timeframe] : 'loading'
-                }
+                status: asyncStatus.LOADING,
             }
         }
         case FETCH_SUCCESS: {
@@ -48,10 +41,7 @@ export default function dashboardTransactionsReducer(state = initialState, actio
             return {
                 ...state,
 
-                status: {
-                    ...state.status, 
-                    [state.timeframe] : 'success',
-                },
+                status: asyncStatus.SUCCESS,
 
                 data: payload, 
 
@@ -63,10 +53,7 @@ export default function dashboardTransactionsReducer(state = initialState, actio
             return {
                 ...state, 
 
-                status: {
-                    ...state.status, 
-                    [state.timeframe]: 'error',
-                },
+                status: asyncStatus.ERROR,
 
                 error: payload,
             }
@@ -77,24 +64,19 @@ export default function dashboardTransactionsReducer(state = initialState, actio
                 ...state, 
                 data: [
                     ...state.data, 
-                    payload
+                    ...payload
                 ]
             }
         }
         case TOGGLE_TIMEFRAME :{
-            const getNewTimeframe = ()=>{
-                if (state.timeframe == 'weekly') {
-                    return 'monthly'
-                }
-                else if (state.timeframe == 'monthly') {
-                    return 'weekly'
-                }
-            }
 
             return {
                 ...state, 
-                timeframe: getNewTimeframe(),
+                timeframe: payload, 
             }
+        }
+        default: {
+            return state;
         }
     }
 }

@@ -1,3 +1,5 @@
+import currencyToSymbolMap from 'currency-symbol-map/map';
+
 export const getAllCurrencyCodeDropdownOptions = ()=>{
     return Object.keys(currencyToSymbolMap).map(code => {
         return {

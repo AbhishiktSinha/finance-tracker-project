@@ -30,8 +30,7 @@ export default class ExchangeRateConvertor {
             const reducedAmount = initializer.reduce(
                 (accumulator, curr)=>{
                     return accumulator+this.convertAmount(defaultCurrency, curr.data)
-                }, 0
-            )
+                }, 0)
 
             return reducedAmount;
         }

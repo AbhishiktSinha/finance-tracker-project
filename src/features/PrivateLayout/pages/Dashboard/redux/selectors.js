@@ -11,20 +11,9 @@ import { selectNewTransaction } from "../../../redux/selectors";
 
 export const selectTimeframe = ({dashboardTransactions: state})=> state.timeframe;
 
-const selectStatusObject = ({dashboardTransactions: state})=> state.status;
+export const selectDashboardTransactionStatus = ({dashboardTransactions: state})=> state.status;
 
 const selectTransactionsList = ({dashboardTransactions: state})=> state.data;
-
-
-/**
- * Select the status for the current timeframe
- */
-export const selectTransactionsStatus = createSelector(
-    selectStatusObject, 
-    selectTimeframe, 
-    (statusObject, timeFrame) => {
-        return statusObject[timeFrame]
-    })
 
 
 /**
@@ -40,19 +29,31 @@ export const wrapper_selectTransactionsInitializer = (type)=>{
             // filter the transactions according to given type
             const transactionsOfType = transactionsList.filter( ({data}) => data.type == type );
 
-            // if timeframe is the month, we don't need futher filter
-            if ( currentTimeframe == timeframe.MONTH) { return transactionsOfType }
-            else if( currentTimeframe == timeframe.WEEK) {
-
-                // filter the transactions that lie within the current week
-                const dayJsUtils = new DayJSUtils();
-            
-                return transactionsOfType.filter( ({data})=> {
-                    
-                    return dayJsUtils.isWithinTimeframe(timeframe.WEEK, data.timeFrame.occurredAt)
-                })
-
+            // if timeframe is the YEAR, we don't need futher filter
+            if ( currentTimeframe == timeframe.YEAR ) {
+                return transactionsOfType;
             }
+            else {
+                
+                const dayJsUtils = new DayJSUtils();
+                
+                return filterByTimeframe(currentTimeframe);
+
+                function filterByTimeframe(targetTimeframe){
+
+                    return transactionsOfType.
+                        filter(({ data: transactionData }) => {
+
+                            const { timestamp: { occurredAt } } = transactionData;
+
+                            return dayJsUtils.isWithinTimeframe(
+                                targetTimeframe,
+                                occurredAt
+                            )
+                        })
+                }              
+                
+            }            
         }
     )
 }
@@ -65,28 +66,39 @@ export const selectNewTransaction_balance = createSelector( selectNewTransaction
 export const selectNewTransaction_income = createSelector( selectNewTransaction, selectTimeframe,
     (newTransaction, timeframe)=>{
 
-        const { data: {type, timestamp: {occurredAt}}} = newTransaction;
-
-        if (type == transactionType.INCOME &&
-            new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
-            return newTransaction;
+        if (newTransaction) {
+            
+            const { data: {type, timestamp: {occurredAt}}} = newTransaction;
+    
+            if (type == transactionType.INCOME &&
+                new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
+                return newTransaction;
+            }
+            else {
+                return undefined;
+            }
         }
         else {
             return undefined;
         }
+
     }
 )
 export const selectNewTransaction_expenditure = createSelector( selectNewTransaction, selectTimeframe,
     (newTransaction, timeframe)=>{
 
-        const { data: {type, timestamp: {occurredAt}}} = newTransaction;
+        if (newTransaction) {
+            
+            const { data: {type, timestamp: {occurredAt}}} = newTransaction;
+    
+            if (type == transactionType.EXPENDITURE &&
+                new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
+                return newTransaction;
+            }
+            else {
+                return undefined;
+            }
+        }
 
-        if (type == transactionType.EXPENDITURE &&
-            new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
-            return newTransaction;
-        }
-        else {
-            return undefined;
-        }
     }
 )

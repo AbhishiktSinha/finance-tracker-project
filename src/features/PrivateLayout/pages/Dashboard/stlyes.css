@@ -10,6 +10,23 @@
 
     row-gap: 24px;
 
+    .transaction-cards-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+
+        gap: 32px;
+
+        .income-expenditure-container {
+            flex: 1;
+            display: flex;
+            gap: 18px;
+            justify-content: inherit;
+
+        }
+    }
+
     .add-txn-button {
         width: 50px;
         height: 50px;
@@ -39,5 +56,15 @@
     & h3 {
         height: 100% !important;
         background-color: var(--skeleton-white) !important;
+    }
+}
+
+
+@media screen and (width < 720px) {
+    .income-expenditure-container {
+        flex-wrap: wrap !important;
+    }
+    .income-card, .expenditure-card {
+        max-width: 640px;
     }
 }

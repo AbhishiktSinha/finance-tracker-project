@@ -1,18 +1,18 @@
-import { consoleError, consoleInfo } from '../../../../../console_styles';
+import { consoleError, consoleInfo, consoleSucess } from '../../../../../console_styles';
 import { DayJSUtils } from '../../../../../dayjs';
+import { timeframe } from '../../../../../enums';
 import { FirestoreCRUD } from '../../../../../firebase/firestore';
-import {FETCH} from './actions'
-import { selectTimeframe } from './selectors';
+import {FETCH_DASHBOARD_TRANSACTIONS as FETCH} from './actions'
 
 /** THUNK  
- * function that loads the transactions within default timeframe
+ * function that loads the transactions for timeframe MONTH
  * to populate the dashboardInitialState
  * 
  * this data is not fetched or stored in redux state in any order
  * whatever sorting needs to be implemented must be done in the UI state and not the application state
  * keep application state processing lights
  * 
- * call this thunk when status of selected timeframe is initial
+ * call this thunk post the first render of the <Dashboard/>
  */
 export function fetchDashboardTransactionsThunk(uid) {
     
@@ -29,7 +29,9 @@ export function fetchDashboardTransactionsThunk(uid) {
             type: FETCH_DASHBOARD_TRANSACTIONS_REQUEST
         })
 
-        const timeframe = selectTimeframe(getState()); 
+        // GET THE TRANSACTIONS FOR THE CURRENT YEAR
+        /* Transaction toggle is a UI modification, it should not trigger an API call */
+        const fetchForTimeframe = timeframe.YEAR;
 
         const dayJsUtils = new DayJSUtils();
 
@@ -42,22 +44,17 @@ export function fetchDashboardTransactionsThunk(uid) {
                         {
                             key: 'timestamp.occurredAt',
                             relationship: '>=',
-                            value: dayJsUtils.getFirstDayTimestamp(timeframe)
+                            value: dayJsUtils.getFirstDayTimestamp(fetchForTimeframe)
                         },
                         {
                             key: 'timestamp.occurredAt',
                             relationship: '<=',
-                            value: dayJsUtils.getLastDayTimestamp(timeframe)
+                            value: dayJsUtils.getLastDayTimestamp(fetchForTimeframe)
                         }
                     ],                    
-                )
-            
-            /* TODO:
-             complete function definition
-             check whether firestore queries check based on number or string    
-             */
+                )   
 
-            consoleInfo('DASHBOARD TRANSACTIONS FETCHED');
+            consoleSucess('DASHBOARD TRANSACTIONS FETCHED');
 
             dispatch({
                 type: FETCH_DASHBOARD_TRANSACTIONS_SUCCESS,

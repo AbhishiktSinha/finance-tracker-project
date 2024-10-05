@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useDispatch } from "react-redux";
 
@@ -9,6 +9,8 @@ import { stateInitializerThunk } from "../../redux/thunk";
 
 import { DayJSUtils } from "../../../../dayjs";
 import { asyncStatus } from "../../../../enums";
+
+import { consoleError } from "../../../../console_styles";
 
 
 /**
@@ -59,6 +61,7 @@ export default function StateInitializerProvider({children}) {
                     setStatus(asyncStatus.SUCCESS);
                 }
                 catch(e) {
+                    consoleError(e);
                     setStatus(asyncStatus.ERROR);
                 }
     

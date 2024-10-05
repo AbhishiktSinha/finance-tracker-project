@@ -1,5 +1,7 @@
+import { useCallback } from 'react';
 import CardDetailsSkeleton from '../CardDetailsSkeleton'
 
+import { consoleDebug, consoleError } from '../../../../../../console_styles';
 import './styles.css'
 
 /*TODO: 
@@ -16,18 +18,36 @@ export default function DashboardTransactionCard({
 }) {
 
     const { defaultCurrency, amount, timeframe } = data;
+    consoleDebug(`Amount recieved in DashboardTransactionCard:  ${typeof amount} | ${amount}`);
+
+    const getDisplayAmount = useCallback((amount) => {
+        consoleDebug(`calling getDisplayAmount()`)
+        if (typeof amount == 'number') {
+
+            consoleDebug('amount exists')
+            if (amount === 0) {
+                consoleDebug('amount == 0');
+                return '00000';
+            }
+            else {
+                return amount.toLocaleString();
+            }
+        }
+
+    }, [])
 
     if (!showUI) {
         return (
-            <div 
-            className= {`dashboard-card dashboard-skeleton-card${rootClassname}`}
-        >
-            <div className="card-header card-header-skeleton">
-                {title}                
-            </div>    
+            <div
+                className={`dashboard-card-skeleton ${rootClassname}`}
+                id={`${rootClassname + '-skeleton'}`}
+            >
+                <div className="card-header-skeleton">
+                    {title}
+                </div>
 
-            <div className='card-details card-details-skeleton'>
-                    
+                <div className='card-details-skeleton'>
+
                     <CardDetailsSkeleton
                         className="defaultCurrency-skeleton"
                     />
@@ -36,30 +56,30 @@ export default function DashboardTransactionCard({
                         className='amount-skeleton'
                     />
 
-                {
-                    insights && (
+                    {
+                        insights && (
 
-                        <CardDetailsSkeleton
-                            className='insights-skeleton'
-                            round={true}
-                        />
-                        
-                    )
-                }
+                            <CardDetailsSkeleton
+                                className='insights-skeleton'
+                                round={true}
+                            />
+
+                        )
+                    }
+                </div>
             </div>
-        </div>
         )
     }
 
     return (
-        <div 
-            className= {`dashboard-card ${rootClassname}`}
-            id={id} 
+        <div
+            className={`dashboard-card ${rootClassname}`}
+            id={id}
             title={title}
             style={styles}
         >
             <div className="card-header">
-                {title}
+                <p className="title">{title}</p>
                 {
                     timeframe && (
                         <div className="timeframe-details">
@@ -69,17 +89,15 @@ export default function DashboardTransactionCard({
                 }
             </div>
 
-            {chart && <div className="transaction-chart"></div>}
-
             <div className='card-details'>
-                
+
                 <div className="defaultCurrency" title={defaultCurrency.code}>
                     <span>
                         {defaultCurrency.symbol}
                     </span>
                 </div>
 
-                <div className="amount">{amount}</div>                
+                <div className="amount">{getDisplayAmount(amount)}</div>
 
                 {
                     insights && (

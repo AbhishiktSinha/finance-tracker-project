@@ -3,6 +3,7 @@ import { useRef, useContext, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import statusContext from '../StateInitializer/context';
+import onboardingStatusContext from './context';
 
 import ModalWrapper from '../../../../components_common/ModalWrapper';
 
@@ -49,7 +50,6 @@ export default function OnboardingAction({ children }) {
             */
             else {
                 consoleDebug(`Default Currency Set`);
-                consoleDebug(`updating EXCHANGERATE from ONBOARDINGACTIONS post render`)
 
                 // perform the update of exchange rate in the thunk 
                 // to avoid direct defaultCurrency dependency
@@ -61,7 +61,7 @@ export default function OnboardingAction({ children }) {
     }, [status])
 
     return (
-        <onboardigStatusContext.Provider value={{isOnboardingDone: isDefaultCurrencySet}}>
+        <onboardingStatusContext.Provider value={{isOnboardingDone: isDefaultCurrencySet}}>
             < ModalWrapper
                 ref={onboardingModalRef}
                 maskClosable={false}
@@ -71,6 +71,6 @@ export default function OnboardingAction({ children }) {
             </ModalWrapper >
 
             {children}
-        </onboardigStatusContext.Provider>
+        </onboardingStatusContext.Provider>
     )
 }

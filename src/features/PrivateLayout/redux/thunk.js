@@ -1,11 +1,11 @@
-import { FETCH_USERDOC, UPDATE as UPDATE_USERDOC } from './actions/userDocActions'
-import { FETCH_BALANCE, UPDATE as UPDATE_BALACNCE } from './actions/balanceActions';
+import { FETCH_USERDOC, UPDATE_USERDOC } from './actions/userDocActions'
+import { FETCH_BALANCE, UPDATE_BALANCE } from './actions/balanceActions';
 import { FETCH_TAG } from './actions/tagActions';
 
 import { selectDefaultCurrency } from './selectors';
 
 import { FirestoreCRUD } from '../../../firebase/firestore';
-import { consoleDebug, consoleError, consoleInfo } from '../../../console_styles';
+import { consoleDebug, consoleError, consoleInfo, consoleSucess } from '../../../console_styles';
 
 import ExchangeRateAPI from '../../../exchangeRate_api';
 
@@ -20,7 +20,7 @@ export const fetchUserDocThunk = (uid) => {
     // return thunk that performs the asynchronous task
     return async (dispatch, getState) => {
         consoleDebug('USERDOC THUNK')
-        const { FETCH_DATA_ERROR, FETCH_DATA_REQUEST, FETCH_DATA_SUCCESS } = FETCH_USERDOC;
+        const { FETCH_USERDOC_DATA_ERROR: FETCH_DATA_ERROR, FETCH_USERDOC_DATA_REQUEST: FETCH_DATA_REQUEST, FETCH_USERDOC_DATA_SUCCESS: FETCH_DATA_SUCCESS } = FETCH_USERDOC;
 
         // signify: network call started
         dispatch({ type: FETCH_DATA_REQUEST });
@@ -60,9 +60,9 @@ export const updateOnboardingDataThunk = function (uid, data) {
             
             await new FirestoreCRUD().batchWrite([
                 {
-                    operationType: 'set', 
+                    operationType: 'update', 
                     docPath: `users/${uid}/`,
-                    data: { 'settings.defaultCurrency' : currency}
+                    data: { settings: { defaultCurrency : currency} }
                 },
                 {
                     operationType: 'set',
@@ -75,19 +75,21 @@ export const updateOnboardingDataThunk = function (uid, data) {
             ])
 
             dispatch({
-                type: UPDATE_BALACNCE.INITIALIZE_BALANCE,
+                type: UPDATE_BALANCE.UPDATE_BALANCE,
                 payload: {
-                    currency: currency, 
-                    amount: Number(amount),
-                }
-            })
-            /* FIXME: replaces the entire userDoc settings */
-            dispatch({
-                type: UPDATE_USERDOC,
-                payload: {
-                    settings: {
-                        defaultCurrency: currency
+                    id: currency, 
+                    data: {
+                        currency: currency, 
+                        amount: Number(amount),
                     }
+                }
+
+            })
+            /* FIXME: replaces the entire userDoc data */
+            dispatch({
+                type: UPDATE_USERDOC.UPDATE_USERDOC_SETTINGS,
+                payload: {
+                    defaultCurrency: currency
                 }
             })
         }
@@ -209,14 +211,14 @@ export const stateInitializerThunk = (uid)=> {
     
     async function fetchUserDoc() {
         try {
-            await new FirestoreCRUD().getDocData(`users/${uid}`);
+            return await new FirestoreCRUD().getDocData(`users/${uid}`);
         } catch(e) {
             throw new UserDocError('Failed to retrieve "userDoc"');
         }
     }
     async function fetchBalance() {
         try {
-            await new FirestoreCRUD().getDocsData(
+            return await new FirestoreCRUD().getDocsData(
                 `users/${uid}/balance`
             )
         } catch(e) {
@@ -234,7 +236,7 @@ export const stateInitializerThunk = (uid)=> {
         }
 
         try {
-            await Promise.all([
+            return await Promise.all([
                 fetchGlobalTags(),
                 fetchCustomTags()
             ])
@@ -248,9 +250,9 @@ export const stateInitializerThunk = (uid)=> {
     /* throw any error back to the caller to facilitate ui update */
     return async (dispatch, getState)=>{
         
-        const { FETCH_DATA_ERROR: FETCH_USERDOC_DATA_ERROR, 
-            FETCH_USERDOC_DATA_REQUEST: FETCH_USERDOC_DATA_REQUEST, 
-            FETCH_USERDOC_DATA_SUCCESS: FETCH_USERDOC_DATA_SUCCESS } = FETCH_USERDOC;
+        const { FETCH_USERDOC_DATA_ERROR, 
+            FETCH_USERDOC_DATA_REQUEST, 
+            FETCH_USERDOC_DATA_SUCCESS } = FETCH_USERDOC;
 
         const { FETCH_TAG_DATA_REQUEST,
             FETCH_TAG_DATA_ERROR,
@@ -273,12 +275,14 @@ export const stateInitializerThunk = (uid)=> {
             ])
 
             /* ------- success ---------------- */
+            consoleSucess(`FETCHED: USERDOC, TAG & BALANCE`);
             dispatch( { type: FETCH_USERDOC_DATA_SUCCESS, payload: userDocData } );
             dispatch( { type: FETCH_BALANCE_DATA_SUCCESS, payload: balanceData });
             dispatch( { type: FETCH_TAG_DATA_SUCCESS, payload: tagData } );
         }
         /* ----------- error ------------------ */
         catch(e) {
+            consoleError(e);
             if (e instanceof BalanceError) {
                 dispatch( { type: FETCH_BALANCE_DATA_ERROR, payload: e.message});
             }

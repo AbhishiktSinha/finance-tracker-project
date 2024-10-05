@@ -1,4 +1,5 @@
-import {FETCH_TAG as FETCH, MANIPULATE} from '../actions/tagActions'
+import { asyncStatus } from '../../../../enums';
+import {FETCH_TAG as FETCH, UPDATE_TAG} from '../actions/tagActions'
 
 const {
     FETCH_TAG_DATA_REQUEST: FETCH_DATA_REQUEST, 
@@ -7,13 +8,13 @@ const {
 } = FETCH;
 
 const {
-    UPDATE_TAG, 
+    MODIFY_TAG, 
     DELETE_TAG, 
     ADD_TAG
-} = MANIPULATE
+} = UPDATE_TAG
 
 const initialState = {
-    status: 'initial', //initial | loading | success | error
+    status: asyncStatus.INITIAL, //initial | loading | success | error
     data: undefined,
     error: '',
 }
@@ -26,19 +27,21 @@ export default function tagReducer(state=initialState, action) {
         case FETCH_DATA_REQUEST : {
             return {
                 ...state, 
-                status: 'loading'
+                status: asyncStatus.LOADING
             }
         }
         case FETCH_DATA_SUCCESS: {
             return {
                 ...state, 
+                status: asyncStatus.SUCCESS,
                 data: payload,
             }
         }
         case FETCH_DATA_ERROR: {
             return {
                 ...state, 
-                data: payload
+                status: asyncStatus.ERROR,
+                error: payload
             }
         }
         default : {

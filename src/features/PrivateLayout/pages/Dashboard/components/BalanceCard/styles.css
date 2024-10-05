@@ -11,13 +11,17 @@
 
     align-items: center;
 
-    .card-header {
+    .card-header, .card-header-skeleton {
         align-self: flex-start;
     }
 
     padding: 12px;
 
-    .card-details {
+    .card-header, .card-header>.title {         
+        color: var(--white) !important;
+    }
+
+    .card-details, .card-details-skeleton {
         justify-content: center;
         align-items: center;
         width: fit-content;
@@ -45,6 +49,19 @@
 }
 .balance-card:hover {
     box-shadow: 0 10px 50px -7px var(--color-primary) !important;
+}
+
+.dashboard-card-skeleton.balance-card {
+
+    max-width: 640px;
+    height: 250px;
+
+    background-image: linear-gradient(to bottom right,
+        var(--color-primary) 50%,
+        var(--accent-color)
+    ); 
+
+    box-shadow: 0 10px 20px -10px var(--color-primary);
 }
 
 @keyframes slideUp {
@@ -82,7 +99,7 @@
         }
     }
 }
-@media screen and (width < 420px) {
+@media screen and (width < 450px) {
     
     #balance_card {
         .card-details {

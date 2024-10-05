@@ -5,8 +5,8 @@ export const FETCH_TAG = {
     FETCH_TAG_DATA_ERROR: 'FETCH_TAG_DATA_ERROR',
 }
 
-export const MANIPULATE = {
+export const UPDATE_TAG = {
     ADD_TAG: 'ADD_TAG',
     DELETE_TAG: 'DELETE_TAG',
-    UPDATE_TAG: 'UPDATE_TAG',
+    MODIFY_TAG: 'MODIFY_TAG',
 }

@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux";
-import { selectDefaultCurrency } from "./selectors";
 import getSymbolFromCurrency from "currency-symbol-map";
 import { Button, Skeleton, Tooltip } from "antd";
 import { MoonOutlined } from "@ant-design/icons";
 
 import './styles.css'
+import { selectDefaultCurrency } from "../../../../features/PrivateLayout/redux/selectors";
 
 export default function QuickActionsIsland() {
 

@@ -3,7 +3,8 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useIsLoggedIn } from "../../custom_hooks";
 import Header from "../../components_common/Header";
 
-import privateContext from './context'
+import privateContext from "./context/userAuthContext";
+
 import StateInitializer from "./components/StateInitializer";
 import OnboardingAction from "./components/OnboardingAction";
 import { Spin } from "antd";

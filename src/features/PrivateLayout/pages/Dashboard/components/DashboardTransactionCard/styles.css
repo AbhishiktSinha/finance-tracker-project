@@ -1,15 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
 
-.dashboard-card {
+.dashboard-card, .dashboard-card-skeleton {
     width: 100%;
+    max-width: 420px;
     border-radius: 12px;
     padding: 8px 12px;
 
     transition: 0.3s ease all;
     cursor: pointer;
+
+    background-color: var(--bg-light-grey)
 }
 
-.dashboard-card {
+.dashboard-card, .dashboard-card-skeleton {
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -17,13 +20,24 @@
 
     padding-bottom: 12px;
 
-    .card-header {
-        font-family: Roboto !important;
-        text-transform: uppercase;
-        color: var(--white) !important
+    .card-header, .card-header-skeleton {
+
+        .title {
+            text-transform: uppercase;
+            color: var(--text-dark) !important;
+    
+            font-size: 18px;
+            letter-spacing: calc(0.1vw + 4px);
+        }
+
+        .timeframe-details {
+            margin-top: 8px !important;
+            font-size: 16px;
+            text-transform: capitalize;
+        }
     }
 
-    .card-details {
+    .card-details, .card-details-skeleton {
 
         display: flex;
         column-gap: 16px;
@@ -37,17 +51,42 @@
 
         width: 100% !important;
         height: inherit;
+        flex: 1;
+
+        justify-content: center;
+        align-items: center;
+        width: fit-content;
+        position: relative;
+
+        /* .defaultCurrency {            
+            padding-top: 20px;
+
+            font-size: 36px;
+            >span {
+                font-weight: 100;
+                color: var(--white);
+            }
+
+            align-self: first baseline;
+        }
+        .amount {
+            color: var(--white) !important;
+            font-size: 112px;
+
+            animation: slideUp 0.1s ease 1
+        } */
         
         /* ----SKELETONS----- */
         
         .defaultCurrency-skeleton{
             height: 30px;
-            width: 60px;
+            width: 60px !important;
+            max-width: 60px !important;
             align-self: first baseline;
         }
         .amount-skeleton {
-            height: 100%;
-            flex-grow: 1;
+            height: 100% !important;
+            flex-grow: 1 !important;
             
         }
         .insights-skeleton {
@@ -60,9 +99,12 @@
 
         /* --- THE ACTUAL UI --- */
         .defaultCurrency {
-            font-size: 16px;
+            font-size: 24px;
             cursor: default;
             font-family: 'Noto Sans Mono' !important;
+            padding-top: 20px;
+
+            align-self: first baseline;
 
             >span {
                 display: flex;
@@ -78,7 +120,8 @@
             }
         }
         .amount {
-            font-size: 34px;
+            font-size: 72px;
+            font-weight: 300;
             letter-spacing: 1.12;
             font-family: 'Noto Sans Mono' !important;
         }

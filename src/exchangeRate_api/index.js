@@ -1,4 +1,5 @@
 import { consoleDebug, consoleError, consoleInfo } from "../console_styles";
+import ExchangeRateAPIError from "../custom_errors/ExchangeRateAPIError";
 import { asyncStatus } from "../enums";
 import endpoints from "../network/endpoints";
 import request from "../network/request";
@@ -26,19 +27,21 @@ export default class ExchangeRateAPI {
                 consoleInfo('exchangeRate object found');
                 consoleDebug(`time_next_update: ${time_next_update} || time_now: ${time_now}`)
     
+                // anticipate an app reload on the same day
                 // use the pre-existing exchangeRate data in localStorage
                 if (time_now < time_next_update) {
-                    this.api_status = 'success';
-                    this.api_promise = Promise.resolve(this.api_status);
-                    
-                    throw new Error(`ExchangeRate API call aborted:\n Call before next update deadline ${time_next_update}`);
+
+                    this.api_status = asyncStatus.SUCCESS;
+                    this.#api_status_promise = Promise.resolve(this.api_status);
+
+                    console.log('exchangeRateAPI priorCheck:', this.#api_status_promise);
+
+                    throw new ExchangeRateAPIError(`API call aborted:\n Call before next update deadline ${time_next_update}`);
     
                 }
             }
             // prepare to get new data
             else {
-                this.api_status = 'initial'
-                this.api_promise = Promise.resolve(this.api_status);
     
                 consoleInfo('exchange-rate API permitted to be called');
                 return;
@@ -46,33 +49,47 @@ export default class ExchangeRateAPI {
         }
     }
 
+    /**## updateExchangeRate()
+     * This method calls the `exchangeRate API` and consequently updates the conversion rate data in the 
+     * `localStorage`.   
+     * The `api_status` is also updated to either **SUCCESS** or **ERROR**.  
+     * Retrieve the updated `api_status` post awaiting the return of this function.  
+     * 
+     *  
+     * > ⚠️ *Use this method only when the `api_status` is **INITIAL*** ⚠️  
+     * > For state: **LOADING** retrieve the Promise of the api call in progress by invoking the 
+     * `getExistingAPIPromise()` method.  
+     * 
+     *  **WARNING:  The method call will be aborted if the api_status is anything but INITIAL**
+     * 
+     * @param {string} defaultCurrency 
+     * @param {string} flag to forcefully update the exchange rate data
+     * @returns Promise of exchangeRate API call
+     */
     static async updateExchangeRate(defaultCurrency, flag) {
 
         try {
+            // if api_status is not valid
+            if (this.api_status != asyncStatus.INITIAL) {
+
+                throw new ExchangeRateAPIError(`API call aborted for api_status: ${this.api_status}. \n
+                    To get the Promise of any existing API call, use getExistingAPICallPromise()`)
+            }
+
             if (flag != 'force') {
                 this.#priorCheck();
             }
 
-
-            /* if check succeeds */
-            if (this.api_status == 'success') {
-                consoleError(`EXCHANGE API ABORTED: PRESENT STATUS: ${this.api_status}`)                
+            const apiKey = import.meta.env.VITE_EXCHANGERATE_API_KEY;
+            const httpConfig = {
+                method: 'GET',
+                url: `${endpoints.baseUrl_exchangeRate}/${apiKey}/latest/${defaultCurrency}`
             }
-            else if (this.api_status == 'loading') {
-                consoleError(`EXCHANGE API ABORTED: PRESENT STATUS: ${this.api_status}`)                                
-            }
-            else {
 
-                const apiKey = import.meta.env.VITE_EXCHANGERATE_API_KEY;
-                const httpConfig = {
-                    method: 'GET',
-                    url: `${endpoints.baseUrl_exchangeRate}/${apiKey}/latest/${defaultCurrency}`
-                }
-
-                /* ----------------- NETWORK CALL HERE --------------------------- */
-                this.api_status = 'loading';
-                this.#api_status_promise = request(httpConfig).
-                then( ({success, data, error})=>{
+            /* ----------------- NETWORK CALL HERE --------------------------- */
+            this.api_status = asyncStatus.LOADING;
+            this.#api_status_promise = request(httpConfig).
+                then(({ success, data, error }) => {
 
                     console.log(success, data, error);
                     // update localStorage on success
@@ -94,28 +111,35 @@ export default class ExchangeRateAPI {
                                 }
                             )
                         )
-                        return 'success';
+                        return asyncStatus.SUCCESS;
                     }
                     else {
                         console.log(error)
-                        return 'error';
+                        return asyncStatus.ERROR;
                     }
                 })
 
-                
-                this.api_status = await this.#api_status_promise;
-            }
+
+            this.api_status = await this.#api_status_promise;
 
         }
         catch (e) {
+            if ( ! e instanceof ExchangeRateAPIError) {
+                this.api_status = asyncStatus.ERROR;
+                this.#api_status_promise = Promise.resolve(this.api_status);
+            }
+            
             consoleError(e)
-        }
-        finally {
-            return this.#api_status_promise;
-        }
+        }        
+
     }
 
-    static existingAPIPromise() {
+    /**## getExistingAPICallPromise()
+     * Call to retrieve and await the promise of any existing ExchangeRate API call  
+     * Use when the `api_status` is **LOADING**
+     * @returns Promise of any exchangeRate API call already in progress
+     */
+    static getExistingAPICallPromise() {
         return this.#api_status_promise;
     }
 }

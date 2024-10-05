@@ -30,9 +30,13 @@ export class FirestoreCRUD {
         return collection(db, name)
     }
 
-    /**
-     * SetDocData: -> to merge or replace contents of existing doc,
-     * or create new doc, with given id
+    /**## setDocData
+     * Method that necessarily takes the docPath, and the data and either creates a new doc if the docRef doesn't exists,  
+     * or overwrites the existing doc found corresponding to the docRef.  
+     * 
+     * @param {string} docPath required absolute path to the target firestore document
+     * @param {object} data data to create the document with
+     * @param {boolean} merge default false | optional argument to specify whether data has to be appended to an existing doc or not
      */
     async setDocData(docPath, data, merge=false) {
 
@@ -52,6 +56,22 @@ export class FirestoreCRUD {
             throw e;
         }
 
+    }
+
+    
+    /**## createNewDoc
+     * Method that implements the **Firestore** `addDoc` function to create a new doc with a random id, 
+     * using the provided data, and returns the docRef of the doc so created.
+     * 
+     * @param {string} collectionPath the absolute path to the targeted collection
+     * @param {object} data the data as an object, used to create the new document
+     * @returns Promise that fulfils with the docRef of the newly created doc
+     */
+    async createNewDoc(collectionPath, data) {
+
+        const collectionRef = this.#getCollectionRef(collectionPath);
+
+        return await addDoc(collectionRef, data)
     }
 
 

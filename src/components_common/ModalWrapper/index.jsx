@@ -20,8 +20,6 @@ const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
         return ({openModal, closeModal, isOpen})
     }, []);
 
-    consoleDebug('ModalWrapper rendered')
-
     return (
         <div className="modal-wrapper">
             <Modal

@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import { auth } from "../firebase";
 
-import { consoleError, consoleInfo } from "../console_styles";
+import { consoleDebug, consoleError, consoleInfo } from "../console_styles";
 import ExchangeRateAPI from "../exchangeRate_api";
 import ExchangeRateConvertor from "../exchangeRate_api/convertor";
 import { asyncStatus, transactionType } from "../enums";
@@ -74,18 +74,32 @@ export function useExchangeRateAPIStatus(defaultCurrencyCode) {
 
     /*EFFECT RUNS after FIRST re-render only
     status: 
-        initial: updateExchangeRate-> makes api call and returns promise of status
-        loading: updateExchangeRate-> does not make api call, returns existing promise
-        success: effect function is aborted
+        initial: make api call -> updateExchangeRate
+        loading: await promise of exising api call -> getExistingAPICallPromise
+        success: do nothing
+        error: do nothing, let the ui handle it
     */
     useEffect(()=>{
+        consoleInfo('useEffect of TransactionCard');
 
         ( async ()=>{
 
-            if (status != asyncStatus.SUCCESS) {
+            consoleInfo('Async IIFE inside the effect');
+            
+            if (status == asyncStatus.INITIAL) {
 
-                const newStatus = await ExchangeRateAPI.updateExchangeRate(defaultCurrencyCode);
-                setStatus(newStatus);
+                consoleDebug(`STATUS: ${status} || ATTEMPTING API CALL`)
+
+                await ExchangeRateAPI.updateExchangeRate(defaultCurrencyCode);
+
+                consoleDebug(`NEW api_status: ${ExchangeRateAPI.api_status}`);
+
+                setStatus(ExchangeRateAPI.api_status);
+            }
+            else if(status == asyncStatus.LOADING) {
+                await ExchangeRateAPI.getExistingAPICallPromise();
+                
+                setStatus(ExchangeRateAPI.api_status);
             }
         } )()
     }, [])
@@ -104,6 +118,14 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
         data: undefined,
         error: ''
     })
+    
+    useMemo(()=>{
+        amount.current.status = status;
+    }, [status])
+    consoleDebug(`Status in useDynamicAmount: ${status}\n
+        Status sent to ${cardTransactionType ? 
+            (cardTransactionType==transactionType.INCOME?'Income':'Expenditure') :
+             'Balance'}: ${amount.current.status}`);
 
     // recompute amount on every defaultCurrencyCode change for success
     useMemo(()=>{
@@ -112,7 +134,7 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
             amount.current.data = new ExchangeRateConvertor().
                 reduceConvertedList(defaultCurrencyCode, initializer)
         }
-    }, [defaultCurrencyCode])
+    }, [defaultCurrencyCode, status])
 
     /* update amount with every distinct newTransaction
     newTransaction is already provided according to the card type

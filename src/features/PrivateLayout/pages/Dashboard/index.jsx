@@ -7,21 +7,21 @@ import { PlusOutlined } from '@ant-design/icons';
 
 import ModalWrapper from '../../../../components_common/ModalWrapper/index.jsx'
 
-import privateContext from '../../context/index.jsx';
+import privateContext from "../../context/userAuthContext/index.jsx";
 import statusContext from '../../components/StateInitializer/context.jsx';
 import onboardingStatusContext from '../../components/OnboardingAction/context'
 
 import BalanceCard from './components/BalanceCard/index.jsx'
-
-import { consoleDebug, consoleError } from '../../../../console_styles/index.js';
+import IncomeCard from './components/IncomeCard';
+import ExpenditureCard from './components/ExpenditureCard'
 
 import Skeleton from './components/Skeleton/index.jsx';
 
-import './stlyes.css';
-import TransactionCardsWrapper from './components/TransactionCardsWrapper/index.jsx';
 import { fetchDashboardTransactionsThunk } from './redux/thunk.js';
 import { checkDisplayUI } from '../../utils.js';
-import { selectTransactionsStatus } from './redux/selectors.js';
+import { selectDashboardTransactionStatus } from './redux/selectors.js';
+
+import './stlyes.css';
 
 /*TODO: 
 Redux to handle the Dashboard internal state of `dashboardTransactions`
@@ -38,10 +38,10 @@ export default function Dashboard() {
 
     const { user } = useContext(privateContext)
     
-    // to handle the initial loading uis
+    // STATUS to handle the initial loading uis
     const { status: initialStateStatus } = useContext(statusContext);
     const { isOnboardingDone } = useContext(onboardingStatusContext)
-    const dashboardTransactionsStatus = useSelector(selectTransactionsStatus)
+    const dashboardTransactionsStatus = useSelector(selectDashboardTransactionStatus)
 
     const showUI = checkDisplayUI([
         initialStateStatus, 
@@ -75,8 +75,14 @@ export default function Dashboard() {
             <h1>Dashboard</h1>
 
             <>
-                <BalanceCard />
-                <TransactionCardsWrapper />
+                <div className="transaction-cards-container">
+                    <BalanceCard />
+
+                    <div className="income-expenditure-container">
+                        <IncomeCard/>
+                        <ExpenditureCard />
+                    </div>
+                </div>
 
                 <ModalWrapper
                     ref={transactionModalRef}

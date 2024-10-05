@@ -1,14 +1,15 @@
 import { consoleDebug } from "../../../../console_styles";
-import { FETCH_USERDOC as FETCH, UPDATE } from "../actions/userDocActions"; 
+import { asyncStatus } from "../../../../enums";
+import { FETCH_USERDOC as FETCH, UPDATE_USERDOC as UPDATE } from "../actions/userDocActions"; 
 
 const initialState = {
-    status: 'initial', // initial | loading | success | failure
+    status: asyncStatus.INITIAL, // initial | loading | success | failure
     data: null,
     error: ''
 }
 
-const { FETCH_DATA_REQUEST, FETCH_DATA_SUCCESS, FETCH_DATA_ERROR } = FETCH;
-const { UPDATE_USER_DATA } = UPDATE;
+const { FETCH_USERDOC_DATA_REQUEST, FETCH_USERDOC_DATA_SUCCESS, FETCH_USERDOC_DATA_ERROR } = FETCH;
+const { UPDATE_USERDOC_DATA, UPDATE_USERDOC_SETTINGS } = UPDATE;
 
 export default function userDocReducer(state = initialState, action) {
 
@@ -17,35 +18,49 @@ export default function userDocReducer(state = initialState, action) {
     
     const {type, payload} = action;
     switch(type) {
-        case FETCH_DATA_REQUEST: {
+
+        case FETCH_USERDOC_DATA_REQUEST: {
             return {
                 ...state, 
-                status: 'loading',
+                status: asyncStatus.LOADING,
                 error: ''
             }
         }
-        case FETCH_DATA_SUCCESS: {  
+        case FETCH_USERDOC_DATA_SUCCESS: {  
             return {
                 ...state,
-                status: 'success',
-                data: payload.data,
+                status: asyncStatus.SUCCESS,
+                data: payload,
                 error: ''
             }
         }
-        case FETCH_DATA_ERROR: {
+        case FETCH_USERDOC_DATA_ERROR: {
             return {
                 ...state,
-                status: 'failure',
-                error: payload.error
+                status: asyncStatus.ERROR,
+                error: payload
             }
         }
 
-        case UPDATE_USER_DATA: {
+        case UPDATE_USERDOC_DATA: {
+            
             return {
                 ...state, 
                 data: {
                     ...state.data,
                     ...payload
+                }
+            }
+        }
+        case UPDATE_USERDOC_SETTINGS: {
+            return {
+                ...state, 
+                data: {
+                    ...state.data, 
+                    settings: {
+                        ...state.data.settings, 
+                        ...payload,
+                    }
                 }
             }
         }

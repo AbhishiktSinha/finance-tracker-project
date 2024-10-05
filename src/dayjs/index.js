@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { consoleDebug, consoleInfo } from '../console_styles';
 
 
 export class DayJSUtils {
@@ -17,6 +18,7 @@ export class DayJSUtils {
      */
     constructor(timestamp = dayjs().valueOf()) {
         this.now = dayjs(timestamp);
+        consoleInfo(`DayJSUtils initialized with now: ${this.now}`)
     }
 
     getCurrentISOWeek() {
@@ -47,7 +49,9 @@ export class DayJSUtils {
      * @returns {Number} Timestamp representing requested day
      */
     getFirstDayTimestamp(timeframe) {
-        return this.now.startOf(timeframe.toLowerCase())
+        const firstDay = this.now.startOf(timeframe);
+        consoleInfo(`First day of "${timeframe}": ${firstDay}`);
+        return firstDay.valueOf();
     }
 
     /**
@@ -56,7 +60,9 @@ export class DayJSUtils {
      * @returns {Number} Timestamp representing requested day
      */
     getLastDayTimestamp(timeframe) {
-        return this.now.endOf(timeframe.toLowerCase());
+        const lastDay = this.now.endOf(timeframe);
+        consoleInfo(`Last day of "${timeframe}" : ${lastDay}`);
+        return lastDay.valueOf();
     }
 
     isWithinTimeframe(timeframe, timestamp) {

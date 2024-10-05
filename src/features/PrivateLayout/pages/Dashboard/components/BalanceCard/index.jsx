@@ -1,11 +1,13 @@
 import { useSelector } from 'react-redux';
 
 import { checkDisplayUI } from '../../../../utils';
-import { selectBalance, selectDefaultCurrency, selectNewTransaction } from '../../../../redux/selectors';
+import { selectBalance, selectDefaultCurrency } from '../../../../redux/selectors';
 import { useDynamicAmount } from '../../../../../../custom_hooks';
 
 import DashboardTransactionCard from '../DashboardTransactionCard';
 import './styles.css'
+import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
+import { selectNewTransaction_balance } from '../../redux/selectors';
 /**
  * # TODO: 
  *What do we envision for the BalanceCard ?  
@@ -25,9 +27,20 @@ export default function BalanceCard() {
 
     const initializer = useSelector(selectBalance);
     const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransaction = useSelector(selectNewTransaction);
+    const newTransaction = useSelector(selectNewTransaction_balance);
 
-    const {status, data, error} = useDynamicAmount(initializer, defaultCurrency.code, newTransaction);
+    consoleInfo(`BALANCE CARD DEPENDENCIES:\n
+        initializer: ${JSON.stringify(initializer)}\n
+        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
+        newTransactions: ${JSON.stringify(newTransaction)}`)
+
+    const {status, data: amount, error} = useDynamicAmount(
+        initializer, 
+        defaultCurrency.code, 
+        newTransaction);
+
+    consoleDebug(`BALANCE CARD STATUS: ${status}\n
+        BALANCE CARD AMOUNT: ${amount}`);
 
     const showCardUI = checkDisplayUI([status]);
 
@@ -41,7 +54,7 @@ export default function BalanceCard() {
             showUI={showCardUI}
             
             data={{
-                amount: data, 
+                amount: amount, 
                 defaultCurrency: defaultCurrency,                 
             }}
         />

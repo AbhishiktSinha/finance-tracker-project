@@ -24,7 +24,7 @@ export class FirebaseSignUp {
             const { user, user: {uid} } = userCredentials;
 
             await updateProfile(user, {
-                displayName: `${first_name} ${last_name}`
+                displayName: first_name + (Boolean(last_name) ? (' ' + last_name) : '')
             }) 
 
             consoleSucess("SUCCESS:\nSigned up with email & password");            
