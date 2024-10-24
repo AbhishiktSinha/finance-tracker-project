@@ -1,5 +1,5 @@
-import { asyncStatus, timeframe } from "../../../../../enums";
-import { FETCH_DASHBOARD_TRANSACTIONS as FETCH, UDPATE_DASHBOARD_TRANSACTIONS as UDPATE } from "./actions";
+import { asyncStatus, timeframe } from "../../../../../../enums";
+import { FETCH_DASHBOARD_TRANSACTIONS as FETCH, UDPATE_DASHBOARD_TRANSACTIONS as UDPATE } from "../actions/dashboardTransactionsActions";
 
 const { 
     FETCH_DASHBOARD_TRANSACTIONS_REQUEST : FETCH_REQUEST,
@@ -14,7 +14,8 @@ const {
 
 
 const initialState = {
-    timeframe: timeframe.MONTH, // week | month | year
+
+    timeframe: timeframe.MONTH, //default UI timeframe
 
     status: asyncStatus.INITIAL, 
     data: undefined,
@@ -60,11 +61,12 @@ export default function dashboardTransactionsReducer(state = initialState, actio
         }
 
         case ADD_DASHBOARD_TRANSACTION :{
+            // add the transaction object recieved as the payload to the data (list)
             return {
                 ...state, 
                 data: [
                     ...state.data, 
-                    ...payload
+                    payload
                 ]
             }
         }

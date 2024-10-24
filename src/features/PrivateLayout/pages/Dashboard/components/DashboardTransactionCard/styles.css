@@ -1,18 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
 
-.dashboard-card, .dashboard-card-skeleton {
+.dashboard-card,
+.dashboard-card-skeleton {
     width: 100%;
     max-width: 420px;
+    min-width: 330px !important;
     border-radius: 12px;
     padding: 8px 12px;
 
     transition: 0.3s ease all;
     cursor: pointer;
 
-    background-color: var(--bg-light-grey)
+    background-color: var(--bg-light-grey);
 }
 
-.dashboard-card, .dashboard-card-skeleton {
+.dashboard-card,
+.dashboard-card-skeleton {
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -20,12 +23,13 @@
 
     padding-bottom: 12px;
 
-    .card-header, .card-header-skeleton {
+    .card-header,
+    .card-header-skeleton {
 
         .title {
             text-transform: uppercase;
             color: var(--text-dark) !important;
-    
+
             font-size: 18px;
             letter-spacing: calc(0.1vw + 4px);
         }
@@ -37,7 +41,8 @@
         }
     }
 
-    .card-details, .card-details-skeleton {
+    .card-details,
+    .card-details-skeleton {
 
         display: flex;
         column-gap: 16px;
@@ -57,45 +62,6 @@
         align-items: center;
         width: fit-content;
         position: relative;
-
-        /* .defaultCurrency {            
-            padding-top: 20px;
-
-            font-size: 36px;
-            >span {
-                font-weight: 100;
-                color: var(--white);
-            }
-
-            align-self: first baseline;
-        }
-        .amount {
-            color: var(--white) !important;
-            font-size: 112px;
-
-            animation: slideUp 0.1s ease 1
-        } */
-        
-        /* ----SKELETONS----- */
-        
-        .defaultCurrency-skeleton{
-            height: 30px;
-            width: 60px !important;
-            max-width: 60px !important;
-            align-self: first baseline;
-        }
-        .amount-skeleton {
-            height: 100% !important;
-            flex-grow: 1 !important;
-            
-        }
-        .insights-skeleton {
-            position: absolute;
-            width: 60px;
-            height: 30px;
-            top: -35px;
-            right: 10px;
-        }
 
         /* --- THE ACTUAL UI --- */
         .defaultCurrency {
@@ -119,12 +85,76 @@
                 border-radius: 50%;
             }
         }
-        .amount {
+
+        .amount-container {
             font-size: 72px;
             font-weight: 300;
             letter-spacing: 1.12;
             font-family: 'Noto Sans Mono' !important;
+
+            position: relative;
+            
+            .insights-chip-skeleton, .insights-chip {
+                position: absolute;
+                width: 60px !important;
+                height: 30px;
+                top: -10px;
+                right: -5px;
+            }
+            .insights-chip {  
+                                
+                left: 80%;
+                text-wrap: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                font-size: 14px;
+
+                width: fit-content !important;
+                height: fit-content !important;
+
+                background-color: var(--color-primary-light);
+                border-radius: 12px;
+                padding: 4px 8px;
+
+          
+                > span {
+                    color: var(--white);
+                    font-weight: 600;
+                }
+            }
+
+
         }
-        
+
+
+    }
+
+    .card-details-skeleton {
+        padding: 0 !important;
+
+        /* ----SKELETONS----- */
+
+        .defaultCurrency-skeleton {
+            height: 30px;
+            width: 60px !important;
+            max-width: 60px !important;
+            align-self: first baseline;
+        }
+
+        .amount-skeleton {
+            height: 70% !important;
+            flex-grow: 1 !important;
+        }
+
+        .insights-chip-skeleton {
+            position: absolute;
+            width: 60px !important;
+            height: 30px;
+            top: -35px;
+            right: 0px;
+        }
+
     }
 }

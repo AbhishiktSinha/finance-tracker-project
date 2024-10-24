@@ -18,3 +18,9 @@ export const asyncStatus = Object.freeze({
     SUCCESS: 'success',
     ERROR: 'error'
 })
+
+export const changeType = Object.freeze({
+    POSITIVE: 'positive', 
+    NEGATIVE: 'negative', 
+    NONE: 'none'
+})

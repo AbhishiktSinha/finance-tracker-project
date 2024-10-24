@@ -1,13 +1,16 @@
 import { useSelector } from 'react-redux';
 
-import { checkDisplayUI } from '../../../../utils';
 import { selectBalance, selectDefaultCurrency } from '../../../../redux/selectors';
+import { selectNewTransaction_balance } from '../../redux/selectors';
+
 import { useDynamicAmount } from '../../../../../../custom_hooks';
+import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
+import { checkDisplayUI } from '../../../../utils';
 
 import DashboardTransactionCard from '../DashboardTransactionCard';
 import './styles.css'
-import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
-import { selectNewTransaction_balance } from '../../redux/selectors';
+import { asyncStatus } from '../../../../../../enums';
+
 /**
  * # TODO: 
  *What do we envision for the BalanceCard ?  

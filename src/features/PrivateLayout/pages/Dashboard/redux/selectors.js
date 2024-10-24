@@ -1,4 +1,5 @@
-import { createSelector, createSelectorCreator } from "reselect";
+
+import { createSelector } from "reselect";
 
 import { consoleInfo } from "../../../../../console_styles";
 import { DayJSUtils } from "../../../../../dayjs";
@@ -7,9 +8,9 @@ import { timeframe, transactionType } from "../../../../../enums";
 import { selectNewTransaction } from "../../../redux/selectors";
 
 
-/* --------------------------- dashboardTransactions SELECTORS ------------- */
 
-export const selectTimeframe = ({dashboardTransactions: state})=> state.timeframe;
+/* --------------------------- dashboardTransactions SELECTORS ------------- */
+export const selectActiveTimeframe = ({dashboardTransactions})=>dashboardTransactions.timeframe;
 
 export const selectDashboardTransactionStatus = ({dashboardTransactions: state})=> state.status;
 
@@ -23,7 +24,7 @@ const selectTransactionsList = ({dashboardTransactions: state})=> state.data;
  */
 export const wrapper_selectTransactionsInitializer = (type)=>{
 
-    return createSelector( selectTimeframe, selectTransactionsList,
+    return createSelector( selectActiveTimeframe, selectTransactionsList,
         (currentTimeframe, transactionsList)=> {
 
             // filter the transactions according to given type
@@ -33,9 +34,7 @@ export const wrapper_selectTransactionsInitializer = (type)=>{
             if ( currentTimeframe == timeframe.YEAR ) {
                 return transactionsOfType;
             }
-            else {
-                
-                const dayJsUtils = new DayJSUtils();
+            else {                                
                 
                 return filterByTimeframe(currentTimeframe);
 
@@ -46,7 +45,7 @@ export const wrapper_selectTransactionsInitializer = (type)=>{
 
                             const { timestamp: { occurredAt } } = transactionData;
 
-                            return dayJsUtils.isWithinTimeframe(
+                            return DayJSUtils.isWithinTimeframe(
                                 targetTimeframe,
                                 occurredAt
                             )
@@ -61,9 +60,9 @@ export const wrapper_selectTransactionsInitializer = (type)=>{
 /* ------------------------------ newTransaction SELECTORS ------------ */
 
 export const selectNewTransaction_balance = createSelector( selectNewTransaction, 
-    (newTransaction)=>newTransaction
+    (newTransaction)=>newTransaction?newTransaction:undefined
 )
-export const selectNewTransaction_income = createSelector( selectNewTransaction, selectTimeframe,
+export const selectNewTransaction_income = createSelector( selectNewTransaction, selectActiveTimeframe,
     (newTransaction, timeframe)=>{
 
         if (newTransaction) {
@@ -71,7 +70,7 @@ export const selectNewTransaction_income = createSelector( selectNewTransaction,
             const { data: {type, timestamp: {occurredAt}}} = newTransaction;
     
             if (type == transactionType.INCOME &&
-                new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
+                DayJSUtils.isWithinTimeframe(timeframe, occurredAt)) {
                 return newTransaction;
             }
             else {
@@ -84,7 +83,7 @@ export const selectNewTransaction_income = createSelector( selectNewTransaction,
 
     }
 )
-export const selectNewTransaction_expenditure = createSelector( selectNewTransaction, selectTimeframe,
+export const selectNewTransaction_expenditure = createSelector( selectNewTransaction, selectActiveTimeframe,
     (newTransaction, timeframe)=>{
 
         if (newTransaction) {
@@ -92,7 +91,7 @@ export const selectNewTransaction_expenditure = createSelector( selectNewTransac
             const { data: {type, timestamp: {occurredAt}}} = newTransaction;
     
             if (type == transactionType.EXPENDITURE &&
-                new DayJSUtils().isWithinTimeframe(timeframe, occurredAt)) {
+                DayJSUtils.isWithinTimeframe(timeframe, occurredAt)) {
                 return newTransaction;
             }
             else {

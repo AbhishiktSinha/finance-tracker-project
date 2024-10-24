@@ -7,7 +7,7 @@ import { PlusOutlined } from '@ant-design/icons';
 
 import ModalWrapper from '../../../../components_common/ModalWrapper/index.jsx'
 
-import privateContext from "../../context/userAuthContext/index.jsx";
+import userAuthContext from "../../context/userAuthContext/index.jsx";
 import statusContext from '../../components/StateInitializer/context.jsx';
 import onboardingStatusContext from '../../components/OnboardingAction/context'
 
@@ -17,7 +17,7 @@ import ExpenditureCard from './components/ExpenditureCard'
 
 import Skeleton from './components/Skeleton/index.jsx';
 
-import { fetchDashboardTransactionsThunk } from './redux/thunk.js';
+import { fetchDashboardTransactionsThunk } from './redux/thunks.js';
 import { checkDisplayUI } from '../../utils.js';
 import { selectDashboardTransactionStatus } from './redux/selectors.js';
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
 
     const dispatch = useDispatch();
 
-    const { user } = useContext(privateContext)
+    const { user } = useContext(userAuthContext)
     
     // STATUS to handle the initial loading uis
     const { status: initialStateStatus } = useContext(statusContext);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
@@ -7,7 +7,10 @@ import { auth } from "../firebase";
 import { consoleDebug, consoleError, consoleInfo } from "../console_styles";
 import ExchangeRateAPI from "../exchangeRate_api";
 import ExchangeRateConvertor from "../exchangeRate_api/convertor";
-import { asyncStatus, transactionType } from "../enums";
+import { asyncStatus, timeframe, transactionType } from "../enums";
+
+import exchangeRateStatusContext from "../features/PrivateLayout/components/ExchangeRateStatusContext/context";
+import { FirestoreCRUD } from "../firebase/firestore";
 import { DayJSUtils } from "../dayjs";
 
 /**
@@ -111,7 +114,8 @@ export function useExchangeRateAPIStatus(defaultCurrencyCode) {
 export function useDynamicAmount(initializer, defaultCurrencyCode, newTransaction, cardTransactionType) {
 
     // re-render on status change
-    const status = useExchangeRateAPIStatus(defaultCurrencyCode);
+    // const status = useExchangeRateAPIStatus(defaultCurrencyCode);
+    const {exchangeRateStatus: status} = useContext(exchangeRateStatusContext)
     
     const amount = useRef({
         'status': status,
@@ -119,13 +123,13 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
         error: ''
     })
     
-    useMemo(()=>{
-        amount.current.status = status;
-    }, [status])
     consoleDebug(`Status in useDynamicAmount: ${status}\n
         Status sent to ${cardTransactionType ? 
             (cardTransactionType==transactionType.INCOME?'Income':'Expenditure') :
              'Balance'}: ${amount.current.status}`);
+    useMemo(()=>{
+        amount.current.status = status;
+    }, [status])
 
     // recompute amount on every defaultCurrencyCode change for success
     useMemo(()=>{
@@ -165,4 +169,146 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
     }, [newTransaction])
 
     return amount.current;
+}
+
+
+export function useInsightState(uid, activeTimeframe, type, defaultCurrencyCode) {
+
+    const initializerFunction = useCallback(()=>{
+        return {
+            status: {
+                [timeframe.YEAR] : asyncStatus.INITIAL,
+                [timeframe.MONTH] : asyncStatus.INITIAL,
+                [timeframe.WEEK] : asyncStatus.INITIAL,
+        
+            }, 
+        
+            data: {
+                [timeframe.YEAR]: undefined, 
+                [timeframe.MONTH]: undefined, 
+                [timeframe.WEEK]: undefined, 
+            },
+        
+            error: { 
+                [timeframe.YEAR]: '',
+                [timeframe.MONTH]: '',
+                [timeframe.WEEK]: '',
+            }
+        }
+    }, [])
+
+    const [state, setState] = useState( initializerFunction )
+
+    console.log('STATE SET IN useInsightState:\n', state);  
+
+    // function to change the status for the given timeframe
+    const setStatus = useCallback( (payload)=>{
+        setState(state=>{
+            return {
+                ...state, 
+                status: {
+                    ...state.status, 
+                    [activeTimeframe]: payload
+                }
+            }
+        })
+    }, [])
+    // utility function to set the data for the given timeframe
+    const setData = useCallback( (payload)=>{
+
+        setState(state=>{
+            return {
+                ...state, 
+                data: {
+                    ...state.data, 
+                    [activeTimeframe]: payload
+                }
+            }
+        })
+    }, [])
+    // utility function to set the error for the given timeframe
+    const setError = useCallback(payload => {
+        setState( state => {
+            return {
+                ...state, 
+                error: {
+                    ...state.error, 
+                    [activeTimeframe]: payload
+                }
+            }
+        })
+    })
+
+    useEffect(()=>{
+
+        (async ()=>{
+
+            if (state.status[activeTimeframe] == asyncStatus.SUCCESS) {
+                return;
+            }
+
+            setStatus(asyncStatus.LOADING);
+
+            try {
+                
+                // first day of the current WEEK/MONTH/YEAR
+                const firstDayTimestamp = DayJSUtils.getFirstDayTimestamp(activeTimeframe);
+                // day in the last MONTH/WEEK/YEAR
+                const dayBeforeTimestamp = firstDayTimestamp - 1000;
+
+                // first day of the previous MONTH/WEEK/YEAR
+                const firstDayTimestamp_prev_timeframe = DayJSUtils.
+                    getFirstDayTimestamp(activeTimeframe, dayBeforeTimestamp);
+                
+                // last day of the previous MONTH/WEEK/YEAR
+                const lastDayTimestamp_prev_timeframe = DayJSUtils.
+                    getLastDayTimestamp(activeTimeframe, dayBeforeTimestamp);
+                
+
+                /* ----------------- NETWORK CALL -------------------- */
+                const transactionListOfType = await new FirestoreCRUD().
+                    getDocsData(
+                        `users/${uid}/transactions`, 
+                        [
+                            {
+                                key: 'timestamp.occurredAt', 
+                                relationship: '>=', 
+                                value: firstDayTimestamp_prev_timeframe
+                            }, 
+                            {
+                                key: 'timestamp.occurredAt', 
+                                relationship: '<=',
+                                value: lastDayTimestamp_prev_timeframe
+                            }, 
+                            {
+                                key: 'type', 
+                                relationship: '==', 
+                                value: type
+                            }
+                        ]
+                    )
+                
+                setStatus(asyncStatus.SUCCESS)
+                setData(new ExchangeRateConvertor().
+                    reduceConvertedList(defaultCurrencyCode, transactionListOfType))
+            }
+            catch(e) {
+                setStatus(asyncStatus.ERROR)
+                setError(e);
+            }
+
+        })()
+
+    }, [state.status[activeTimeframe]])
+
+    // return the insight status,data,error for the current MONTH/WEEK/YEAR
+    consoleDebug(`SENDING DATA TO INCOME CARD:\N
+        STATUS: ${state.status[activeTimeframe]}\n
+        DATA: ${state.data[activeTimeframe]}\n
+        error: ${state.error[activeTimeframe]}`)
+    return {
+        status: state.status[activeTimeframe],
+        data: state.data[activeTimeframe], 
+        error: state.error[activeTimeframe]
+    }
 }

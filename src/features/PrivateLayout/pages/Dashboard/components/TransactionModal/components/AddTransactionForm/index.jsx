@@ -1,11 +1,14 @@
-import { Form, Select, Flex, Input } from 'antd'
+import { Form, Select, Flex, Input, Divider } from 'antd'
 import ActionButton from '../../../../../../../../components_common/ActionButton'
 
 import './styles.css'
 import { useSelector } from 'react-redux'
-import { selectDefaultCurrency } from '../../../../redux/selectors'
+import { selectDefaultCurrency } from '../../../../../../redux/selectors'
 import { getAllCurrencyCodeDropdownOptions } from '../../../../../../utils'
 import { transactionType } from '../../../../../../../../enums'
+import { selectBalance } from '../../../../../../redux/selectors'
+import TagsDropdown from './components/TagsDropdown'
+import { useMemo } from 'react'
 
 /*BASIC JSX STRUCTURE
 
@@ -25,7 +28,7 @@ Call addTransactionThunk to handle backend and frontend data updation
 export default function AddTransactionForm({ transactionType: type, additionalFormItems, onFinishCheck, formFieldRules }) {
 
   const currency = useSelector(selectDefaultCurrency);
-  const balanceObject = useSelector(({ userDoc }) => userDoc.data?.balance);
+  const balanceList = useSelector(selectBalance);
 
   const currencyOptions = useMemo(() => {
 
@@ -33,10 +36,11 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       return getAllCurrencyCodeDropdownOptions()
     }
     else {
-      return Object.keys(balance).map(code => {
+      return balanceList.map( 
+        ({id, data}) => {
         return {
-          label: code,
-          value: code
+          label: id,
+          value: id
         }
       })
     }
@@ -64,8 +68,8 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
 
       onFinish={onFinish}
       initialValues={{
-        currency: currency,
-
+        currency: currency.code,
+        
       }}
     >
       {/* TITLE */}
@@ -92,8 +96,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         >
           <Select
             options={currencyOptions}
-            showSearch
-            defaultValue={currency}
+            showSearch            
           />
         </Form.Item>
 
@@ -118,6 +121,9 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         ]}
       >
         {/* TODO: add tag selection dropdown, with loading state spinner */}
+        <TagsDropdown 
+          type={type} 
+          />
       </Form.Item>
     </Form>
   )

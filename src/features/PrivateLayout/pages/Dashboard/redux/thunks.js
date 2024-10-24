@@ -2,7 +2,7 @@ import { consoleError, consoleInfo, consoleSucess } from '../../../../../console
 import { DayJSUtils } from '../../../../../dayjs';
 import { timeframe } from '../../../../../enums';
 import { FirestoreCRUD } from '../../../../../firebase/firestore';
-import {FETCH_DASHBOARD_TRANSACTIONS as FETCH} from './actions'
+import {FETCH_DASHBOARD_TRANSACTIONS} from './actions/dashboardTransactionsActions'
 
 /** THUNK  
  * function that loads the transactions for timeframe MONTH
@@ -20,7 +20,7 @@ export function fetchDashboardTransactionsThunk(uid) {
         FETCH_DASHBOARD_TRANSACTIONS_REQUEST, 
         FETCH_DASHBOARD_TRANSACTIONS_SUCCESS,
         FETCH_DASHBOARD_TRANSACTIONS_ERROR
-    } = FETCH;
+    } = FETCH_DASHBOARD_TRANSACTIONS;
 
     return async (dispatch, getState)=>{
         // TODO: write the function body
@@ -33,8 +33,6 @@ export function fetchDashboardTransactionsThunk(uid) {
         /* Transaction toggle is a UI modification, it should not trigger an API call */
         const fetchForTimeframe = timeframe.YEAR;
 
-        const dayJsUtils = new DayJSUtils();
-
         try {
             
             const transactionsList = await new FirestoreCRUD().
@@ -44,12 +42,12 @@ export function fetchDashboardTransactionsThunk(uid) {
                         {
                             key: 'timestamp.occurredAt',
                             relationship: '>=',
-                            value: dayJsUtils.getFirstDayTimestamp(fetchForTimeframe)
+                            value: DayJSUtils.getFirstDayTimestamp(fetchForTimeframe)
                         },
                         {
                             key: 'timestamp.occurredAt',
                             relationship: '<=',
-                            value: dayJsUtils.getLastDayTimestamp(fetchForTimeframe)
+                            value: DayJSUtils.getLastDayTimestamp(fetchForTimeframe)
                         }
                     ],                    
                 )   

@@ -1,4 +1,5 @@
 import currencyToSymbolMap from 'currency-symbol-map/map';
+import { changeType } from '../../enums';
 
 export const getAllCurrencyCodeDropdownOptions = ()=>{
     return Object.keys(currencyToSymbolMap).map(code => {
@@ -33,4 +34,26 @@ export function checkDisplayUI (statusList = [], isOnboardingDone) {
     }
 
     return showUI;
+}
+
+export function getChangeType(oldValue, newValue) {
+
+    if (oldValue < newValue) {
+        return changeType.POSITIVE
+    }
+    else if (oldValue > newValue) {
+        return changeType.NEGATIVE
+    }
+    else {
+        return changeType.NONE;
+    }
+}
+
+export function getValueChangePercentage(oldValue, newValue) {
+
+    const change = Math.abs(newValue - oldValue);
+
+    if (change == 0) { return 0}
+    else if(oldValue == 0) { return Infinity }
+    else { return ( (change/oldValue) * 100 )};
 }

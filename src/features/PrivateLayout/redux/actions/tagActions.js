@@ -6,7 +6,7 @@ export const FETCH_TAG = {
 }
 
 export const UPDATE_TAG = {
-    ADD_TAG: 'ADD_TAG',
+    CREATE_TAG: 'CREATE_TAG',
     DELETE_TAG: 'DELETE_TAG',
     MODIFY_TAG: 'MODIFY_TAG',
 }

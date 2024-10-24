@@ -1,18 +1,19 @@
 import { FETCH_USERDOC, UPDATE_USERDOC } from './actions/userDocActions'
 import { FETCH_BALANCE, UPDATE_BALANCE } from './actions/balanceActions';
-import { FETCH_TAG } from './actions/tagActions';
+import { FETCH_TAG, UPDATE_TAG } from './actions/tagActions';
 
 import { selectDefaultCurrency } from './selectors';
 
 import { FirestoreCRUD } from '../../../firebase/firestore';
 import { consoleDebug, consoleError, consoleInfo, consoleSucess } from '../../../console_styles';
 
-import ExchangeRateAPI from '../../../exchangeRate_api';
 
 import UserDocError from '../../../custom_errors/UserDocError'
 import BalanceError from '../../../custom_errors/BalanceError'
 import TagError from '../../../custom_errors/TagError'
 import InitializerError from '../../../custom_errors/InitializerError'
+import endpoints from '../../../network/endpoints';
+import request from '../../../network/request';
 
 export const fetchUserDocThunk = (uid) => {
 
@@ -100,34 +101,83 @@ export const updateOnboardingDataThunk = function (uid, data) {
 
 }
 
-/**(DEPRECATED) THUNK to handle conditional updates to the exchangeRate data stored in localStorage
- * This thunk middleware function does note deal with application state updates
+/**THUNK to handle conditional updates to the exchangeRate data stored in localStorage
+ * This thunk middleware function does not deal with application state updates
  * 
- * This operation is handled in a thunk of the dashboard for the following reasons: 
- *  1. Avoid direct dependency of the dashboard component on the defaultCurrency
+ * This operation is handled in a thunk of the PrivateLayout for the following reasons: 
+ *  1. Avoid direct dependency of the PrivateRoute on the defaultCurrency
  *  2. Selectors can be used without any controversy in thunks 
  */
-export const updateExchangeRateThunk = ()=>{
+export const updateExchangeRateThunk = (flag)=>{
 
     consoleInfo('updateExchangeRate ----T H U N K---- WRAPPER')
 
-    return async (dispatch, getState)=> {
+    function priorCheck() {
+        if (Boolean(localStorage.getItem('exchangeRate'))) {
 
-        consoleInfo('thunk to update exchange rate in localStorage')
-        consoleDebug(`exhangeRate exists: ${Boolean(localStorage.getItem('exchangeRate'))}`)
-
-        
-        try {
-            // run prior checks before calling the exchange-rate-api
-            exchangeRateUpdatePriorCheck()
-
-            const state = getState();
-            await ExchangeRateAPI.updateExchangeRate(selectDefaultCurrency(state), 'force')
-
-        }catch(e) {
-            consoleError(e);
+            const time_next_update = JSON.parse(localStorage.getItem('exchangeRate'))?.time_next_update;
+            const margin = 500; //ms
+            const time_now = new Date().getTime();
+            
+            if (time_next_update && ( time_now < time_next_update - margin ) ) {
+                consoleError(`API Call aborted, time_next_udpate: ${new Date(time_next_update)}`)
+                return false
+            }
+            else {
+                return true;
+            }
         }
-    
+    }
+
+    return async (dispatch, getState)=> {
+        
+        const {code: defaultCurrencyCode} = selectDefaultCurrency(getState());
+
+        // prior check by default
+        if (flag != 'force') {
+            const update_required = priorCheck();
+            
+            // abort if update is not required
+            if (!update_required) {
+                return
+            }
+        }
+
+        /* PREPARING FOR NETWORK CALL */
+
+        const apiKey = import.meta.env.VITE_EXCHANGERATE_API_KEY;
+        const httpConfig = {
+            method: 'GET',
+            url: `${endpoints.baseUrl_exchangeRate}/${apiKey}/latest/${defaultCurrencyCode}`
+        }
+
+        /* ----------------- NETWORK CALL HERE --------------------------- */
+        const { success, data, error } = await request(httpConfig)
+
+        if (success) {
+            const {
+                time_last_update_utc: time_last_update,
+                time_next_update_utc: time_next_update,
+                base_code: defaultCurrency,
+                conversion_rates
+            } = data.data;
+
+            localStorage.setItem('exchangeRate',
+                JSON.stringify(
+                    {
+                        time_last_update: new Date(time_last_update).getTime(),
+                        time_next_update: new Date(time_next_update).getTime(),
+                        defaultCurrency: defaultCurrency,
+                        conversion_rates: conversion_rates
+                    }
+                )
+            )
+            // returns without error
+        }
+        else {
+            throw error;
+        }
+        
     }
 }
 
@@ -202,7 +252,7 @@ export const fetchTagsThunk = (uid)=>{
     }
 }
 
-/**
+/** THUNK TO INITIALIZE THE PRIVATE LAYOUT STATE
  * 
  * @param {string} uid The User's UID provided as an argument
  * @returns thunk to fetch the essential stateful data from the Firestore
@@ -236,10 +286,12 @@ export const stateInitializerThunk = (uid)=> {
         }
 
         try {
-            return await Promise.all([
+            const [globalTags, customTags] = await Promise.all([
                 fetchGlobalTags(),
                 fetchCustomTags()
             ])
+
+            return [...globalTags, ...customTags];
         }
         catch(e) {
             throw new TagError('Failed to retrieve "tags"')
@@ -294,6 +346,33 @@ export const stateInitializerThunk = (uid)=> {
             }
 
             throw new InitializerError('State Initialization Failed');
+        }
+    }
+}
+
+export const createTagThunk = (uid, data)=>{
+    
+    const {CREATE_TAG} = UPDATE_TAG
+
+    return async (dispatch, getState)=>{
+
+        try {
+
+            const {id} = await new FirestoreCRUD().createNewDoc(
+                `users/${uid}/customTags`, 
+                data
+            )
+
+            dispatch({
+                type: CREATE_TAG, 
+                payload: {
+                    id: id, 
+                    data: data
+                }
+            })
+        }
+        catch(e) {            
+            throw new Error(e);
         }
     }
 }

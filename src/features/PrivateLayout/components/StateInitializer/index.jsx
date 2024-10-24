@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { useDispatch } from "react-redux";
 
-import privateContext from "../../context";
+
 import statusContext from "./context";
 
 import { stateInitializerThunk } from "../../redux/thunk";
@@ -11,6 +11,7 @@ import { DayJSUtils } from "../../../../dayjs";
 import { asyncStatus } from "../../../../enums";
 
 import { consoleError } from "../../../../console_styles";
+import userAuthContext from "../../context/userAuthContext";
 
 
 /**
@@ -28,7 +29,7 @@ import { consoleError } from "../../../../console_styles";
  */
 export default function StateInitializerProvider({children}) {
 
-    const {user} = useContext(privateContext)
+    const {user} = useContext(userAuthContext)
 
     // const status = useSelector(({userDoc})=>userDoc.status);
 

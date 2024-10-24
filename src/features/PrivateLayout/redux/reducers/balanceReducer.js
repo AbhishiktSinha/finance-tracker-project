@@ -57,14 +57,17 @@ export default function balanceReducer(state = initialState, action) {
 
         case UPDATE_BALANCE: {
 
-            const {data: { type, currency: transactionCurr, amount: transactionAmt}} = payload;
+            const { data: { type, currency: transactionCurr, amount: transactionAmt} } = payload;
             
             // no type is provided --> Initialization case
             if (! Boolean(type)) {
                 return {
                     ...state, 
                     data: [
-                        payload
+                        {
+                            ...payload, 
+                            id: transactionCurr, //id of the balance object is the currency of the balance amount
+                        }
                     ]
                 }
             }
@@ -73,7 +76,7 @@ export default function balanceReducer(state = initialState, action) {
                 // increase the value of the currency of transaction
                 return {
                     ...state,
-                    data: data.map( balanceObj => {
+                    data: state.data.map( balanceObj => {
 
                         const { id, data: { amount: balanceAmt } } = balanceObj;
 
@@ -103,7 +106,7 @@ export default function balanceReducer(state = initialState, action) {
                 return {
                     ...state, 
 
-                    data: data.map(balanceObj=>{
+                    data: state.data.map(balanceObj=>{
 
                         const {id, data : {amount : balanceAmt}} = balanceObj;
 

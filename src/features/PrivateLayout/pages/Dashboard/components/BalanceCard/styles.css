@@ -1,4 +1,4 @@
-#balance_card {
+.balance-card {
     max-width: 640px;
     height: 250px;
 
@@ -17,7 +17,7 @@
 
     padding: 12px;
 
-    .card-header, .card-header>.title {         
+    .card-header, .card-header-skeleton>.title, .card-header>.title {         
         color: var(--white) !important;
     }
 
@@ -39,11 +39,20 @@
 
             align-self: first baseline;
         }
-        .amount {
+        .amount-container {
             color: var(--white) !important;
             font-size: 112px;
 
             animation: slideUp 0.1s ease 1
+        }
+    }
+
+    .card-details-skeleton {
+        & div[class="ant-skeleton-content"] {
+
+            h3 {
+                background-color: var(--skeleton-white) !important;
+            }
         }
     }
 }
@@ -62,6 +71,10 @@
     ); 
 
     box-shadow: 0 10px 20px -10px var(--color-primary);
+
+    .card-header-skeleton {
+        color: var(--white) !important; 
+    }
 }
 
 @keyframes slideUp {
@@ -89,7 +102,7 @@
     
     #balance_card {
         .card-details {
-            .amount {
+            .amount-container {
                 font-size: 100px !important;
             }
 
@@ -105,12 +118,13 @@
         .card-details {
             column-gap: 4px !important;
 
-            .amount {
-                font-size: 84px !important;
+            .amount-container {
+                font-size: 72px !important;
             }
 
             .defaultCurrency {
                 padding-right: 0 !important;
+                font-size: 24px !important;
             }
         }
     }

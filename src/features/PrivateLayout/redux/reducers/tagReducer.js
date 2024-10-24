@@ -10,7 +10,7 @@ const {
 const {
     MODIFY_TAG, 
     DELETE_TAG, 
-    ADD_TAG
+    CREATE_TAG
 } = UPDATE_TAG
 
 const initialState = {
@@ -42,6 +42,17 @@ export default function tagReducer(state=initialState, action) {
                 ...state, 
                 status: asyncStatus.ERROR,
                 error: payload
+            }
+        }
+
+        case CREATE_TAG: {
+            // insert new tag object in the tag list (data)
+            return {
+                ...state, 
+                data: [
+                    ...state.data, 
+                    payload
+                ]
             }
         }
         default : {

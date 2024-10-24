@@ -3,12 +3,13 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useIsLoggedIn } from "../../custom_hooks";
 import Header from "../../components_common/Header";
 
-import privateContext from "./context/userAuthContext";
+import userAuthContext from "./context/userAuthContext";
 
 import StateInitializer from "./components/StateInitializer";
 import OnboardingAction from "./components/OnboardingAction";
 import { Spin } from "antd";
 import { asyncStatus } from "../../enums";
+import ExchangeRateStatusContext from "./components/ExchangeRateStatusContext";
 
 export default function PrivateContextProviderLayout() {
 
@@ -21,7 +22,7 @@ export default function PrivateContextProviderLayout() {
 
     else {
         return (
-            <privateContext.Provider value={{user}}>
+            <userAuthContext.Provider value={{user}}>
                                 
                 <div id="app-container">
                     <div className="app-page">
@@ -40,9 +41,11 @@ export default function PrivateContextProviderLayout() {
 
                                     <StateInitializer>
                                         <OnboardingAction>
+                                            <ExchangeRateStatusContext>
+
+                                                <Outlet />
                                             
-                                            <Outlet />
-                                            
+                                            </ExchangeRateStatusContext>
                                         </OnboardingAction>
                                     </StateInitializer>
                                 )
@@ -51,7 +54,7 @@ export default function PrivateContextProviderLayout() {
                     </div>
                 </div>
 
-            </privateContext.Provider>
+            </userAuthContext.Provider>
         )
     }
 }

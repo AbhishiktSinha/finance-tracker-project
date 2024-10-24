@@ -1,4 +1,4 @@
-import dashboardTransactionsReducer from "../features/PrivateLayout/pages/Dashboard/redux/reducer";
+import dashboardTransactionsReducer from "../features/PrivateLayout/pages/Dashboard/redux/reducers/dashboardTransactionsReducer";
 import balanceReducer from "../features/PrivateLayout/redux/reducers/balanceReducer";
 import newTransactionReducer from "../features/PrivateLayout/redux/reducers/newTransactionReducer";
 import tagReducer from "../features/PrivateLayout/redux/reducers/tagReducer";

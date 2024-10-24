@@ -19,8 +19,12 @@ export default class ExchangeRateConvertor {
      * @param {Array<object>} initializer 
      * @returns ReducedConvertedAmount | undefined
      * 
-     * function to reduce a list of amount-structured objects to a single 
-     * reduced amount value
+     * Function to reduce a list of amount-structured objects to a single 
+     * reduced amount value  
+     * **Note**:  
+     * This function always returns the cumulative summed up value of all the given amount-structured objects.  
+     * Use this function only for amount-structured objects of the same type i.e for either income or expenditure type transacion list or balance list
+     * 
      */
     reduceConvertedList(defaultCurrency, initializer=[]) {
 

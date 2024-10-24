@@ -108,11 +108,11 @@ export class FirestoreCRUD {
     }
 
     /** 
- * GetDocs --> Query docs from a collection
- * @param {collectionPath} string - absolute path to the collection 
- * @param {queryBuilder} Array<{key, relationship, value}> - array of where objects to build a query
- * @param {order} Array<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
-*/
+     * GetDocs --> Query docs from a collection
+     * @param {collectionPath} string - absolute path to the collection 
+     * @param {queryBuilder} Array<{key, relationship, value}> - array of where objects to build a query
+     * @param {order} Array<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
+    */
     async getDocsData(collectionPath, queryBuilder = [], order = []) {
         // Get collection reference
         const collectionRef = this.#getCollectionRef(collectionPath);

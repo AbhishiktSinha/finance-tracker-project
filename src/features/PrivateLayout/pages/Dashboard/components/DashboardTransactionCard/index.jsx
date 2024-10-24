@@ -3,6 +3,8 @@ import CardDetailsSkeleton from '../CardDetailsSkeleton'
 
 import { consoleDebug, consoleError } from '../../../../../../console_styles';
 import './styles.css'
+import { asyncStatus, changeType } from '../../../../../../enums';
+import { DashOutlined, FallOutlined, RiseOutlined } from '@ant-design/icons';
 
 /*TODO: 
 OVERHAULING
@@ -19,6 +21,7 @@ export default function DashboardTransactionCard({
 
     const { defaultCurrency, amount, timeframe } = data;
     consoleDebug(`Amount recieved in DashboardTransactionCard:  ${typeof amount} | ${amount}`);
+    console.log('INSIGHT RECIEVED IN DashboardTransactionCard:', insights);
 
     const getDisplayAmount = useCallback((amount) => {
         consoleDebug(`calling getDisplayAmount()`)
@@ -30,7 +33,7 @@ export default function DashboardTransactionCard({
                 return '00000';
             }
             else {
-                return amount.toLocaleString();
+                return Number(amount.toFixed(0)).toLocaleString();
             }
         }
 
@@ -43,7 +46,7 @@ export default function DashboardTransactionCard({
                 id={`${rootClassname + '-skeleton'}`}
             >
                 <div className="card-header-skeleton">
-                    {title}
+                    <p className="title">{title}</p>
                 </div>
 
                 <div className='card-details-skeleton'>
@@ -60,7 +63,7 @@ export default function DashboardTransactionCard({
                         insights && (
 
                             <CardDetailsSkeleton
-                                className='insights-skeleton'
+                                className='insights-chip-skeleton'
                                 round={true}
                             />
 
@@ -97,23 +100,50 @@ export default function DashboardTransactionCard({
                     </span>
                 </div>
 
-                <div className="amount">{getDisplayAmount(amount)}</div>
+                <div className="amount-container">
 
-                {
-                    insights && (
+                    {
+                        insights && (
 
-                        insights == 'loading' ?
-                            (
-                                <CardDetailsSkeleton
-                                    className='insights-skeleton'
-                                    round={true}
-                                />
-                            ) :
-                            (
-                                <></>
-                            )
-                    )
-                }
+                            (insights.status == asyncStatus.INITIAL || insights.status == asyncStatus.LOADING) ?
+                                (
+                                    <CardDetailsSkeleton
+                                        className='insights-chip-skeleton'
+                                        round={true}
+                                    />
+                                ) :
+                                (
+                                    <div className="insights-chip">
+                                        <span className="insights-change-indicator">
+                                            {
+                                                insights.data.changeType == changeType.POSITIVE && (
+                                                    <RiseOutlined className='insights-change-indicator-icon' />
+                                                )
+                                            }
+                                            {
+                                                insights.data.changeType == changeType.NEGATIVE && (
+                                                    <FallOutlined className='insights-change-indicator-icon' />
+                                                )
+                                            }
+                                            {
+                                                insights.data.changeType == changeType.NONE && (
+                                                    <DashOutlined classID='insights-change-indicator-icon' />
+                                                )
+                                            }
+                                        </span>
+
+                                        <span className="change-value">
+                                            {`${insights.data.value} ${insights.data.unit}`}
+                                        </span>
+                                    </div>
+                                )
+                        )
+                    }
+                        
+                    {getDisplayAmount(amount)}
+                </div>
+
+                
             </div>
         </div>
     )

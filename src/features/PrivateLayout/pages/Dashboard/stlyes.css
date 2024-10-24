@@ -1,8 +1,9 @@
 #dashboard-page {
-    padding:8px 12px;
+    padding:24px 12px;
     position: relative;
 
-    height: var(--main-height);
+    height: fit-content;
+    min-height: var(--main-height);
 
     display: flex;
     flex-direction: column;
@@ -35,7 +36,7 @@
             color: var(--white)
         }
 
-        position: absolute;
+        position: fixed;
         bottom: 24px;
         right: 12px;
 
@@ -53,9 +54,12 @@
 }
 
 .card-details-skeleton {
-    & h3 {
-        height: 100% !important;
-        background-color: var(--skeleton-white) !important;
+    & div[class="ant-skeleton-content"] {
+        height: 100%;
+        
+        h3 {
+            height: inherit !important;
+        }
     }
 }
 

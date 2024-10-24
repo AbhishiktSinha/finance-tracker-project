@@ -3,7 +3,6 @@ import { useContext, useMemo, useRef } from 'react'
 import {Form, Input, Select} from 'antd'
 
 import ActionButton from '../../../../../../components_common/ActionButton';
-import privateContext from '../../../../context';
 
 import { consoleDebug, consoleError } from '../../../../../../console_styles';
 import { updateOnboardingDataThunk } from '../../../../redux/thunk';
@@ -12,13 +11,14 @@ import { useDispatch } from 'react-redux';
 import { getAllCurrencyCodeDropdownOptions} from '../../../../utils';
 
 import './styles.css'
+import userAuthContext from '../../../../context/userAuthContext';
 
 export default function OnboardingForm({modalRef}) {
 
     const dispatch = useDispatch();
     
     const saveButtonRef = useRef();
-    const {user: {uid}} = useContext(privateContext)
+    const {user: {uid}} = useContext(userAuthContext)
 
     // currency dropdown options
     const options = useMemo(()=>{

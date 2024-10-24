@@ -2,6 +2,7 @@
 
 import getSymbolFromCurrency from "currency-symbol-map";
 import { createSelector } from "reselect";
+import { consoleDebug } from "../../../console_styles";
 
 /* export const selectDefaultCurrency = ({userDoc})=> {
     if (Boolean(userDoc.data?.settings?.defaultCurrency)) {
@@ -26,3 +27,16 @@ export const selectBalance = ({balance}) => balance.data;
 /* ------------ newTransaction SELECTORS --------------- */
 export const selectNewTransaction = ({newTransaction})=> newTransaction.data;
 
+/* -------------------- TAG SELECTORS -------------------- */
+export const selectTags = ({tags}) => tags.data;
+export const wrapper_selectTagsOfType = (type) => {
+    
+    return createSelector([selectTags], (tagsList)=>{
+
+        return tagsList.filter( tagItem => {
+                      
+            // consoleDebug(`${tagItem.data.name} -- category:${tagItem.data.category} || required type: ${type}`)
+            return (tagItem.data.category == type)
+        })
+    })
+}

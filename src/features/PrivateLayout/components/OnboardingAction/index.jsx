@@ -35,26 +35,9 @@ export default function OnboardingAction({ children }) {
             if (!Boolean(isDefaultCurrencySet)) {
                 consoleError('DEFAULT CURRENCY NOT SET');
                 onboardingModalRef.current.openModal();
-            }
-
-            /*  FIXME: ✅
-                    The execution of this effect is defered until all the children 
-                    components have been rendered and their effects have run.  
-                    The descendant components of type DashboardTransaction cards 
-                    need the updated exchangeRates in the localStorage to display 
-                    accurate amount information.  
-                    The network call to udpate the localStorage exchange rate doesn't happen 
-                    until after the DashboardTransaction cards have renderd.  
-                    This poses a delayed information procurement problem. 
-                    How should we render these cards and make them listen to changes in the localStorage
-            */
+            }            
             else {
                 consoleDebug(`Default Currency Set`);
-
-                // perform the update of exchange rate in the thunk 
-                // to avoid direct defaultCurrency dependency
-                
-                // dispatch(updateExchangeRateThunk())
             }
         }
 

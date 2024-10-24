@@ -1,6 +1,10 @@
+import { transactionType } from "../../../../../../../../enums";
+import AddTransactionForm from "../AddTransactionForm";
 
 export default function AddIncomeTransaction() {
     return (
-        <h1>Income Transaction Form</h1>
+        <AddTransactionForm 
+            transactionType={transactionType.INCOME}
+        />
     )
 }
