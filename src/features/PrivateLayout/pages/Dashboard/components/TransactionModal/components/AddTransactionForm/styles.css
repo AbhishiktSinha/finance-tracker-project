@@ -1,0 +1,27 @@
+.add-transaction-form {
+
+    padding-block: 12px;
+    
+    .transaction-form-row {
+        width: 100% !important;
+
+        gap: 8px;
+    
+        .ant-form-item:nth-child(2) {
+            flex: 1;
+        }
+
+    }
+    .date-time-section {
+
+        .ant-form-item {
+            flex: 1;
+        }
+
+        & .transaction-date-picker {
+            width: 100%;
+        }        
+    }
+
+
+}

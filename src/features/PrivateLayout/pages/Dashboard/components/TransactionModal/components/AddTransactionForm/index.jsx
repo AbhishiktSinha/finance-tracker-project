@@ -1,7 +1,6 @@
-import { Form, Select, Flex, Input, Divider } from 'antd'
+import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
 import ActionButton from '../../../../../../../../components_common/ActionButton'
 
-import './styles.css'
 import { useSelector } from 'react-redux'
 import { selectDefaultCurrency } from '../../../../../../redux/selectors'
 import { getAllCurrencyCodeDropdownOptions } from '../../../../../../utils'
@@ -9,6 +8,9 @@ import { transactionType } from '../../../../../../../../enums'
 import { selectBalance } from '../../../../../../redux/selectors'
 import TagsDropdown from './components/TagsDropdown'
 import { useMemo } from 'react'
+
+import './styles.css'
+import DateTimePicker from './components/DateTimePicer'
 
 /*BASIC JSX STRUCTURE
 
@@ -28,7 +30,7 @@ Call addTransactionThunk to handle backend and frontend data updation
 export default function AddTransactionForm({ transactionType: type, additionalFormItems, onFinishCheck, formFieldRules }) {
 
   const currency = useSelector(selectDefaultCurrency);
-  const balanceList = useSelector(selectBalance);
+  const balanceList = useSelector(selectBalance);  
 
   const currencyOptions = useMemo(() => {
 
@@ -69,10 +71,10 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       onFinish={onFinish}
       initialValues={{
         currency: currency.code,
-        
+        type: type.toString().toUpperCase(),        
       }}
     >
-      {/* TITLE */}
+      {/* ---------------------------------------TITLE------------------------- */}
       <Form.Item
         name='title'
         label='Title'
@@ -83,13 +85,14 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         <Input placeholder='Transction Title' />
       </Form.Item>
 
-      {/* CURRENCY AND AMOUNT */}
+      {/* ----------------------CURRENCY AND AMOUNT------------------------- */}
       <Flex
-        rootClassName='transaction-value-section'
+        rootClassName='transaction-value-section transaction-form-row'
       >
         {/* CURRENCY */}
         <Form.Item
           name='currency'
+          label='Currency'
           rules={[
             { required: true, message: 'Please Select Currency' }
           ]}
@@ -103,9 +106,10 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         {/* AMOUNT */}
         <Form.Item
           name='amount'
+          label='Amount'
           rules={[
             { required: true, message: 'Please Enter Amount' },
-            { type: 'number', message: 'Plesae Enter A Valid Number' }
+            { pattern: /^[1-9]\d*$/, message: 'Please Enter a Valid Number'}
           ]}
         >
           <Input placeholder='0000' />
@@ -113,18 +117,53 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
 
       </Flex>
 
-      {/* TAGS */}
-      <Form.Item
-        name='tag'
-        rules={[
-          { required: true, message: 'Please select tag' }
-        ]}
-      >
-        {/* TODO: add tag selection dropdown, with loading state spinner */}
-        <TagsDropdown 
-          type={type} 
+      {/* -------------------------------TYPE AND TAGS------------------------------ */}
+      <Flex rootClassName='type-tag-section transaction-form-row' >
+        
+        {/* TYPE */}
+        <Form.Item 
+          name={'type'}
+          label='Type'
+          rules={[
+            { required: true, message: 'Please select Type'}
+          ]}
+        >
+          <Select 
+            options={[
+              {
+                label: transactionType.INCOME.toUpperCase(), 
+                key: transactionType.INCOME
+              }, 
+              {
+                label: transactionType.EXPENDITURE.toUpperCase(), 
+                key: transactionType.EXPENDITURE
+              }
+            ]}
+            value={type}
+            {...(type && {disabled: true})}
           />
-      </Form.Item>
+        
+        </Form.Item>
+
+        {/* TAG */}
+        <TagsDropdown type={type} />         
+
+      </Flex>
+
+      {/* ------------------------------------ DATE & TIME --------------------------------------- */}
+      <Flex 
+        rootClassName='transaction-form-row date-time-section'
+      >        
+        <DateTimePicker name={'occurredAt'} />
+      </Flex>
+
+      <Flex rootClassName='transaction-form-row'>
+        <Button 
+          type='primary' 
+          htmlType='submit'>
+            Create {type.toUpperCase()} Transaction
+        </Button>
+      </Flex>
     </Form>
   )
 }

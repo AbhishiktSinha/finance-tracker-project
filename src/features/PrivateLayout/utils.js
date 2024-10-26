@@ -57,3 +57,13 @@ export function getValueChangePercentage(oldValue, newValue) {
     else if(oldValue == 0) { return Infinity }
     else { return ( (change/oldValue) * 100 )};
 }
+
+export function range(start, endExclusive, step = 1) {
+    let arr = [];
+    for (let i = start; i < endExclusive; i += step) {
+      arr.push(i);
+    }
+  
+    return arr;
+  }
+  
