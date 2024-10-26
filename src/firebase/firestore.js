@@ -168,7 +168,13 @@ export class FirestoreCRUD {
     }
 
     
-    /**
+    /**## batchWrite()  
+     * function to perform database operations in a batch  
+     * requires the following fields for each operation :  
+     * - `operationType`: 'set', 'update', 'delete', 
+     * - `docPath`: if the document already exists
+     * - `collectionPath`: if the document has to be created with random ref
+     * - `data`: the data of the operation
      * 
      * @param {Array<object>} operationsList required fields: operationType, docPath, data
      * @returns Promise of committing the batch
@@ -179,10 +185,19 @@ export class FirestoreCRUD {
 
             const batch = writeBatch(db);
 
-            operationsList.forEach( ({operationType='', docPath='', data={}}) => {
+            operationsList.forEach( ({operationType='', docPath='', collectionPath='', data={}}) => {
 
-                const docRef = this.#getDocRef(docPath);
-
+                let docRef;
+                // if no docPath is provided, collection Path will be used to create a random docRef
+                if (docPath == '') {
+                    
+                    docRef = this.#getCollectionRef(collectionPath).doc();
+                }
+                else {
+                    docRef = this.#getDocRef(docPath);
+                }
+                
+                
                 switch(operationType) {
                     case 'set' : {
                         batch.set(docRef, data);

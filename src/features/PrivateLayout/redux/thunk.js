@@ -376,3 +376,15 @@ export const createTagThunk = (uid, data)=>{
         }
     }
 }
+
+
+export const createTransactionThunk = (uid, data)=>{
+    
+    /* TODO:
+        - transform the data recieved from the form into format compatible with 
+            state and backend
+        - batch write for balance & transactions in the backend
+        - redux state udpate for balance & newTransaction
+        - conditional redux state update for either dashboardTransactions or transactionsHistory
+    */
+}

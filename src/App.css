@@ -31,6 +31,8 @@ h1, h2, h3, h4 {
   --text-dark: #313131;
   --white: #fff;
 
+  --disabled-text: #c9c9c9;
+
 
   --skeleton-white: #ffffff55;
 
@@ -69,5 +71,18 @@ button:hover {
   background-color: var(--accent-color) !important;
   >span {
     color: var(--white) !important
+  }
+}
+
+
+.disabled, 
+div[class*='disabled'], 
+p[class*='disabled'],
+li[class*='disabled'], 
+span[class*='disabled'], 
+a[class*='disabled'] {
+  color: var(--disabled-text) !important;
+  >div, >p, >span {
+    color: var(--disabled-text) !important;
   }
 }

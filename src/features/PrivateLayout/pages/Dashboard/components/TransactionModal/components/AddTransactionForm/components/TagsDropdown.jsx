@@ -9,7 +9,7 @@ export default function TagsDropdown({type}) {
 
     return (
       <Form.Item
-        name='tag'
+        name='tagId'
         label='Tag'
         rules={[
           {required: true, message: 'Please Select Tag'}

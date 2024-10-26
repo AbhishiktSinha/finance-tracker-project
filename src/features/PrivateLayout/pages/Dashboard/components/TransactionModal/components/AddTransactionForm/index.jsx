@@ -10,7 +10,7 @@ import TagsDropdown from './components/TagsDropdown'
 import { useMemo } from 'react'
 
 import './styles.css'
-import DateTimePicker from './components/DateTimePicer'
+import DateTimePicker from './components/DateTimePicker'
 
 /*BASIC JSX STRUCTURE
 
@@ -86,9 +86,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       </Form.Item>
 
       {/* ----------------------CURRENCY AND AMOUNT------------------------- */}
-      <Flex
-        rootClassName='transaction-value-section transaction-form-row'
-      >
+      <Flex rootClassName='transaction-value-section transaction-form-row'>
         {/* CURRENCY */}
         <Form.Item
           name='currency'
@@ -151,9 +149,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       </Flex>
 
       {/* ------------------------------------ DATE & TIME --------------------------------------- */}
-      <Flex 
-        rootClassName='transaction-form-row date-time-section'
-      >        
+      <Flex rootClassName='transaction-form-row date-time-section'>        
         <DateTimePicker name={'occurredAt'} />
       </Flex>
 

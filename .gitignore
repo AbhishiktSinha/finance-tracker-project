@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 # Miscellaneous Markdown
-TODO.md
 Thoughts.md
 
 # environment files
