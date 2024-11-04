@@ -1,16 +1,20 @@
 import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
 import ActionButton from '../../../../../../../../components_common/ActionButton'
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectDefaultCurrency } from '../../../../../../redux/selectors'
 import { getAllCurrencyCodeDropdownOptions } from '../../../../../../utils'
 import { transactionType } from '../../../../../../../../enums'
 import { selectBalance } from '../../../../../../redux/selectors'
 import TagsDropdown from './components/TagsDropdown'
-import { useMemo } from 'react'
+import { useContext, useMemo, useRef } from 'react'
 
 import './styles.css'
 import DateTimePicker from './components/DateTimePicker'
+import dayjs from 'dayjs'
+import { updateTransactionThunk } from '../../../../../../redux/thunk'
+import { consoleError, consoleInfo } from '../../../../../../../../console_styles'
+import userAuthContext from '../../../../../../context/userAuthContext'
 
 /*BASIC JSX STRUCTURE
 
@@ -27,10 +31,16 @@ Basic Data Handling
 Create transaction object using form values
 Call addTransactionThunk to handle backend and frontend data updation
   */
-export default function AddTransactionForm({ transactionType: type, additionalFormItems, onFinishCheck, formFieldRules }) {
+export default function AddTransactionForm({ transactionType: type, additionalFormItems, onFinishCheck, onFinishDispatch, formFieldRules }) {
 
   const currency = useSelector(selectDefaultCurrency);
   const balanceList = useSelector(selectBalance);  
+
+  const {user: {uid}} = useContext(userAuthContext)
+
+  const dispatch = useDispatch();
+
+  const actionButtonRef = useRef();
 
   const currencyOptions = useMemo(() => {
 
@@ -58,7 +68,40 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
     }
 
     if (submitForm) {
-      console.log(values);
+
+      const {occurredAt, ...restValues} = values;
+      const now = dayjs().valueOf();
+
+      const data = {
+        
+        ...restValues, 
+
+        timestamp: {
+          createdAt: now, 
+          occurredAt: occurredAt.valueOf(), 
+          modifiedAt: now,
+        }
+      }
+      console.log(data);
+
+      try {
+
+        actionButtonRef.current.setButtonLoading();
+        const transactionObject = await dispatch(updateTransactionThunk(uid, data));
+
+        consoleInfo('TRANSACTION ADDED TO FIRESTORE');
+        console.log(transactionObject);
+        
+        onFinishDispatch && onFinishDispatch(dispatch, transactionObject);
+        
+      }
+      catch(e) {
+        consoleError(`AddTransactionFormError:\n`);
+        console.log(e);
+      }
+      finally {
+        actionButtonRef.current.setButtonActive();
+      }
     }
   }
 
@@ -71,7 +114,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       onFinish={onFinish}
       initialValues={{
         currency: currency.code,
-        type: type.toString().toUpperCase(),        
+        type: type,        
       }}
     >
       {/* ---------------------------------------TITLE------------------------- */}
@@ -130,14 +173,14 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
             options={[
               {
                 label: transactionType.INCOME.toUpperCase(), 
-                key: transactionType.INCOME
+                value: transactionType.INCOME
               }, 
               {
                 label: transactionType.EXPENDITURE.toUpperCase(), 
-                key: transactionType.EXPENDITURE
+                value: transactionType.EXPENDITURE
               }
             ]}
-            value={type}
+            
             {...(type && {disabled: true})}
           />
         
@@ -154,11 +197,13 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       </Flex>
 
       <Flex rootClassName='transaction-form-row'>
-        <Button 
-          type='primary' 
-          htmlType='submit'>
-            Create {type.toUpperCase()} Transaction
-        </Button>
+        <ActionButton 
+          type='primary'
+          htmlType='submit'
+          ref={actionButtonRef}
+        >
+          Create {type.toUpperCase()} Transaction
+        </ActionButton>        
       </Flex>
     </Form>
   )

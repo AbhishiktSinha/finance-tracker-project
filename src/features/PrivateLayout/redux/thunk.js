@@ -1,5 +1,6 @@
 import { FETCH_USERDOC, UPDATE_USERDOC } from './actions/userDocActions'
 import { FETCH_BALANCE, UPDATE_BALANCE } from './actions/balanceActions';
+import { UPDATE_NEW_TRANSACTION } from './actions/newTransactionActions'
 import { FETCH_TAG, UPDATE_TAG } from './actions/tagActions';
 
 import { selectDefaultCurrency } from './selectors';
@@ -14,6 +15,8 @@ import TagError from '../../../custom_errors/TagError'
 import InitializerError from '../../../custom_errors/InitializerError'
 import endpoints from '../../../network/endpoints';
 import request from '../../../network/request';
+import { rules } from 'eslint-plugin-react';
+import { transactionType } from '../../../enums';
 
 export const fetchUserDocThunk = (uid) => {
 
@@ -378,13 +381,159 @@ export const createTagThunk = (uid, data)=>{
 }
 
 
-export const createTransactionThunk = (uid, data)=>{
+/** ## newFirestoreTransactionThunk
+ * THUNK to update the following firestore subcollecitons:  
+ * - `transactions`: create and add a new transaction
+ * - `balance`: create a new document for the transaction's currency, or udpate the document if it exists  
+ * 
+ * ### Redux State Updates: 
+ * Post successful `firestore` updates, this thunk udpates the following `redux` state slices:  
+ * - `balance`: dispatch --> UDPATE_BALANCE
+ * - `newTransaction`: dispatch --> UPDATE_NEW_TRANSACTION
+ * 
+ * @param {string} uid User's UID retrieved from firestore
+ * @param {object} data Transaction data in appropriate format
+ * @returns Promise of firestore updation and relevant redux state updation
+ */
+export const updateTransactionThunk = (uid, data)=>{
+
+    // RECIEVED DATA DOESN'T REQUIRE FURTHER MODIFICATION
+
+    const {UPDATE_BALANCE: UPDATE_BALANCE_DATA} = UPDATE_BALANCE;
+
+    const payloadObject = {};
     
-    /* TODO:
-        - transform the data recieved from the form into format compatible with 
-            state and backend
-        - batch write for balance & transactions in the backend
-        - redux state udpate for balance & newTransaction
-        - conditional redux state update for either dashboardTransactions or transactionsHistory
-    */
+    return async (dispatch, getState)=>{
+
+        const getTransactionId = (transactionData)=>{
+            
+            if (transactionData.id) {
+                return transactionData.id;
+            }
+            else {
+                return new FirestoreCRUD().getRandomDocID(`users/${uid}/transactions`);
+            }
+        }
+        const getTransactionData = (transactionData)=>{
+            const {id, ...restData} = transactionData;
+            return restData;
+        }
+        const transactionId = getTransactionId(data);
+        const transactionData = getTransactionData(data);
+
+        try { 
+            
+            await new FirestoreCRUD().firestoreTransaction(
+                [
+                    // transaction
+                    {
+                        docPathDependencies: [`users/${uid}/transactions/${transactionId}`], 
+                        targetDocPath: `users/${uid}/transactions/${transactionId}`,
+
+                        transactionConditionFunction: (docSnapDependencies)=>{
+
+                            const [transactionDocSnap, ...restDocSnaps] = docSnapDependencies; 
+
+                            // if financial transaction doc is being updated
+                            if (transactionDocSnap.exists()) {
+
+                                payloadObject.transactionData = transactionData;
+
+                                return {
+                                    commit: true, 
+                                    operation: 'set', 
+                                    option: {merge: true}, 
+                                    data: transactionData
+                                }
+                            }
+                            // if new financial Transaction is being created
+                            else {
+                                payloadObject.transactionData = {
+                                    id: transactionId, 
+                                    data: transactionData
+                                }
+                                
+                                return {
+                                    commit: true, 
+                                    operation: 'set', 
+                                    data: transactionData
+                                }
+                            }
+
+                        }
+                    }, 
+                    // balance
+                    {
+                        docPathDependencies: [`users/${uid}/balance/${transactionData.currency}`], 
+                        targetDocPath: `users/${uid}/balance/${transactionData.currency}`,
+                        
+                        transactionConditionFunction: (docSnapDependencies)=>{
+                            
+                            const [balanceDocSnap, ...restDocSnaps] = docSnapDependencies;
+                            const {type, amount, currency} = transactionData
+
+                            // if balance document exists
+                            if (balanceDocSnap.exists()) {
+
+                                const balanceAmount = balanceDocSnap.data().amount;
+                                const newAmount = type == transactionType.INCOME ? 
+                                    balanceAmount + amount :
+                                    balanceAmount - amount;
+
+                                // application state
+                                payloadObject.balanceData = {type, amount, currency}
+
+                                // firestore
+                                return {
+                                    commit: true, 
+                                    operation: 'set', 
+                                    option: {merge: true}, 
+                                    data: { amount: newAmount }
+                                }
+                            }
+                            // if balance document does NOT exist
+                            else {
+
+                                payloadObject.balanceData = {amount, currency};
+
+                                return {
+                                    commit: true, 
+                                    operation: 'set', 
+                                    data: {
+                                        amount: amount, 
+                                        currency: currency
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            )
+
+            // update the BALANCE state
+            dispatch({
+                type: UPDATE_BALANCE_DATA, 
+                payload: payloadObject.balanceData
+            })
+
+            // update the NEW_TRANSACTION state
+            dispatch( {
+                type: UPDATE_NEW_TRANSACTION, 
+                payload: {
+                    id: transactionId, 
+                    data: transactionData
+                }
+            })
+
+            // return data to update the TRANSACTION state
+            return {
+                id: transactionId, 
+                data: transactionData
+            }
+        }
+        catch(e) {
+            // the operation of this thunk affects the UI
+            throw e;
+        }
+    }
 }

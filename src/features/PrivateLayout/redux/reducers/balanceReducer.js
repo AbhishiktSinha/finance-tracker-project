@@ -1,4 +1,4 @@
-import { consoleError } from "../../../../console_styles";
+import { consoleError, consoleInfo } from "../../../../console_styles";
 import { asyncStatus, transactionType } from "../../../../enums";
 import { FETCH_BALANCE, UPDATE_BALANCE as UPDATE } from "../actions/balanceActions"
 
@@ -56,17 +56,24 @@ export default function balanceReducer(state = initialState, action) {
 
 
         case UPDATE_BALANCE: {
+            consoleInfo('UPDATE_BALANCE call')
+            console.log(payload)
 
-            const { data: { type, currency: transactionCurr, amount: transactionAmt} } = payload;
+            const { type, currency: transactionCurr, amount: transactionAmt } = payload;
             
-            // no type is provided --> Initialization case
+            // no type is provided --> Initialization case for the particular currency
             if (! Boolean(type)) {
                 return {
                     ...state, 
+
                     data: [
+
+                        ...(state.data ? state.data: []), 
+
                         {
-                            ...payload, 
-                            id: transactionCurr, //id of the balance object is the currency of the balance amount
+                            id: transactionCurr, 
+
+                            data: payload,
                         }
                     ]
                 }
@@ -129,10 +136,11 @@ export default function balanceReducer(state = initialState, action) {
                 }
             }
             else {
-                consoleError(`Invalid 'type' property: ${type}`);
+                consoleError(`balanceReducer UPDATE_BALANCE: Invalid 'type' property: ${type}`);
                 return state;
             }
         }
+        
         default : {
             return state;
         }

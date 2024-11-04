@@ -7,7 +7,7 @@
  */
 import { db } from ".";
 
-import { doc, setDoc, addDoc, getDoc, collection, updateDoc, onSnapshot, query, where, getDocs, orderBy, writeBatch } from "firebase/firestore";
+import { doc, setDoc, addDoc, getDoc, collection, updateDoc, onSnapshot, query, where, getDocs, orderBy, writeBatch, runTransaction } from "firebase/firestore";
 
 import { consoleError, consoleInfo, consoleSucess } from "../console_styles";
 
@@ -20,14 +20,29 @@ export class FirestoreCRUD {
     /**
      * Private Methods: retrieve ref to doc or collection
      */
-    #getDocRef(path) {
+    #getDocRef(docPath, collectionPath) {
+        if (collectionPath) { 
+            return doc (this.#getCollectionRef(collectionPath));
+        }
+        if (typeof docPath  !== 'string') {
+            throw new Error('Path must be a string')
+        }
+        return doc(db, docPath, );
+    }
+    #getCollectionRef(path) {
         if (typeof path !== 'string') {
             throw new Error('Path must be a string')
         }
-        return doc(db, path);
+        return collection(db, path)
     }
-    #getCollectionRef(name) {
-        return collection(db, name)
+
+    /**
+     * 
+     * @param {string} collectionPath 
+     * @returns random `id` for a document in this collection
+     */
+    getRandomDocID(collectionPath) {
+        return doc(this.#getCollectionRef(collectionPath)).id;
     }
 
     /**## setDocData
@@ -175,8 +190,9 @@ export class FirestoreCRUD {
      * - `docPath`: if the document already exists
      * - `collectionPath`: if the document has to be created with random ref
      * - `data`: the data of the operation
+     * - `options`: relevant when we wish to **set** the value for one or more fields of a possibly non existing document
      * 
-     * @param {Array<object>} operationsList required fields: operationType, docPath, data
+     * @param {Array<object>} operationsList required fields: operationType, docPath, data | optional fields: options
      * @returns Promise of committing the batch
      */
     async batchWrite(operationsList = []) {
@@ -185,26 +201,29 @@ export class FirestoreCRUD {
 
             const batch = writeBatch(db);
 
-            operationsList.forEach( ({operationType='', docPath='', collectionPath='', data={}}) => {
+            operationsList.forEach( ({operationType='', docPath='', collectionPath='', data={}, options={}}) => {
 
                 let docRef;
                 // if no docPath is provided, collection Path will be used to create a random docRef
-                if (docPath == '') {
+                if (docPath == '' && collectionPath != '') {
                     
-                    docRef = this.#getCollectionRef(collectionPath).doc();
+                    docRef = this.#getDocRef(undefined, collectionPath);
+                }
+                else if (docPath != ''){
+                    docRef = this.#getDocRef(docPath);
                 }
                 else {
-                    docRef = this.#getDocRef(docPath);
+                    throw new Error(`Invalid argument for batch write: empty docPath & collectionPath`);
                 }
                 
                 
                 switch(operationType) {
                     case 'set' : {
-                        batch.set(docRef, data);
+                        batch.set(docRef, data, options);
                         break;
                     }
                     case 'update' : {
-                        batch.update(docRef, data);
+                        batch.update(docRef, data,);
                         break;
                     }
                     case 'delete' : {
@@ -223,5 +242,75 @@ export class FirestoreCRUD {
             throw new Error("batchWriteError: Invalid Argument 'operationsList'");            
         }
 
+    }
+
+
+    /**
+     * 
+     * @param {Array<object>} transactionOperationsList list of { docPathDependencies, targetDocPath, transactionConditionFunction }
+     * @returns Promise of fullfilled transaction or throws error
+     */
+    async firestoreTransaction(transactionOperationsList = []) {
+
+        // return the promise of whatever is returned after transaction success
+
+        return runTransaction(db, async (transaction)=>{
+
+            consoleInfo('RUNNING FIRESTORE TRANSACTION');
+            console.log(transactionOperationsList);
+            
+            // retreive the data from each transaction operation
+            transactionOperationsList.forEach( 
+                
+                async (transactionOperation) => {
+
+                    const { 
+                        docPathDependencies, 
+                        targetDocPath,
+                        transactionConditionFunction } = transactionOperation; 
+                    
+                    // get the dependency array for the document snapshots
+                    const docSnapDependencies = await Promise.all(
+                        // get the promise of Doc Snap for each docPath
+                        docPathDependencies.map( docPath => {
+                        
+                        const docRef = this.#getDocRef(docPath);
+                        return transaction.get(docRef);
+                    }))
+
+                    const {
+                        commit ,
+                        operation, 
+                        option, 
+                        data
+                    } = transactionConditionFunction(docSnapDependencies)
+
+                    if (commit) {
+
+                        const targetDocRef = this.#getDocRef(targetDocPath);
+
+                        switch(operation) {
+                            case 'set': {
+                                transaction.set(targetDocRef, data, option?option:{});
+                                break;
+                            }
+                            case 'update': {
+                                transaction.update(targetDocRef, data)
+                                break;
+                            }
+                            case 'delete': {
+                                transaction.delete(targetDocRef)
+                            }
+                            default: {
+                                throw `Invalid transaction operation type: ${operation}`
+                            }
+                        }
+                    }
+                    else {
+                        consoleError(`transaction for ${targetDocPath} not committed`);
+                    }
+                }
+            )
+        })
     }
 }

@@ -5,8 +5,19 @@ import { Tabs } from "antd";
 
 import "./styles.css"
 import { lazy, Suspense, useMemo } from "react";
+import { UDPATE_DASHBOARD_TRANSACTIONS } from "../../redux/actions/dashboardTransactionsActions";
+import { transactionType } from "../../../../../../enums";
+import { consoleDebug } from "../../../../../../console_styles";
 
 export default function TransactionModal() {
+    const onFinshDispatch = (dispatch, data)=>{
+        consoleDebug('ATTEMPTING Redux DashboardTransaction State udpate');
+        const {ADD_DASHBOARD_TRANSACTION} = UDPATE_DASHBOARD_TRANSACTIONS;
+        dispatch({
+            type: ADD_DASHBOARD_TRANSACTION, 
+            payload: data
+        })
+    }
 
     const AddIncomeTransaction = lazy(()=>import('./components/AddIncomeTransaction'));
     const AddExpenditureTransaction = lazy(()=>import('./components/AddExpenditureTransaction'));
@@ -15,12 +26,12 @@ export default function TransactionModal() {
         return (
             [
                 {
-                    key: 'incomeTab',
+                    key: transactionType.INCOME,
                     label: 'Income',
-                    children: <Suspense><AddIncomeTransaction/></Suspense>
+                    children: <Suspense><AddIncomeTransaction onFinshDispatch={onFinshDispatch}/></Suspense>
                 }, 
                 {
-                    key: 'expenditureTab',
+                    key: transactionType.EXPENDITURE,
                     label: 'Expenditure',
                     children: <Suspense><AddExpenditureTransaction/></Suspense>
                 }
@@ -30,7 +41,7 @@ export default function TransactionModal() {
 
     return (
         <Tabs
-            defaultActiveKey="incomeKey"
+            defaultActiveKey={transactionType.INCOME}
             items={items}
             animated={{inkBar: true, tabPane: true}}
             rootClassName="tab-selector"
