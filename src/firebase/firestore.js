@@ -245,6 +245,7 @@ export class FirestoreCRUD {
     }
 
 
+    // FIXME: FirebaseError: Firestore transactions require all reads to be executed before all writes.
     /**
      * 
      * @param {Array<object>} transactionOperationsList list of { docPathDependencies, targetDocPath, transactionConditionFunction }
@@ -259,58 +260,58 @@ export class FirestoreCRUD {
             consoleInfo('RUNNING FIRESTORE TRANSACTION');
             console.log(transactionOperationsList);
             
-            // retreive the data from each transaction operation
-            transactionOperationsList.forEach( 
+            // retreive the data from each transaction 
+            for (const transactionOperation of transactionOperationsList) {
+
+
+                const { 
+                    docPathDependencies, 
+                    targetDocPath,
+                    transactionConditionFunction } = transactionOperation; 
+
                 
-                async (transactionOperation) => {
-
-                    const { 
-                        docPathDependencies, 
-                        targetDocPath,
-                        transactionConditionFunction } = transactionOperation; 
+                // get the dependency array for the document snapshots
+                const docSnapDependencies = await Promise.all(
+                    // get the promise of Doc Snap for each docPath
+                    docPathDependencies.map( docPath => {
                     
-                    // get the dependency array for the document snapshots
-                    const docSnapDependencies = await Promise.all(
-                        // get the promise of Doc Snap for each docPath
-                        docPathDependencies.map( docPath => {
-                        
-                        const docRef = this.#getDocRef(docPath);
-                        return transaction.get(docRef);
-                    }))
+                    const docRef = this.#getDocRef(docPath);
+                    return transaction.get(docRef);
+                }))
 
-                    const {
-                        commit ,
-                        operation, 
-                        option, 
-                        data
-                    } = transactionConditionFunction(docSnapDependencies)
+                const {
+                    commit ,
+                    operation, 
+                    option, 
+                    data
+                } = transactionConditionFunction(docSnapDependencies)
 
-                    if (commit) {
+                if (commit) {
 
-                        const targetDocRef = this.#getDocRef(targetDocPath);
+                    const targetDocRef = this.#getDocRef(targetDocPath);
 
-                        switch(operation) {
-                            case 'set': {
-                                transaction.set(targetDocRef, data, option?option:{});
-                                break;
-                            }
-                            case 'update': {
-                                transaction.update(targetDocRef, data)
-                                break;
-                            }
-                            case 'delete': {
-                                transaction.delete(targetDocRef)
-                            }
-                            default: {
-                                throw `Invalid transaction operation type: ${operation}`
-                            }
+                    switch(operation) {
+                        case 'set': {
+                            transaction.set(targetDocRef, data, option?option:{});
+                            break;
+                        }
+                        case 'update': {
+                            transaction.update(targetDocRef, data)
+                            break;
+                        }
+                        case 'delete': {
+                            transaction.delete(targetDocRef)
+                        }
+                        default: {
+                            throw `Invalid transaction operation type: ${operation}`
                         }
                     }
-                    else {
-                        consoleError(`transaction for ${targetDocPath} not committed`);
-                    }
                 }
-            )
+                else {
+                    consoleError(`transaction for ${targetDocPath} not committed`);
+                }
+            }
+            
         })
     }
 }
