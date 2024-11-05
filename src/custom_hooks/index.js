@@ -123,13 +123,14 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
         error: ''
     })
     
+    useMemo(()=>{
+    }, [status])
+        amount.current.status = status;
+    
     consoleDebug(`Status in useDynamicAmount: ${status}\n
         Status sent to ${cardTransactionType ? 
             (cardTransactionType==transactionType.INCOME?'Income':'Expenditure') :
              'Balance'}: ${amount.current.status}`);
-    useMemo(()=>{
-        amount.current.status = status;
-    }, [status])
 
     // recompute amount on every defaultCurrencyCode change for success
     useMemo(()=>{
@@ -149,7 +150,7 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
         if (Boolean(newTransaction)) {
 
             const transactionValue = new ExchangeRateConvertor().
-                convertAmount(defaultCurrencyCode, newTransaction);
+                convertAmount(defaultCurrencyCode, newTransaction.data);
 
             const { data: {type} } = newTransaction;
             
@@ -157,12 +158,12 @@ export function useDynamicAmount(initializer, defaultCurrencyCode, newTransactio
             // newTransaction is of the specific type
             // increase income or expenditure amount
             if (Boolean(cardTransactionType)) { 
-                amount.data += transactionValue;
+                amount.current.data += transactionValue;
             }
             // for balance card, no cardTransactionType is provided
             else { 
-                if (type == transactionType.INCOME) { amount.data += transactionValue}
-                else if (type == transactionType.EXPENDITURE) { amount.data -= transactionValue }
+                if (type == transactionType.INCOME) { amount.current.data += transactionValue}
+                else if (type == transactionType.EXPENDITURE) { amount.current.data -= transactionValue }
             }
         }
 
@@ -302,7 +303,7 @@ export function useInsightState(uid, activeTimeframe, type, defaultCurrencyCode)
     }, [state.status[activeTimeframe]])
 
     // return the insight status,data,error for the current MONTH/WEEK/YEAR
-    consoleDebug(`SENDING DATA TO INCOME CARD:\N
+    consoleDebug(`SENDING INSIGHT DATA TO ${type} CARD:\n
         STATUS: ${state.status[activeTimeframe]}\n
         DATA: ${state.data[activeTimeframe]}\n
         error: ${state.error[activeTimeframe]}`)

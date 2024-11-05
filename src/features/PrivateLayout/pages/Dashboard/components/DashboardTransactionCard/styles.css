@@ -4,7 +4,7 @@
 .dashboard-card-skeleton {
     width: 100%;
     max-width: 420px;
-    min-width: 330px !important;
+    min-width: 350px !important;
     border-radius: 12px;
     padding: 8px 12px;
 
@@ -103,7 +103,7 @@
             }
             .insights-chip {  
                                 
-                left: 80%;
+                left: 65%;
                 text-wrap: nowrap;
                 display: flex;
                 align-items: center;

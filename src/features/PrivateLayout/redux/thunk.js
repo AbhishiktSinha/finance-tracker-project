@@ -17,6 +17,7 @@ import endpoints from '../../../network/endpoints';
 import request from '../../../network/request';
 import { rules } from 'eslint-plugin-react';
 import { transactionType } from '../../../enums';
+import { batch } from 'react-redux';
 
 export const fetchUserDocThunk = (uid) => {
 
@@ -381,21 +382,20 @@ export const createTagThunk = (uid, data)=>{
 }
 
 
-/** ## newFirestoreTransactionThunk
- * THUNK to update the following firestore subcollecitons:  
- * - `transactions`: create and add a new transaction
- * - `balance`: create a new document for the transaction's currency, or udpate the document if it exists  
+/**THUNK to handle creating / updating financial transactions  
+ * This thunk uses Firestore Transactions to read data from `balance` and `transactions` collections and udpates data accordingly  
+ *   
+ * Post data udpate on the backend this thunk deals with application state updates 
+ * by firing dispatches to update the `balance` and `newTransaction` state in Redux store  
+ *   
+ * The dispatchCallback callback recieved as an argument is used to make the dispatch call to udpate the appropriate transaction state slice in redux
  * 
- * ### Redux State Updates: 
- * Post successful `firestore` updates, this thunk udpates the following `redux` state slices:  
- * - `balance`: dispatch --> UDPATE_BALANCE
- * - `newTransaction`: dispatch --> UPDATE_NEW_TRANSACTION
- * 
- * @param {string} uid User's UID retrieved from firestore
- * @param {object} data Transaction data in appropriate format
- * @returns Promise of firestore updation and relevant redux state updation
+ * @param {string} uid 
+ * @param {object} data 
+ * @param {(dispatch: Function, transactionData: object)=>void} dispatchCallback
+ * @returns Promise<void>
  */
-export const updateTransactionThunk = (uid, data)=>{
+export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
 
     // RECIEVED DATA DOESN'T REQUIRE FURTHER MODIFICATION
 
@@ -425,16 +425,16 @@ export const updateTransactionThunk = (uid, data)=>{
             
             await new FirestoreCRUD().firestoreTransaction(
                 [
-                    // transaction
+                    // ----------------------------------transaction
                     {
-                        docPathDependencies: [`users/${uid}/transactions/${transactionId}`], 
-                        targetDocPath: `users/${uid}/transactions/${transactionId}`,
+                        // docs to read
+                        docPathDependencies: [`users/${uid}/transactions/${transactionId}`],                         
 
                         transactionConditionFunction: (docSnapDependencies)=>{
 
                             const [transactionDocSnap, ...restDocSnaps] = docSnapDependencies; 
 
-                            // if financial transaction doc is being updated
+                            // if existing financial transaction doc is being updated
                             if (transactionDocSnap.exists()) {
 
                                 payloadObject.transactionData = transactionData;
@@ -443,7 +443,8 @@ export const updateTransactionThunk = (uid, data)=>{
                                     commit: true, 
                                     operation: 'set', 
                                     option: {merge: true}, 
-                                    data: transactionData
+                                    data: transactionData, 
+                                    targetDocPath: `users/${uid}/transactions/${transactionId}`,
                                 }
                             }
                             // if new financial Transaction is being created
@@ -456,16 +457,16 @@ export const updateTransactionThunk = (uid, data)=>{
                                 return {
                                     commit: true, 
                                     operation: 'set', 
-                                    data: transactionData
+                                    data: transactionData,
+                                    targetDocPath: `users/${uid}/transactions/${transactionId}`,
                                 }
                             }
 
                         }
                     }, 
-                    // balance
+                    // --------------------------------balance
                     {
-                        docPathDependencies: [`users/${uid}/balance/${transactionData.currency}`], 
-                        targetDocPath: `users/${uid}/balance/${transactionData.currency}`,
+                        docPathDependencies: [`users/${uid}/balance/${transactionData.currency}`],                        
                         
                         transactionConditionFunction: (docSnapDependencies)=>{
                             
@@ -488,7 +489,8 @@ export const updateTransactionThunk = (uid, data)=>{
                                     commit: true, 
                                     operation: 'set', 
                                     option: {merge: true}, 
-                                    data: { amount: newAmount }
+                                    data: { amount: newAmount },
+                                    targetDocPath: `users/${uid}/balance/${transactionData.currency}`,
                                 }
                             }
                             // if balance document does NOT exist
@@ -502,7 +504,8 @@ export const updateTransactionThunk = (uid, data)=>{
                                     data: {
                                         amount: amount, 
                                         currency: currency
-                                    }
+                                    },
+                                    targetDocPath: `users/${uid}/balance/${transactionData.currency}`,
                                 }
                             }
                         }
@@ -510,26 +513,31 @@ export const updateTransactionThunk = (uid, data)=>{
                 ]
             )
 
-            // update the BALANCE state
-            dispatch({
-                type: UPDATE_BALANCE_DATA, 
-                payload: payloadObject.balanceData
-            })
+            batch(() => {
 
-            // update the NEW_TRANSACTION state
-            dispatch( {
-                type: UPDATE_NEW_TRANSACTION, 
-                payload: {
-                    id: transactionId, 
-                    data: transactionData
-                }
-            })
+                // update the BALANCE state
+                consoleInfo('dispatch -> UPDATE_BALANCE_DATA')
+                dispatch({
+                    type: UPDATE_BALANCE_DATA,
+                    payload: {
+                        id: transactionData.currency, 
+                        data: payloadObject.balanceData
+                    }
+                })
 
-            // return data to update the TRANSACTION state
-            return {
-                id: transactionId, 
-                data: transactionData
-            }
+                // update the NEW_TRANSACTION state
+                consoleInfo('dispatch -> UDPATE_NEW_TRANSACTION')
+                dispatch({
+                    type: UPDATE_NEW_TRANSACTION,
+                    payload: {
+                        id: transactionId,
+                        data: transactionData
+                    }
+                })
+
+                // use the parametric callback to update transactions
+                dispatchCallback && dispatchCallback(dispatch, payloadObject.transactionData)
+            })
         }
         catch(e) {
             // the operation of this thunk affects the UI

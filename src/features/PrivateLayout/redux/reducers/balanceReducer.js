@@ -54,12 +54,22 @@ export default function balanceReducer(state = initialState, action) {
             }
         }
 
-
+        /**
+         * payload strucutre:           
+         *  {
+         *      id: ----, 
+         *      data: {
+         *              type: //optional ,
+         *              currency: ----, 
+         *              amount: -------
+         *          }
+         *  }
+         */
         case UPDATE_BALANCE: {
             consoleInfo('UPDATE_BALANCE call')
             console.log(payload)
 
-            const { type, currency: transactionCurr, amount: transactionAmt } = payload;
+            const { id, data: {type, currency: transactionCurr, amount: transactionAmt} } = payload;
             
             // no type is provided --> Initialization case for the particular currency
             if (! Boolean(type)) {
@@ -70,11 +80,7 @@ export default function balanceReducer(state = initialState, action) {
 
                         ...(state.data ? state.data: []), 
 
-                        {
-                            id: transactionCurr, 
-
-                            data: payload,
-                        }
+                        payload,
                     ]
                 }
             }
@@ -85,13 +91,13 @@ export default function balanceReducer(state = initialState, action) {
                     ...state,
                     data: state.data.map( balanceObj => {
 
-                        const { id, data: { amount: balanceAmt } } = balanceObj;
+                        const { id: balanceId, data: { amount: balanceAmt } } = balanceObj;
 
                         // update the data.amount of the target balance object
-                        if (id == transactionCurr) {
+                        if ( balanceId == id) {
                             
                             return {
-                                ...balanceObj, //unchanged field: id
+                                ...balanceObj, //unchanged field: balanceId
 
                                 data: {
                                     ...balanceObj.data, //unchanged fields: currency, lastUpdateAt, ... etc
@@ -115,10 +121,10 @@ export default function balanceReducer(state = initialState, action) {
 
                     data: state.data.map(balanceObj=>{
 
-                        const {id, data : {amount : balanceAmt}} = balanceObj;
+                        const {id: balanceId, data : {amount : balanceAmt}} = balanceObj;
 
                         // update the data.amount for the targeted balance object
-                        if (id == transactionCurr) {
+                        if (id == balanceId) {
 
                             return {
                                 ...balanceObj, 

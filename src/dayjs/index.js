@@ -49,7 +49,7 @@ export class DayJSUtils {
         // get the first day of the timeframe that timestamp lies in
         const firstDay = dayjs(timestamp).startOf(timeframe);
 
-        consoleInfo(`First day of "${timeframe}": ${firstDay}`);
+        // consoleInfo(`First day of "${timeframe}": ${firstDay}`);
         return firstDay.valueOf();
     }
 
@@ -70,7 +70,7 @@ export class DayJSUtils {
 
         const lastDay = dayjs(timestamp).endOf(timeframe);
 
-        consoleInfo(`Last day of "${timeframe}" : ${lastDay}`);
+        // consoleInfo(`Last day of "${timeframe}" : ${lastDay}`);
         return lastDay.valueOf();
     }
 

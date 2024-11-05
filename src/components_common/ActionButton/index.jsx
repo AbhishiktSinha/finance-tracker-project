@@ -40,6 +40,7 @@ const ActionButton = forwardRef(
             <Button {...buttonProps}
                 disabled={!buttonState.active}
                 loading={buttonState.loading}
+                {...(buttonState.loading && {type: 'primary'})}
             >
                 {
                     !buttonState.loading ? 

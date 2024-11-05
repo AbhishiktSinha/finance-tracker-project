@@ -10,9 +10,12 @@ import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../.
 import DashboardTransactionCard from "../DashboardTransactionCard";
 import { useContext } from "react";
 import userAuthContext from "../../../../context/userAuthContext";
+import { consoleDebug } from "../../../../../../console_styles";
 
 
 export default function ExpenditureCard() {
+
+    consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);
 
     const {uid} = useContext(userAuthContext)
 

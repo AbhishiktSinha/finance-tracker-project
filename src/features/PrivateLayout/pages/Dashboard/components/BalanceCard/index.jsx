@@ -28,6 +28,8 @@ import { asyncStatus } from '../../../../../../enums';
 
 export default function BalanceCard() {
 
+    consoleDebug('------ BALANCE CARD RENDERD --------')
+    
     const initializer = useSelector(selectBalance);
     const defaultCurrency = useSelector(selectDefaultCurrency);
     const newTransaction = useSelector(selectNewTransaction_balance);

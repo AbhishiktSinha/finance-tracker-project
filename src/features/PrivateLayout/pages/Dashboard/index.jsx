@@ -87,7 +87,12 @@ export default function Dashboard() {
                 <ModalWrapper
                     ref={transactionModalRef}
                 >
-                    <Suspense><TransactionModal/></Suspense>
+                    <Suspense>
+                        <TransactionModal
+                            modalRef={transactionModalRef}
+                        />
+                    </Suspense>
+
                 </ModalWrapper>
 
                 <Button

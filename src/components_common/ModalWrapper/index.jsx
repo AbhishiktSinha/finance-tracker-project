@@ -1,8 +1,9 @@
-import { Modal } from "antd";
 import { forwardRef, useCallback, useImperativeHandle, useState } from "react";
+import { Modal } from "antd";
+
+import modalContext from './context'
 
 import './style.css'
-import { consoleDebug } from "../../console_styles";
 
 const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
 
@@ -33,7 +34,13 @@ const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
                 footer={null}
                 {...restProps}
             >
-                {children}
+                {/* context to allow children like forms to control closing the modal */}
+                <modalContext.Provider 
+                    value={ { closeModal } }
+                >
+                    {children}
+                </modalContext.Provider>
+
             </Modal>
         </div>
     )

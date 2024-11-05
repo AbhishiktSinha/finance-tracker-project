@@ -7,7 +7,7 @@ import { selectActiveTimeframe } from "../../redux/selectors"
 import { asyncStatus, changeType, transactionType } from "../../../../../../enums";
 import { useDynamicAmount, useInsightState } from "../../../../../../custom_hooks";
 import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../../../utils";
-import { consoleInfo } from "../../../../../../console_styles";
+import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
 
 import DashboardTransactionCard from "../DashboardTransactionCard";
 import { useContext } from "react";
@@ -15,6 +15,8 @@ import userAuthContext from "../../../../context/userAuthContext";
 
 
 export default function IncomeCard() {
+
+    consoleDebug(`------- INCOME CARD RENDERED ------`)
 
     const {uid} = useContext(userAuthContext);
 

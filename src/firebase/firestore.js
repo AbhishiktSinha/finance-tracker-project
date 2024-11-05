@@ -259,14 +259,15 @@ export class FirestoreCRUD {
 
             consoleInfo('RUNNING FIRESTORE TRANSACTION');
             console.log(transactionOperationsList);
+
+            const transactionDataList = [];
             
-            // retreive the data from each transaction 
+            // READ ------------------- retreive the data from each transactionOperation
             for (const transactionOperation of transactionOperationsList) {
 
 
                 const { 
                     docPathDependencies, 
-                    targetDocPath,
                     transactionConditionFunction } = transactionOperation; 
 
                 
@@ -279,17 +280,24 @@ export class FirestoreCRUD {
                     return transaction.get(docRef);
                 }))
 
-                const {
-                    commit ,
+                transactionDataList.push(transactionConditionFunction(docSnapDependencies));
+            }
+
+            // CONDITIONAL WRITE ------------------- commit transactions
+            for (const transactionData of transactionDataList) {
+
+                const { 
+                    commit, 
                     operation, 
                     option, 
-                    data
-                } = transactionConditionFunction(docSnapDependencies)
+                    data, 
+                    targetDocPath,
+                } = transactionData;
 
                 if (commit) {
-
+    
                     const targetDocRef = this.#getDocRef(targetDocPath);
-
+    
                     switch(operation) {
                         case 'set': {
                             transaction.set(targetDocRef, data, option?option:{});
@@ -311,7 +319,9 @@ export class FirestoreCRUD {
                     consoleError(`transaction for ${targetDocPath} not committed`);
                 }
             }
-            
+
         })
+            
     }
+    
 }
