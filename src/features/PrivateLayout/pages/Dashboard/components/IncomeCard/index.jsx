@@ -1,11 +1,12 @@
 import { useSelector } from "react-redux";
 
-import { selectNewTransaction_income, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
+import { selectNewTransactionData_income, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
 import { selectActiveTimeframe } from "../../redux/selectors"
 
 import { asyncStatus, changeType, transactionType } from "../../../../../../enums";
-import { useDynamicAmount, useInsightState } from "../../../../../../custom_hooks";
+import useInsightState from "../../../../../../custom_hooks/useInsightState";
+import useDynamicAmount from "../../../../../../custom_hooks/useDynamicAmount";
 import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../../../utils";
 import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
 
@@ -18,13 +19,13 @@ export default function IncomeCard() {
 
     consoleDebug(`------- INCOME CARD RENDERED ------`)
 
-    const {uid} = useContext(userAuthContext);
+    const {user: {uid} } = useContext(userAuthContext);
 
     const initializer = useSelector(
         wrapper_selectTransactionsInitializer(transactionType.INCOME)
     )
     const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransaction = useSelector(selectNewTransaction_income);
+    const newTransactionData = useSelector(selectNewTransactionData_income);
 
     const timeframe = useSelector(selectActiveTimeframe);
     
@@ -32,13 +33,13 @@ export default function IncomeCard() {
     consoleInfo(`INCOME CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
         defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
-        newTransactions: ${JSON.stringify(newTransaction)}
+        newTransactions: ${JSON.stringify(newTransactionData)}
         timeframe: ${timeframe}`)
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
         defaultCurrency.code, 
-        newTransaction, 
+        newTransactionData, 
         transactionType.INCOME);
 
     const showCardUI = checkDisplayUI([status]);
@@ -47,7 +48,7 @@ export default function IncomeCard() {
         uid, 
         timeframe, 
         transactionType.INCOME, 
-        defaultCurrency.code)
+        defaultCurrency.code, )
 
 
     consoleInfo(`INSIGHT DATA IN INCOME CARD: \n
@@ -72,8 +73,8 @@ export default function IncomeCard() {
                 data: insightsData == undefined ? 
                     undefined: 
                     {
-                        changeType: getChangeType(insightsData, amount),
-                        value: getValueChangePercentage(insightsData, amount),
+                        changeType: getChangeType(insightsData.amount, amount),
+                        value: getValueChangePercentage(insightsData.amount, amount).toFixed(0),                        
                         unit: '%'
                     } ,
                 error: insightsError

@@ -10,12 +10,18 @@ const initialState = {
 export default function newTransactionReducer(state=initialState, action) {
     const {type, payload} = action;
     
+    
     if (type == UPDATE_NEW_TRANSACTION) {
         consoleInfo('NewTransaction UPDATe')
+        
         console.log(payload)
+        
+        const { id: newTransID, data: newTransData} = payload;
+
         return {
             ...state, 
-            data: payload
+            data: newTransData, 
+            id: newTransID, 
         }
     }
     else {

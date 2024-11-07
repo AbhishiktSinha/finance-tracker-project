@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 
-import { useIsLoggedIn } from "../../custom_hooks";
+// import { useIsLoggedIn } from "../../custom_hooks";
+import useIsLoggedIn from "../../custom_hooks/useIsLoggedIn";
 import Header from "../../components_common/Header";
 
 import userAuthContext from "./context/userAuthContext";

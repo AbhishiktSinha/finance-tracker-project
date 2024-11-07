@@ -44,7 +44,12 @@ export default class ExchangeRateConvertor {
     }
 
     /**
-     * 
+     * ## convertAmount  
+     * Converts a single data to equivalent value in the given defaultCurrencyCode.  
+     *   
+     * Provided data should be an `object`, necessarily containing the following fields:  
+     *- `currency`: currency of the data
+     *- `amount`: amount in the respective currency
      * @param {string} defaultCurrency 
      * @param {object} amountObject object which necessarily contains the fields: `currency` and `amount`
      * @returns the amount converted to the equivalent value in the defaultCurrency | undefined

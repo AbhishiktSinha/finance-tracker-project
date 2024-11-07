@@ -59,19 +59,19 @@ export const wrapper_selectTransactionsInitializer = (type)=>{
 
 /* ------------------------------ newTransaction SELECTORS ------------ */
 
-export const selectNewTransaction_balance = createSelector( selectNewTransaction, 
-    (newTransaction)=>newTransaction?newTransaction:undefined
+export const selectNewTransactionData_balance = createSelector( selectNewTransaction, 
+    (newTransactionData)=>newTransactionData?newTransactionData:undefined
 )
-export const selectNewTransaction_income = createSelector( selectNewTransaction, selectActiveTimeframe,
-    (newTransaction, timeframe)=>{
+export const selectNewTransactionData_income = createSelector( selectNewTransaction, selectActiveTimeframe,
+    (newTransactionData, activeTimeframe)=>{
 
-        if (newTransaction) {
+        if (newTransactionData) {
             
-            const { data: {type, timestamp: {occurredAt}}} = newTransaction;
+            const { type, timestamp: {occurredAt} } = newTransactionData;
     
             if (type == transactionType.INCOME &&
-                DayJSUtils.isWithinTimeframe(timeframe, occurredAt)) {
-                return newTransaction;
+                DayJSUtils.isWithinTimeframe(activeTimeframe, occurredAt, 0)) {
+                return newTransactionData;
             }
             else {
                 return undefined;
@@ -83,16 +83,16 @@ export const selectNewTransaction_income = createSelector( selectNewTransaction,
 
     }
 )
-export const selectNewTransaction_expenditure = createSelector( selectNewTransaction, selectActiveTimeframe,
-    (newTransaction, timeframe)=>{
+export const selectNewTransactionData_expenditure = createSelector( selectNewTransaction, selectActiveTimeframe,
+    (newTransactionData, timeframe)=>{
 
-        if (newTransaction) {
+        if (newTransactionData) {
             
-            const { data: {type, timestamp: {occurredAt}}} = newTransaction;
+            const { type, timestamp: {occurredAt} } = newTransactionData;
     
             if (type == transactionType.EXPENDITURE &&
                 DayJSUtils.isWithinTimeframe(timeframe, occurredAt)) {
-                return newTransaction;
+                return newTransactionData;
             }
             else {
                 return undefined;

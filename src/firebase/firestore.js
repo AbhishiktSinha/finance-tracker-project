@@ -9,7 +9,7 @@ import { db } from ".";
 
 import { doc, setDoc, addDoc, getDoc, collection, updateDoc, onSnapshot, query, where, getDocs, orderBy, writeBatch, runTransaction } from "firebase/firestore";
 
-import { consoleError, consoleInfo, consoleSucess } from "../console_styles";
+import { consoleDebug, consoleError, consoleInfo, consoleSucess } from "../console_styles";
 
 
 export class FirestoreCRUD {
@@ -124,9 +124,9 @@ export class FirestoreCRUD {
 
     /** 
      * GetDocs --> Query docs from a collection
-     * @param {collectionPath} string - absolute path to the collection 
-     * @param {queryBuilder} Array<{key, relationship, value}> - array of where objects to build a query
-     * @param {order} Array<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
+     * @param {string} collectionPath - absolute path to the collection 
+     * @param {Array<object>} queryBuilder<{key, relationship, value}> - array of where objects to build a query
+     * @param {Array<object>} order<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
     */
     async getDocsData(collectionPath, queryBuilder = [], order = []) {
         // Get collection reference
@@ -151,7 +151,7 @@ export class FirestoreCRUD {
             collectionRef,
             ...(queryBuilder.length > 0 ? getQueries() : []),
             ...(order.length > 0 ? getOrder() : [])
-        );
+        );        
 
         // Execute the query and get documents
         const querySnapshot = await getDocs(q);
@@ -245,7 +245,6 @@ export class FirestoreCRUD {
     }
 
 
-    // FIXME: FirebaseError: Firestore transactions require all reads to be executed before all writes.
     /**
      * 
      * @param {Array<object>} transactionOperationsList list of { docPathDependencies, targetDocPath, transactionConditionFunction }

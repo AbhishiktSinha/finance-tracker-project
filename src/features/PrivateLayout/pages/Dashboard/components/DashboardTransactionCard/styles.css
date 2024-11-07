@@ -103,7 +103,8 @@
             }
             .insights-chip {  
                                 
-                left: 65%;
+                /* left: 65%; */
+                right: 0%;
                 text-wrap: nowrap;
                 display: flex;
                 align-items: center;

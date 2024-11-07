@@ -1,10 +1,11 @@
 import { useSelector } from "react-redux";
-import { selectNewTransaction_expenditure, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
+import { selectNewTransactionData_expenditure, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
 import { selectActiveTimeframe } from "../../redux/selectors";
 
 import { changeType, transactionType } from "../../../../../../enums";
-import { useDynamicAmount, useInsightState } from "../../../../../../custom_hooks";
+import useInsightState from "../../../../../../custom_hooks/useInsightState";
+import useDynamicAmount from "../../../../../../custom_hooks/useDynamicAmount";
 import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../../../utils";
 
 import DashboardTransactionCard from "../DashboardTransactionCard";
@@ -23,14 +24,14 @@ export default function ExpenditureCard() {
         wrapper_selectTransactionsInitializer(transactionType.EXPENDITURE)
     )
     const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransaction = useSelector(selectNewTransaction_expenditure);
+    const newTransactionData = useSelector(selectNewTransactionData_expenditure);
 
     const timeframe = useSelector(selectActiveTimeframe);
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
         defaultCurrency.code, 
-        newTransaction, 
+        newTransactionData, 
         transactionType.EXPENDITURE);
 
     const showCardUI = checkDisplayUI([status]);
@@ -61,8 +62,8 @@ export default function ExpenditureCard() {
                 data: insightsData == undefined ? 
                 undefined: 
                 {
-                    changeType: getChangeType(insightsData, amount), 
-                    value: getValueChangePercentage(insightsData, amount), 
+                    changeType: getChangeType(insightsData.amount, amount), 
+                    value: getValueChangePercentage(insightsData.amount, amount), 
                     unit: '%',
                 }, 
                 error: insightsError

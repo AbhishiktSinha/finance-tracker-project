@@ -2,6 +2,8 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { consoleDebug, consoleInfo } from '../console_styles';
 
+import { timeframe as timeframeEnum } from '../enums';
+
 
 /**
  * Uses the `login_timestamp` as a frame of reference **(now)** for any computations
@@ -77,15 +79,54 @@ export class DayJSUtils {
     /**
      * ## isWithinTimeframe
      * Function that checks and returns whether a given instance represented by its corresponding timestamp 
-     * lies within the given timeframe or not.   
+     * lies within the given current timeframe or not.  
+     * That is, if the given timestamp lies in the current WEEK, MONTH, YEAR etc.  
      * 
      * @param {string} timeframe 'month' | 'year' | 'week'
      * @param {number} timestamp timestamp in milliseconds
      * @returns boolean true | false
      */
-    static isWithinTimeframe(timeframe, timestamp) {
+    /* static isWithinTimeframe(timeframe, timestamp) {
         return (timestamp >= this.getFirstDayTimestamp(timeframe) &&
             timestamp <= this.getLastDayTimestamp(timeframe));
+    }
+     */
+
+    /**## isWithinTimeframe
+     * Function that checks whether the given `timestamp` 
+     * lies within `x` weeks/months/years from the current week/month/year
+     * 
+     * @param {string} timeframe week | month | year are the only accepted values
+     * @param {number} timestamp millisecond value
+     * @param {number} difference integer value, defaults to 0
+     */
+    static isWithinTimeframe(timeframe, timestamp, difference=0) {
+        
+        const now = dayjs(this.getLoginTimeStamp());
+        const target = dayjs(timestamp);
+
+        if (timeframe == timeframeEnum.YEAR) {
+
+            return (target.year() == (now.year() + difference) );
+        }
+        else {
+
+            // check month or isoWeek if timestamp lies in the current year
+            if (target.year() == now.year()) {
+
+                if (timeframe == timeframeEnum.MONTH) {
+
+                    return (target.month() == ( now.month() + difference ))
+                }
+                else if (timeframe == timeframeEnum.WEEK) {
+
+                    return (target.isoWeek() == ( now.isoWeek() + difference ))
+                }
+            }
+            else {
+                return false;
+            }
+        }
     }
 
 }
