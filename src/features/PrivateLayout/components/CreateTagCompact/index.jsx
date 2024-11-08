@@ -66,7 +66,8 @@ export default function CreateTagCompact({type}) {
             await dispatch(createTagThunk(uid, {
                 name: tagData.name, 
                 color: tagData.color? tagData.color.toHexString() : '',
-                origin: 'custom'
+                origin: 'custom',
+                category: type
             }))
 
             setTagData(defaultState);

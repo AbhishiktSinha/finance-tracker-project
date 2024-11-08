@@ -1,6 +1,9 @@
 import currencyToSymbolMap from 'currency-symbol-map/map';
 import { changeType } from '../../enums';
 
+import { DayJSUtils } from '../../dayjs';
+import { FirestoreCRUD } from '../../firebase/firestore';
+
 export const getAllCurrencyCodeDropdownOptions = ()=>{
     return Object.keys(currencyToSymbolMap).map(code => {
         return {
@@ -67,3 +70,60 @@ export function range(start, endExclusive, step = 1) {
     return arr;
   }
   
+
+
+export async function fetchPreviousTimeframeTransactions(uid, activeTimeframe, type) {
+
+    try {
+                
+        // first day of the current WEEK/MONTH/YEAR
+        const firstDayTimestamp = DayJSUtils.getFirstDayTimestamp(activeTimeframe);
+        // day in the last MONTH/WEEK/YEAR
+        const dayBeforeTimestamp = firstDayTimestamp - 1000;
+
+        // first day of the previous MONTH/WEEK/YEAR
+        const firstDayTimestamp_prev_timeframe = DayJSUtils.
+            getFirstDayTimestamp(activeTimeframe, dayBeforeTimestamp);
+        
+        // last day of the previous MONTH/WEEK/YEAR
+        const lastDayTimestamp_prev_timeframe = DayJSUtils.
+            getLastDayTimestamp(activeTimeframe, dayBeforeTimestamp);
+        
+
+        /* ----------------- NETWORK CALL -------------------- */
+        const transactionListOfType = await new FirestoreCRUD().
+            getDocsData(
+                `users/${uid}/transactions`, 
+                [
+                    {
+                        key: 'timestamp.occurredAt', 
+                        relationship: '>=', 
+                        value: firstDayTimestamp_prev_timeframe
+                    }, 
+                    {
+                        key: 'timestamp.occurredAt', 
+                        relationship: '<=',
+                        value: lastDayTimestamp_prev_timeframe
+                    }, 
+                    {
+                        key: 'type', 
+                        relationship: '==', 
+                        value: type
+                    }
+                ]
+            )
+        
+
+        return {
+            success: true, 
+            data: transactionListOfType, 
+            error: '', 
+        }
+    }
+    catch(e) {
+        return {
+            success: false, 
+            error: e
+        }
+    }
+}

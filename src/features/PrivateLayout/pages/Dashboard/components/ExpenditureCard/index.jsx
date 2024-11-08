@@ -16,9 +16,7 @@ import { consoleDebug } from "../../../../../../console_styles";
 
 export default function ExpenditureCard() {
 
-    consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);
-
-    const {uid} = useContext(userAuthContext)
+    consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);    
 
     const initializer = useSelector(
         wrapper_selectTransactionsInitializer(transactionType.EXPENDITURE)
@@ -36,15 +34,6 @@ export default function ExpenditureCard() {
 
     const showCardUI = checkDisplayUI([status]);
 
-    const {status: insightsStatus, 
-        data: insightsData, 
-        error: insightsError} = useInsightState(
-            uid,
-            timeframe, 
-            transactionType.EXPENDITURE, 
-            defaultCurrency.code, 
-        )
-
     return (
         <DashboardTransactionCard 
             rootClassname='expenditure-card'
@@ -54,19 +43,15 @@ export default function ExpenditureCard() {
             data={{
                 defaultCurrency: defaultCurrency, 
                 amount: amount, 
-                timeframe: timeframe
+                timeframe: timeframe,
+                type: transactionType.EXPENDITURE
             }}
 
             insights={{
-                status: insightsStatus, 
-                data: insightsData == undefined ? 
-                undefined: 
-                {
-                    changeType: getChangeType(insightsData.amount, amount), 
-                    value: getValueChangePercentage(insightsData.amount, amount), 
-                    unit: '%',
-                }, 
-                error: insightsError
+                aggregateTransactionAmt: amount, 
+                defaultCurrencyCode: defaultCurrency.code,
+                activeTimeframe: timeframe, 
+                type: transactionType.EXPENDITURE,
             }}
         />
     )

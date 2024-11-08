@@ -41,11 +41,11 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
 
   // ----------------------------- selectors -------------
   const currency = useSelector(selectDefaultCurrency);
-  const balanceList = useSelector(selectBalance);  
+  const balanceList = useSelector(selectBalance);
 
   // ------------------------------ context --------------
-  const {user: {uid}} = useContext(userAuthContext)
-  const {closeModal} = useContext(modalContext)
+  const { user: { uid } } = useContext(userAuthContext)
+  const { closeModal } = useContext(modalContext)
 
   const dispatch = useDispatch();
 
@@ -57,13 +57,13 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       return getAllCurrencyCodeDropdownOptions()
     }
     else {
-      return balanceList.map( 
-        ({id, data}) => {
-        return {
-          label: id,
-          value: id
-        }
-      })
+      return balanceList.map(
+        ({ id, data }) => {
+          return {
+            label: id,
+            value: id
+          }
+        })
     }
 
   }, [])
@@ -71,28 +71,24 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
   // -------------------------------- form submit handler -----
   const onFinish = async (values) => {
 
-    let submitForm = true;
-    if (onFinishCheck) {
+    try {
 
-      submitForm = onFinishCheck(values);
-    }
+      onFinishCheck && onFinishCheck(values);
 
-    if (submitForm) {
-
-      const {occurredAt, amount, ...restValues} = values;
+      const { occurredAt, amount, ...restValues } = values;
       const now = dayjs().valueOf();
 
       const data = {
-        
-        timestamp: {
-          createdAt: now, 
-          occurredAt: occurredAt.valueOf(), 
-          modifiedAt: now,
-        }, 
 
-        amount: Number(amount), 
-        
-        ...restValues, 
+        timestamp: {
+          createdAt: now,
+          occurredAt: occurredAt.valueOf(),
+          modifiedAt: now,
+        },
+
+        amount: Number(amount),
+
+        ...restValues,
 
       }
       console.log(data);
@@ -103,12 +99,12 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         const transactionObject = await dispatch(updateTransactionThunk(uid, data, onFinishDispatch));
 
         consoleInfo('TRANSACTION ADDED TO FIRESTORE using AddTransactionForm');
-        console.log(transactionObject);  
-        
+        console.log(transactionObject);
+
         closeModal();
-        
+
       }
-      catch(e) {
+      catch (e) {
         consoleError(`AddTransactionFormError:\n`);
         console.log(e);
       }
@@ -116,9 +112,13 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         actionButtonRef.current.setButtonActive();
       }
     }
-  }
+    catch (submitError) {
+      consoleError(submitError)
+    }
 
-  
+  } 
+
+
   return (
     <Form
       rootClassName={`add-transaction-form ${transactionType}-form`}
@@ -128,7 +128,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
       onFinish={onFinish}
       initialValues={{
         currency: currency.code,
-        type: type,        
+        type: type,
       }}
     >
       {/* ---------------------------------------TITLE------------------------- */}
@@ -154,7 +154,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         >
           <Select
             options={currencyOptions}
-            showSearch            
+            showSearch
           />
         </Form.Item>
 
@@ -164,7 +164,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
           label='Amount'
           rules={[
             { required: true, message: 'Please Enter Amount' },
-            { pattern: /^[1-9]\d*$/, message: 'Please Enter a Valid Number'}
+            { pattern: /^[1-9]\d*$/, message: 'Please Enter a Valid Number' }
           ]}
         >
           <Input placeholder='0000' />
@@ -174,50 +174,50 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
 
       {/* -------------------------------TYPE AND TAGS------------------------------ */}
       <Flex rootClassName='type-tag-section transaction-form-row' >
-        
+
         {/* TYPE */}
-        <Form.Item 
+        <Form.Item
           name={'type'}
           label='Type'
           rules={[
-            { required: true, message: 'Please select Type'}
+            { required: true, message: 'Please select Type' }
           ]}
         >
-          <Select 
+          <Select
             options={[
               {
-                label: transactionType.INCOME.toUpperCase(), 
+                label: transactionType.INCOME.toUpperCase(),
                 value: transactionType.INCOME
-              }, 
+              },
               {
-                label: transactionType.EXPENDITURE.toUpperCase(), 
+                label: transactionType.EXPENDITURE.toUpperCase(),
                 value: transactionType.EXPENDITURE
               }
             ]}
-            
-            {...(type && {disabled: true})}
+
+            {...(type && { disabled: true })}
           />
-        
+
         </Form.Item>
 
         {/* TAG */}
-        <TagsDropdown type={type} />         
+        <TagsDropdown type={type} />
 
       </Flex>
 
       {/* ------------------------------------ DATE & TIME --------------------------------------- */}
-      <Flex rootClassName='transaction-form-row date-time-section'>        
+      <Flex rootClassName='transaction-form-row date-time-section'>
         <DateTimePicker name={'occurredAt'} />
       </Flex>
 
       <Flex rootClassName='transaction-form-row'>
-        <ActionButton 
+        <ActionButton
           type='primary'
           htmlType='submit'
           ref={actionButtonRef}
         >
           Create {type.toUpperCase()} Transaction
-        </ActionButton>        
+        </ActionButton>
       </Flex>
     </Form>
   )

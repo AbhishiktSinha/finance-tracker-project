@@ -5,6 +5,7 @@ import { consoleDebug, consoleError } from '../../../../../../console_styles';
 import './styles.css'
 import { asyncStatus, changeType } from '../../../../../../enums';
 import { DashOutlined, FallOutlined, RiseOutlined } from '@ant-design/icons';
+import InsightChip from '../InsightChip';
 
 /*TODO: 
 OVERHAULING
@@ -15,13 +16,12 @@ create separate jsx for skeleton card to show conditionally based on status
 */
 
 export default function DashboardTransactionCard({
-    rootClassname, id, title, orientation, styles,
+    rootClassname, id, title, type, orientation, styles,
     showUI, data, chart, insights,
 }) {
 
     const { defaultCurrency, amount, timeframe } = data;
     consoleDebug(`Amount recieved in DashboardTransactionCard:  ${typeof amount} | ${amount}`);
-    console.log('INSIGHT RECIEVED IN DashboardTransactionCard:', insights);
 
     const getDisplayAmount = useCallback((amount) => {
         consoleDebug(`calling getDisplayAmount()`)
@@ -105,38 +105,12 @@ export default function DashboardTransactionCard({
                     {
                         insights && (
 
-                            (insights.status == asyncStatus.INITIAL || insights.status == asyncStatus.LOADING) ?
-                                (
-                                    <CardDetailsSkeleton
-                                        className='insights-chip-skeleton'
-                                        round={true}
-                                    />
-                                ) :
-                                (
-                                    <div className="insights-chip">
-                                        <span className="insights-change-indicator">
-                                            {
-                                                insights.data.changeType == changeType.POSITIVE && (
-                                                    <RiseOutlined className='insights-change-indicator-icon' />
-                                                )
-                                            }
-                                            {
-                                                insights.data.changeType == changeType.NEGATIVE && (
-                                                    <FallOutlined className='insights-change-indicator-icon' />
-                                                )
-                                            }
-                                            {
-                                                insights.data.changeType == changeType.NONE && (
-                                                    <DashOutlined classID='insights-change-indicator-icon' />
-                                                )
-                                            }
-                                        </span>
-
-                                        <span className="change-value">
-                                            {`${insights.data.value} ${insights.data.unit}`}
-                                        </span>
-                                    </div>
-                                )
+                            <InsightChip 
+                                aggregateTransactionAmt={insights.aggregateTransactionAmt}
+                                defaultCurrencyCode={insights.defaultCurrencyCode}
+                                activeTimeframe={insights.activeTimeframe}
+                                type={insights.type}
+                            />
                         )
                     }
                         

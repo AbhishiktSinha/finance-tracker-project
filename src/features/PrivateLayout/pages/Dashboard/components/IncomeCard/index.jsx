@@ -44,18 +44,6 @@ export default function IncomeCard() {
 
     const showCardUI = checkDisplayUI([status]);
 
-    const {status: insightsStatus, data: insightsData, error: insightsError} = useInsightState(
-        uid, 
-        timeframe, 
-        transactionType.INCOME, 
-        defaultCurrency.code, )
-
-
-    consoleInfo(`INSIGHT DATA IN INCOME CARD: \n
-        status: ${insightsStatus}\n
-        data: ${insightsData}\n
-        error: ${insightsError}`)
-
     return (
         <DashboardTransactionCard 
             rootClassname='income-card'
@@ -65,19 +53,15 @@ export default function IncomeCard() {
             data={{
                 defaultCurrency: defaultCurrency, 
                 amount: amount, 
-                timeframe: timeframe
+                timeframe: timeframe,
+                type: transactionType.INCOME
             }}
 
             insights={{
-                status: insightsStatus, 
-                data: insightsData == undefined ? 
-                    undefined: 
-                    {
-                        changeType: getChangeType(insightsData.amount, amount),
-                        value: getValueChangePercentage(insightsData.amount, amount).toFixed(0),                        
-                        unit: '%'
-                    } ,
-                error: insightsError
+                defaultCurrencyCode: defaultCurrency.code, 
+                aggregateTransactionAmt: amount, 
+                type: transactionType.INCOME,
+                activeTimeframe: timeframe
             }}
         />
     )

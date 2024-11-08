@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 
-import { consoleDebug, consoleError, consoleInfo, consoleSucess } from "../console_styles";
+import {consoleDebug, consoleInfo, consoleSucess } from "../console_styles";
 
 import ExchangeRateConvertor from "../exchangeRate_api/convertor";
 import { asyncStatus, timeframe as timeframeEnum, transactionType } from "../enums";
@@ -8,6 +8,8 @@ import { asyncStatus, timeframe as timeframeEnum, transactionType } from "../enu
 import { FirestoreCRUD } from "../firebase/firestore";
 import { DayJSUtils } from "../dayjs";
 import { useSelector } from "react-redux";
+import { fetchPreviousTimeframeTransactions } from "../features/PrivateLayout/utils";
+import userAuthContext from "../features/PrivateLayout/context/userAuthContext";
 
 
 // FIXME: make this hook responsive to newTransaction
@@ -46,7 +48,7 @@ import { useSelector } from "react-redux";
  * @param {string} defaultCurrencyCode 
  * @returns Object with necessary insight information
  */
-export default function useInsightState(uid, activeTimeframe, type, defaultCurrencyCode) {
+export default function useInsightState(activeTimeframe, defaultCurrencyCode, newTransactionData, type) {
 
     const initializerFunction = useCallback(()=>{
         return {
@@ -71,22 +73,10 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
         }
     }, [])
 
-    const [state, setState] = useState( initializerFunction )
+    const [state, setState] = useState( initializerFunction )    
+    const {user: {uid}} = useContext(userAuthContext);
 
-    const newTransactionData = useSelector( ({newTransaction})=>{
-        consoleDebug(`************************* selecting newTransactionData for ${type} ******************`)
-        console.log(newTransaction.data)
-        if (Boolean(newTransaction.data)) {
-
-            return ( newTransaction.data.type == type ? 
-                newTransaction.data : 
-                undefined
-            );
-        }
-    })
-    console.log(newTransactionData);
-
-    console.log('STATE SET IN useInsightState:\n', state);  
+    console.log('STATE SET IN',type,'useInsightState:\n', state);  
 
     /**Utility function to change the status for the given timeframe 
      * 
@@ -146,58 +136,27 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
 
         (async ()=>{
 
+            consoleDebug(`insightHook Effect ----> activeTimeframe [initial] | initial`)
+
             if (state.status[activeTimeframe] == asyncStatus.SUCCESS) {
                 return;
             }
 
             setStatus(asyncStatus.LOADING);
 
-            try {
-                
-                // first day of the current WEEK/MONTH/YEAR
-                const firstDayTimestamp = DayJSUtils.getFirstDayTimestamp(activeTimeframe);
-                // day in the last MONTH/WEEK/YEAR
-                const dayBeforeTimestamp = firstDayTimestamp - 1000;
+            const {
+                success, 
+                data: transactionList, 
+                error} = await fetchPreviousTimeframeTransactions(uid,activeTimeframe,type);
 
-                // first day of the previous MONTH/WEEK/YEAR
-                const firstDayTimestamp_prev_timeframe = DayJSUtils.
-                    getFirstDayTimestamp(activeTimeframe, dayBeforeTimestamp);
-                
-                // last day of the previous MONTH/WEEK/YEAR
-                const lastDayTimestamp_prev_timeframe = DayJSUtils.
-                    getLastDayTimestamp(activeTimeframe, dayBeforeTimestamp);
-                
+            if (success) {
 
-                /* ----------------- NETWORK CALL -------------------- */
-                const transactionListOfType = await new FirestoreCRUD().
-                    getDocsData(
-                        `users/${uid}/transactions`, 
-                        [
-                            {
-                                key: 'timestamp.occurredAt', 
-                                relationship: '>=', 
-                                value: firstDayTimestamp_prev_timeframe
-                            }, 
-                            {
-                                key: 'timestamp.occurredAt', 
-                                relationship: '<=',
-                                value: lastDayTimestamp_prev_timeframe
-                            }, 
-                            {
-                                key: 'type', 
-                                relationship: '==', 
-                                value: type
-                            }
-                        ]
-                    )
-                
-
-                consoleSucess(`Fetched ${type} Insights`);                
+                consoleSucess(`^^^^^^^^^^ Fetched ${type} Pevious Timeframe Transactions for Insights ^^^^^^^^^^^`);                
                 
                 setStatus(asyncStatus.SUCCESS)
                 
                 const reducedConvertedAmount = new ExchangeRateConvertor().
-                    reduceConvertedList(defaultCurrencyCode, transactionListOfType);
+                    reduceConvertedList(defaultCurrencyCode, transactionList);
                 
                 // set data in this format for insight data
                 setData({
@@ -205,10 +164,11 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
                     amount: reducedConvertedAmount
                 })
             }
-            catch(e) {
+            else {
                 setStatus(asyncStatus.ERROR)
-                setError(e);
+                setError(error);
             }
+
 
         })()
 
@@ -216,6 +176,7 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
 
     /* ------------------ DEFAULT CURRENCY CHANGE EFFECT --------------- */
     useEffect(()=>{
+        consoleDebug(`insightHook Effect ----> defaultCurrency | initial`)
 
         // convert the existing data into the new default currency
         for (const timeframe in state.status) {
@@ -246,11 +207,12 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
     /* -------------------- NEW TRANSACTION RESPONSIVENESS ------------------ */
     useEffect(()=>{
 
-        consoleDebug('Insight newTransaction Change')
-
+        consoleDebug(`insightHook Effect ----> newTransaction | initial`)
+        
         if (! Boolean(newTransactionData)) {
             return;
         }
+        consoleDebug('Insight newTransaction Change')
         
         /* If the newTransactionData lies in the previous WEEK/MONTH/YEAR,  
             udpate the data for those timeframes
@@ -300,14 +262,6 @@ export default function useInsightState(uid, activeTimeframe, type, defaultCurre
         }
 
     },[newTransactionData])
-
-
-
-    // return the insight status,data,error for the current MONTH/WEEK/YEAR
-    consoleDebug(`SENDING INSIGHT DATA TO ${type} CARD`);
-    console.log('STATUS:', state.status[activeTimeframe], '\n',
-        'DATA:', state.data[activeTimeframe], '\n',
-        'ERROR:', state.error[activeTimeframe])
 
 
     return {
