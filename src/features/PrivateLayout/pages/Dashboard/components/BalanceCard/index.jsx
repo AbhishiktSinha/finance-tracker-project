@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 
 import { selectBalance, selectDefaultCurrency } from '../../../../redux/selectors';
-import { selectNewTransactionData_balance } from '../../redux/selectors';
+import { selectActiveTimeframe, selectNewTransactionData_balance } from '../../redux/selectors';
 
 import useDynamicAmount from '../../../../../../custom_hooks/useDynamicAmount';
 import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
@@ -9,7 +9,7 @@ import { checkDisplayUI } from '../../../../utils';
 
 import DashboardTransactionCard from '../DashboardTransactionCard';
 import './styles.css'
-import { asyncStatus } from '../../../../../../enums';
+import { asyncStatus, transactionType } from '../../../../../../enums';
 
 /**
  * # TODO: 
@@ -33,6 +33,7 @@ export default function BalanceCard() {
     const initializer = useSelector(selectBalance);
     const defaultCurrency = useSelector(selectDefaultCurrency);
     const newTransactionData = useSelector(selectNewTransactionData_balance);
+    const timeframe = useSelector(selectActiveTimeframe)
 
     consoleInfo(`BALANCE CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
@@ -62,6 +63,7 @@ export default function BalanceCard() {
                 amount: amount, 
                 defaultCurrency: defaultCurrency,                 
             }}
+
         />
     )
 }

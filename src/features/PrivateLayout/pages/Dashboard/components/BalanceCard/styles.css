@@ -1,5 +1,7 @@
 .balance-card {
     max-width: 640px;
+    width: inherit !important;
+    min-width: 350px !important;
     height: 250px;
 
     background-image: linear-gradient(to bottom right,
@@ -98,12 +100,12 @@
     }
 }
 
-@media screen and (width < 540px) {
+@media screen and (width < 600px) {
     
-    #balance_card {
+    #balance_card {        
         .card-details {
             .amount-container {
-                font-size: 100px !important;
+                font-size: clamp(72px, 17vw, 100px) !important;
             }
 
             .defaultCurrency {
@@ -112,19 +114,19 @@
         }
     }
 }
-@media screen and (width < 450px) {
+@media screen and (width < 470px) {
     
     #balance_card {
         .card-details {
             column-gap: 4px !important;
 
             .amount-container {
-                font-size: 72px !important;
+                font-size: clamp(54px, 16vw, 72px) !important;
             }
 
             .defaultCurrency {
                 padding-right: 0 !important;
-                font-size: 24px !important;
+                font-size: 30px !important;
             }
         }
     }

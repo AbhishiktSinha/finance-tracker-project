@@ -73,52 +73,54 @@ export default function DashboardTransactionCard({
             </div>
         )
     }
+    else {
 
-    return (
-        <div
-            className={`dashboard-card ${rootClassname}`}
-            id={id}
-            title={title}
-            style={styles}
-        >
-            <div className="card-header">
-                <p className="title">{title}</p>
-                {
-                    timeframe && (
-                        <div className="timeframe-details">
-                            This <span className="timeframe">{timeframe}</span>
-                        </div>
-                    )
-                }
-            </div>
-
-            <div className='card-details'>
-
-                <div className="defaultCurrency" title={defaultCurrency.code}>
-                    <span>
-                        {defaultCurrency.symbol}
-                    </span>
-                </div>
-
-                <div className="amount-container">
-
+        return (
+            <div
+                className={`dashboard-card ${rootClassname}`}
+                id={id}
+                title={title}
+                style={styles}
+            >
+                <div className="card-header">
+                    <p className="title">{title}</p>
                     {
-                        insights && (
-
-                            <InsightChip 
-                                aggregateTransactionAmt={insights.aggregateTransactionAmt}
-                                defaultCurrencyCode={insights.defaultCurrencyCode}
-                                activeTimeframe={insights.activeTimeframe}
-                                type={insights.type}
-                            />
+                        timeframe && (
+                            <div className="timeframe-details">
+                                This <span className="timeframe">{timeframe}</span>
+                            </div>
                         )
                     }
-                        
-                    {getDisplayAmount(amount)}
                 </div>
-
-                
+    
+                <div className='card-details'>
+    
+                    <div className="defaultCurrency" title={defaultCurrency.code}>
+                        <span>
+                            {defaultCurrency.symbol}
+                        </span>
+                    </div>
+    
+                    <div className="amount-container">
+    
+                        {
+                            insights && (
+    
+                                <InsightChip 
+                                    aggregateTransactionAmt={insights.aggregateTransactionAmt}
+                                    defaultCurrencyCode={insights.defaultCurrencyCode}
+                                    activeTimeframe={insights.activeTimeframe}
+                                    type={insights.type}
+                                />
+                            )
+                        }
+                            
+                        {getDisplayAmount(amount)}
+                    </div>
+    
+                    
+                </div>
             </div>
-        </div>
-    )
-}
+        )
+    }
+    }

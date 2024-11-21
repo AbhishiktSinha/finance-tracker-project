@@ -247,7 +247,7 @@ export class FirestoreCRUD {
 
     /**
      * 
-     * @param {Array<object>} transactionOperationsList list of { docPathDependencies, targetDocPath, transactionConditionFunction }
+     * @param {Array<object>} transactionOperationsList list of { docPathDependencies, transactionConditionFunction }
      * @returns Promise of fullfilled transaction or throws error
      */
     async firestoreTransaction(transactionOperationsList = []) {

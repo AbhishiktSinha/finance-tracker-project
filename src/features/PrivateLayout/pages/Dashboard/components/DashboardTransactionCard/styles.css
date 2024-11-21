@@ -45,8 +45,11 @@
     .card-details-skeleton {
 
         display: flex;
-        column-gap: 16px;
-        padding: 0 12px;
+        column-gap: clamp(5px, 1vw, 15px);
+
+        /* padding: 0 12px; */
+        padding-inline: clamp(0px, 0.5vw, 12px);
+
         justify-content: space-between;
 
         position: relative;
@@ -158,4 +161,17 @@
         }
 
     }
+}
+
+@media screen and (width < 440px) {
+    
+        .dashboard-card {                        
+
+            .card-details {
+
+                .amount-container {
+                    font-size: 54px !important
+                }
+            }
+        }
 }

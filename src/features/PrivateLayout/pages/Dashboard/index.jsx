@@ -74,7 +74,8 @@ export default function Dashboard() {
         <div id="dashboard-page">
             <h1>Dashboard</h1>
 
-            <>
+            <div className='page-contents-wrapper'>
+                
                 <div className="transaction-cards-container">
                     <BalanceCard />
 
@@ -103,7 +104,7 @@ export default function Dashboard() {
                     onClick={handleButtonClick}
                 >
                 </Button>
-            </>
+            </div>
 
         </div>
     )

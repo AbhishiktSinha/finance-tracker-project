@@ -20,6 +20,7 @@ export default function TagsDropdown({type}) {
             placeholder="Select Tag"
 
             showSearch
+            optionFilterProp="label"
             
             options={
               tagsList.map(tagItem=>{

@@ -26,6 +26,50 @@
 <span>Savings in _month_</span>
 </div>
 
+## What I'm working on: 
+Balance Insights - *need separate logic*.  
+
+~~Will try to tweak `reduceConvert` to accomodate both types of transactions~~ ✅
+
+## Styling TODOs
+- Function to check number of digits in amount, and style accordingly
+
+## Features to Implement
+- Elevatae `dashboardTransactions` state slice to `primaryTransactions`, available to the entire application instead of being localized to `dashboard`.
+
+- `primaryTransactions` state should the transactions for a time-period of `1 year` instead of the current year. 
+
+- Dashboard Page Timeframe Toggle
+
+- Dashboard components wrapped in Flex rows
+
+- Balance Insights
+
+- Budgets
+
+- Saving Goals
+
+- Transfer amounts from Usable Balance to Savings Balance
+
+- Draw amounts from savings for expenditure transactions
+
+- Currency Exchange
+
+## Pages & Routes Still to Create
+- `/settings`
+- `/statistics/income`
+- `/statistics/expenditure`
+- `/statistics`
+- `/history` or `/transactions`
+
+## Optional Cards for `Dashobard` Page
+- budget card
+- savings card
+- balance-by-currencies card
+- currency-convertor card
+
+
+
 ## Currency Conversion QuickAction 
 Add a QuickAction Button opens a currency conversion modal.  
 Leverage the day's conversion rates stored in `localStorage`.  

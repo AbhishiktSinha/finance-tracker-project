@@ -1,4 +1,5 @@
 import { consoleError } from "../console_styles";
+import { transactionType } from "../enums";
 
 /**
  * Class that provides the following utility functions :
@@ -17,6 +18,7 @@ export default class ExchangeRateConvertor {
      * 
      * @param {string} defaultCurrency 
      * @param {Array<object>} initializer 
+     * @param {boolean} binary_types boolean flag to accomodate both types of transactions to be reduce-converted
      * @returns ReducedConvertedAmount | undefined
      * 
      * Function to reduce a list of amount-structured objects to a single 
@@ -26,14 +28,30 @@ export default class ExchangeRateConvertor {
      * Use this function only for amount-structured objects of the same type i.e for either income or expenditure type transacion list or balance list
      * 
      */
-    reduceConvertedList(defaultCurrency, initializer=[]) {
+    reduceConvertedList(defaultCurrency, initializer=[], binary_types = false) {
 
         try {
             this.#priorCheck();
             
             const reducedAmount = initializer.reduce(
                 (accumulator, curr)=>{
-                    return accumulator+this.convertAmount(defaultCurrency, curr.data)
+                    
+                    const convertedAmt = this.convertAmount(defaultCurrency, curr.data);
+
+                    if (! binary_types) {
+                        return (accumulator + convertedAmt)
+                    }
+                    else {
+
+                        const currType = curr.data.type;
+                        
+                        return (
+                            currType == transactionType.INCOME ? 
+                                accumulator + convertedAmt : 
+                                accumulator - convertedAmt
+                        )
+                    }
+
                 }, 0)
 
             return reducedAmount;

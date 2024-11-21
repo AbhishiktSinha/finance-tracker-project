@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext } from "react";
+import { useState, useEffect, useCallback, useContext, useMemo } from "react";
 
 import {consoleDebug, consoleInfo, consoleSucess } from "../console_styles";
 
@@ -42,6 +42,8 @@ import userAuthContext from "../features/PrivateLayout/context/userAuthContext";
  * - {object} data : { currency, amount }
  * - {string} error: ----
  * 
+ * **Note**: Returned { data } is relative for *balance card*
+ * 
  * @param {string} uid 
  * @param {string} activeTimeframe 
  * @param {string} type 
@@ -50,26 +52,34 @@ import userAuthContext from "../features/PrivateLayout/context/userAuthContext";
  */
 export default function useInsightState(activeTimeframe, defaultCurrencyCode, newTransactionData, type) {
 
+    /**Function that creates an object with the timeframes as the keys  
+     * and the provided value as the default value for all the keys.  
+     * 
+     * @param {any} value any value to initialize all the timeframe keys with
+     * @returns {object} an object with timeframe keys all initialized with the given value
+     */
+    const initializeTimeframes = useCallback((value)=>{
+        
+        const obj = {};
+
+        for (const timeframe in timeframeEnum) {
+
+            obj[timeframeEnum[timeframe]] = value;
+        }
+
+        return obj;
+
+    }, [])
+
+    /** State Initializer Function
+     */ 
     const initializerFunction = useCallback(()=>{
         return {
-            status: {
-                [timeframeEnum.YEAR] : asyncStatus.INITIAL,
-                [timeframeEnum.MONTH] : asyncStatus.INITIAL,
-                [timeframeEnum.WEEK] : asyncStatus.INITIAL,
+            status: initializeTimeframes(asyncStatus.INITIAL), 
         
-            }, 
+            data: initializeTimeframes(undefined),
         
-            data: {
-                [timeframeEnum.YEAR]: undefined, 
-                [timeframeEnum.MONTH]: undefined, 
-                [timeframeEnum.WEEK]: undefined, 
-            },
-        
-            error: { 
-                [timeframeEnum.YEAR]: '',
-                [timeframeEnum.MONTH]: '',
-                [timeframeEnum.WEEK]: '',
-            }
+            error: initializeTimeframes(''),
         }
     }, [])
 
@@ -138,7 +148,8 @@ export default function useInsightState(activeTimeframe, defaultCurrencyCode, ne
 
             consoleDebug(`insightHook Effect ----> activeTimeframe [initial] | initial`)
 
-            if (state.status[activeTimeframe] == asyncStatus.SUCCESS) {
+            // abort api call if status is not INITIAL
+            if (state.status[activeTimeframe] != asyncStatus.INITIAL) {
                 return;
             }
 
@@ -156,7 +167,11 @@ export default function useInsightState(activeTimeframe, defaultCurrencyCode, ne
                 setStatus(asyncStatus.SUCCESS)
                 
                 const reducedConvertedAmount = new ExchangeRateConvertor().
-                    reduceConvertedList(defaultCurrencyCode, transactionList);
+                    reduceConvertedList(
+                        defaultCurrencyCode, 
+                        transactionList, 
+                        type == transactionType.ALL ? true : false
+                    );
                 
                 // set data in this format for insight data
                 setData({
@@ -172,7 +187,7 @@ export default function useInsightState(activeTimeframe, defaultCurrencyCode, ne
 
         })()
 
-    }, [state.status[activeTimeframe]])
+    }, [activeTimeframe])
 
     /* ------------------ DEFAULT CURRENCY CHANGE EFFECT --------------- */
     useEffect(()=>{
