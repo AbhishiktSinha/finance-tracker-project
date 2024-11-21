@@ -1,28 +1,56 @@
 #dashboard-page {    
-
-    padding:24px 12px;
+    
+    /* for multility button */
     position: relative;
 
+    /* for html scrollbar */
     height: fit-content;
     min-height: var(--main-height);
 
+    /* does not make content flexible horizontally */
     display: flex;
     flex-direction: column;
     align-items: center;
 
     row-gap: 24px;
+
+    width: 100vw;
     
     .page-contents-wrapper {
         
+        /* makes flexible horizontally */
+        width: 100%;
+
         display: flex;
         flex-direction: column;
         align-items: center;
     
         row-gap: 24px;
 
-        max-width: inherit;
-        max-width: 924px;
+        /* width: 724px; */
+        /* max-width: 872px; */
+        /* width: fit-content; */
+        /* width: 872px; */
+        /* min-width: 400px; */
+        /* flex-shrink: 1 !important; */
 
+
+        .dashboard-content-row {
+
+            width: 100%;
+            display: flex;
+            justify-content: center ;
+            /* align-items: center; */
+            flex-wrap: wrap;
+    
+            gap: 24px;  
+        }
+
+        .income-expenditure-row { 
+
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
 
         .transaction-cards-container {
             width: 100%;
@@ -80,18 +108,22 @@
 }
 
 
-@media screen and (width < 740px) {
-    .income-expenditure-container {
+/* ------ large-screen -------- */
+/* @media screen and (width < 1080px) {
+
+    #dashboard
+} */
+
+@media screen and (width < 800px) {
+    .income-expenditure-row {
         flex-wrap: wrap !important;
     }
     .income-card, .expenditure-card {
-        max-width: 640px;
+        width: 640px !important;
+        max-width: 640px !important;
+    } 
+    /* .income-expenditure-container {
+        flex-wrap: wrap !important;
     }
-}
-
-@media screen and (width < 400px) {
-    
-    #dashboard-page {
-        padding-inline: 4px !important;
-    }
+    */
 }

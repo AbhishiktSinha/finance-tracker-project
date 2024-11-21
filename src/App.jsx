@@ -11,7 +11,7 @@ import Balance from "./features/PrivateLayout/pages/Balance";
 import Transactions from "./features/PrivateLayout/pages/Transactions";
 import Budget from "./features/PrivateLayout/pages/Budget";
 
-import './App.css'
+import './App.scss'
 
 export default function App() {
 

@@ -1,0 +1,7 @@
+.balance-overview-chart-card {
+    /* flex: 1; */
+    width: 200px;
+    height: inherit;
+    
+    background-color: #ff000066;
+}

@@ -1,0 +1,151 @@
+html {
+  background-color: var(--bg-light);
+}
+p, span, div, button, input::placeholder {
+  color: var(--text-dark);  
+}
+h1, h2, h3, h4 {
+  color: var(--black);
+  font-weight: 500;
+}
+
+/* ---------- SASS DISPLAY BREAKPOINTS --------- */
+$small-screen-width: 350px;
+$mobile-width: 400px;
+$tablet-width: 800px;
+$intermediate-large-screen-width: 900px;
+$large-screen-width: 1080px;
+$desktop-width: 1440px;
+
+:root {
+  --bg-light: #F6F8FC;
+
+  --bg-dark: #000321;
+
+  --bg-light-grey: #dae2f4;
+
+
+  --color-primary: #335dda;
+  --color-primary-light: #4d6bc5;
+  --color-secondary: #2f4379;
+
+  --accent-color: #547bef;
+
+  --shadow-black: #0202022e;
+  --shadow-dark-accent: #001e6f86;
+  --shadow-white: #ffffffbb;
+
+  --black: #222;
+  --text-dark: #313131;
+  --white: #fff;
+
+  --disabled-text: #c9c9c9;
+
+
+  --skeleton-white: #ffffff55;
+
+  --main-height: calc(100vh - 55px);
+
+  --default-font-family: 'Roboto';
+
+
+
+  /* ----- layouts constants ----------- */  
+
+  --page-block-padding: 24px;
+  --page-inline-padding-desktops: 120px;
+  --page-inline-padding-large: 75px;
+  --page-inline-padding-intermediate-large: 50px;
+  --page-inline-padding-tablets: 30px;
+  --page-inline-padding-mobiles: 10px;
+  --page-inline-padding-small-screen: 5px;
+
+}
+
+* {
+  padding: 0;
+  margin: 0 !important;
+
+  box-sizing: border-box;
+  font-family: var(--default-font-family) !important;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);  
+}
+
+div, p, h1, h2, h3, label {
+  color: var(--text-dark) !important;
+}
+.ant-tooltip-inner {
+  color: #fff !important;
+}
+
+button[class*='primary'] {
+  background-color: var(--color-primary);
+  >span {
+    color: var(--white) ;
+  }
+}
+button:hover {
+  background-color: var(--accent-color) !important;
+  >span {
+    color: var(--white) !important
+  }
+}
+
+
+.disabled, 
+div[class*='disabled'], 
+p[class*='disabled'],
+li[class*='disabled'], 
+span[class*='disabled'], 
+a[class*='disabled'] {
+  color: var(--disabled-text) !important;
+  >div, >p, >span {
+    color: var(--disabled-text) !important;
+  }
+}
+
+
+/* -------- PAGE INLINE PADDING & MEDIA QUERIES -------------- */
+.route-page {
+  // default behaviour for very small screens
+  padding-inline: var(--page-inline-padding-small-screen);
+}
+
+// greater than small-screen: mobile-width
+@media screen and (min-width: $small-screen-width) {
+  .route-page {
+    padding-inline: var(--page-inline-padding-mobiles);
+  }
+}
+
+// greater than mobile: tablet-width
+@media screen and (min-width: $mobile-width) {
+  .route-page {
+    padding-inline: var(--page-inline-padding-tablets)
+  }
+}
+
+// greater than tablet width: intermediate-large-screen-width
+@media screen and (min-width: $tablet-width) {
+  .route-page {
+    padding-inline: var(--page-inline-padding-intermediate-large);
+  }
+}
+
+// greater than intermediate large screen width: large-screen-width
+@media screen and (min-width: $intermediate-large-screen-width) {
+  .route-page {
+    padding-inline: var(--page-inline-padding-large);
+  }
+}
+
+// greater than large-screen-width: desktop-width
+@media screen and (min-width: $large-screen-width) {
+  .route-page {
+    padding-inline: var(--page-inline-padding-desktops);
+  }
+}

@@ -2,9 +2,12 @@
 
 .dashboard-card,
 .dashboard-card-skeleton {
-    width: 100%;
+    /* width: 100%; */
+    width: 420px;
     max-width: 420px;
     min-width: 350px !important;
+    flex-shrink: 1 !important;
+    
     border-radius: 12px;
     padding: 8px 12px;
 

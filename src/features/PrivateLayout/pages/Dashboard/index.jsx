@@ -22,6 +22,8 @@ import { checkDisplayUI } from '../../utils.js';
 import { selectDashboardTransactionStatus } from './redux/selectors.js';
 
 import './stlyes.css';
+import BalanceOverviewChartCard from './components/BalanceOverviewChartCard/index.jsx';
+import DashboardRecentTransactions from './components/DashboardRecentTransactions/index.jsx'
 
 /*TODO: 
 Redux to handle the Dashboard internal state of `dashboardTransactions`
@@ -71,19 +73,32 @@ export default function Dashboard() {
     
     const TransactionModal = lazy(()=>import('./components/TransactionModal'));
     return (
-        <div id="dashboard-page">
-            <h1>Dashboard</h1>
+        <div id="dashboard-page" className='route-page'>
+            <h1 style={{width: '100%'}}>Dashboard</h1>
 
             <div className='page-contents-wrapper'>
+
+                <div className="dashboard-content-row">
+                    <BalanceCard />
+                    <BalanceOverviewChartCard />
+                </div>
+
+                <div className="dashboard-content-row income-expenditure-row">
+                    <IncomeCard />
+                    <ExpenditureCard />
+                </div>
                 
-                <div className="transaction-cards-container">
+                <div className="dashboard-content-row recent-transactions-row">
+                    <DashboardRecentTransactions />
+                </div>
+                {/* <div className="transaction-cards-container">
                     <BalanceCard />
 
                     <div className="income-expenditure-container">
                         <IncomeCard/>
                         <ExpenditureCard />
                     </div>
-                </div>
+                </div> */}
 
                 <ModalWrapper
                     ref={transactionModalRef}
