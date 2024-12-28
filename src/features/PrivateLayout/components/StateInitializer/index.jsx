@@ -33,9 +33,14 @@ export default function StateInitializerProvider({children}) {
 
     // const status = useSelector(({userDoc})=>userDoc.status);
 
-    // SYNTHETIC STATUS
+    // SYNTHETIC STATUS ------> of initial state data needed for the application
     const [status, setStatus] = useState(asyncStatus.INITIAL) 
     const dispatch = useDispatch();
+
+    // if login timestamp is not set, set it now
+    if (!DayJSUtils.getLoginTimeStamp()) {
+        DayJSUtils.setLoginTimestamp();
+    }
 
     /* useEffect(()=>{
 

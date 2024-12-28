@@ -1,10 +1,10 @@
 import { transactionType } from "../../../../../../../../enums";
-import AddTransactionForm from "../AddTransactionForm";
+import TransactionMangementForm from "../../../../../../../../components_common/TransactionManangementForm";
 
 export default function AddIncomeTransaction({onFinshDispatch}) {
         
     return (
-        <AddTransactionForm 
+        <TransactionMangementForm 
             transactionType={transactionType.INCOME}
             onFinishDispatch={onFinshDispatch}
         />

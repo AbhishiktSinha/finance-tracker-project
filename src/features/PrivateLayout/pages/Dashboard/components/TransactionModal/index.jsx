@@ -6,7 +6,7 @@ import { Tabs } from "antd";
 import "./styles.css"
 import { lazy, Suspense, useMemo } from "react";
 import { DayJSUtils } from "../../../../../../dayjs"; 
-import { UDPATE_DASHBOARD_TRANSACTIONS } from "../../redux/actions/dashboardTransactionsActions";
+import { UDPATE_PRIMARY_TRANSACTIONS } from "../../../../redux/actions/primaryTransactionsActions";
 import { timeframe, transactionType } from "../../../../../../enums";
 import { consoleDebug, consoleError, consoleInfo } from "../../../../../../console_styles";
 import dayjs from "dayjs";
@@ -21,10 +21,10 @@ export default function TransactionModal({modalRef}) {
 
         if (DayJSUtils.isWithinTimeframe(timeframe.YEAR, occurredAt)) {
 
-            const {ADD_DASHBOARD_TRANSACTION} = UDPATE_DASHBOARD_TRANSACTIONS;
-            consoleInfo('dispatch -> ADD_DASHBOARD_TRANSACTION')
+            const {ADD_PRIMARY_TRANSACTION} = UDPATE_PRIMARY_TRANSACTIONS;
+            consoleInfo('dispatch -> ADD_PRIMARY_TRANSACTION')
             dispatch({
-                type: ADD_DASHBOARD_TRANSACTION, 
+                type: ADD_PRIMARY_TRANSACTION, 
                 payload: transactionData
             })
         }
@@ -49,7 +49,7 @@ export default function TransactionModal({modalRef}) {
                 {
                     key: transactionType.EXPENDITURE,
                     label: 'Expenditure',
-                    children: <Suspense><AddExpenditureTransaction/></Suspense>
+                    children: <Suspense><AddExpenditureTransaction onFinishDispatch={onFinshDispatch}/></Suspense>
                 }
             ]
         )

@@ -1,0 +1,23 @@
+@use '@dashboard_styles/dashboard-card';
+@use '@app_styles/fonts' as fonts;
+
+.dashboard-recent-transactions-container {
+    width: 100%;
+    min-height: 480px;
+
+    background-color: dashboard-card.$card-background-color;
+
+    border-radius: dashboard-card.$card-border-radius;
+
+    padding-block: dashboard-card.$card-padding-block;
+    padding-inline: dashboard-card.$card-padding-inline;
+
+    display:flex;
+    flex-direction: column;
+    row-gap: 16px;
+
+    .section-title {
+        font-size: fonts.$title-large-size;
+        margin-bottom: 12px !important;
+    }
+}

@@ -146,6 +146,21 @@ export default function balanceReducer(state = initialState, action) {
                 return state;
             }
         }
+
+        
+        /**
+         * payload structure: 
+         * [
+         *      {
+         *          operation: balanceOperation.ADD_AMOUNT | balanceOperation.SUBTRACT_AMOUNT, 
+         *          currency: ---------, 
+         *          amount: -----------,
+         *      }
+         * ]
+         */
+        case UPDATE_BALANCE: {
+            
+        }
         
         default : {
             return state;

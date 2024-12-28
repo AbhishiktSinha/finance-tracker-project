@@ -1,4 +1,4 @@
-# Gray Overflows 
+## Gray Overflows 
 
 <div class='light-on'>
 <style>
@@ -35,13 +35,13 @@ Balance Insights - *need separate logic*.
 - Function to check number of digits in amount, and style accordingly
 
 ## Features to Implement
-- Elevatae `dashboardTransactions` state slice to `primaryTransactions`, available to the entire application instead of being localized to `dashboard`.
+- ~~Elevatae `dashboardTransactions` state slice to `primaryTransactions`, available to the entire application instead of being localized to `dashboard`.~~ ✅
 
-- `primaryTransactions` state should the transactions for a time-period of `1 year` instead of the current year. 
+- ~~`primaryTransactions` state should store the transactions for a time-period of `1 year` instead of the current year.~~ ✅
+
+- ~~Dashboard components wrapped in Flex rows~~ ✅
 
 - Dashboard Page Timeframe Toggle
-
-- Dashboard components wrapped in Flex rows
 
 - Balance Insights
 

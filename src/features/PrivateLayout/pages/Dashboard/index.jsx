@@ -17,13 +17,12 @@ import ExpenditureCard from './components/ExpenditureCard'
 
 import Skeleton from './components/Skeleton/index.jsx';
 
-import { fetchDashboardTransactionsThunk } from './redux/thunks.js';
 import { checkDisplayUI } from '../../utils.js';
-import { selectDashboardTransactionStatus } from './redux/selectors.js';
 
-import './stlyes.css';
+import './stlyes.scss';
 import BalanceOverviewChartCard from './components/BalanceOverviewChartCard/index.jsx';
-import DashboardRecentTransactions from './components/DashboardRecentTransactions/index.jsx'
+import DashboardRecentTransactions from './components/RecentTransactionsList/index.jsx'
+import ActiveTimeframeContextProvider from './context/ActiveTimeframeContext/Provider.jsx';
 
 /*TODO: 
 Redux to handle the Dashboard internal state of `dashboardTransactions`
@@ -42,27 +41,15 @@ export default function Dashboard() {
     
     // STATUS to handle the initial loading uis
     const { status: initialStateStatus } = useContext(statusContext);
-    const { isOnboardingDone } = useContext(onboardingStatusContext)
-    const dashboardTransactionsStatus = useSelector(selectDashboardTransactionStatus)
+    const { isOnboardingDone } = useContext(onboardingStatusContext)    
 
-    const showUI = checkDisplayUI([
-        initialStateStatus, 
-        dashboardTransactionsStatus], isOnboardingDone);
+    const showUI = checkDisplayUI([initialStateStatus], isOnboardingDone);
 
     /* TRANSACTION MODAL */
     const transactionModalRef = useRef();
     const handleButtonClick = (e) => {
         transactionModalRef.current.openModal();
     }
-    
-    // initialize dashboard state
-    useEffect(()=>{
-        if (dashboardTransactionsStatus == 'initial') {
-            dispatch(fetchDashboardTransactionsThunk(user.uid))
-        }
-        
-    }, [])
-
 
     // CONDITIONAL SKELETON RENDER
     if (!showUI) {
@@ -72,55 +59,56 @@ export default function Dashboard() {
     /* -------------------------------------------------------------------- */
     
     const TransactionModal = lazy(()=>import('./components/TransactionModal'));
+
     return (
-        <div id="dashboard-page" className='route-page'>
-            <h1 style={{width: '100%'}}>Dashboard</h1>
+        <ActiveTimeframeContextProvider >
 
-            <div className='page-contents-wrapper'>
+            <div id="dashboard-page" className='route-page'>
+                <h1 style={{ width: '100%' }}>Dashboard</h1>
 
-                <div className="dashboard-content-row">
-                    <BalanceCard />
-                    <BalanceOverviewChartCard />
-                </div>
+                <div className='page-contents-wrapper'>
 
-                <div className="dashboard-content-row income-expenditure-row">
-                    <IncomeCard />
-                    <ExpenditureCard />
-                </div>
-                
-                <div className="dashboard-content-row recent-transactions-row">
-                    <DashboardRecentTransactions />
-                </div>
-                {/* <div className="transaction-cards-container">
-                    <BalanceCard />
+                    <div className="dashboard-content-row balance-and-overview-row">
+                        <BalanceCard />
+                        <BalanceOverviewChartCard />
+                    </div>
 
-                    <div className="income-expenditure-container">
-                        <IncomeCard/>
+                    <div className="dashboard-content-row income-expenditure-row">
+                        <IncomeCard />
                         <ExpenditureCard />
                     </div>
-                </div> */}
 
-                <ModalWrapper
-                    ref={transactionModalRef}
-                >
-                    <Suspense>
-                        <TransactionModal
-                            modalRef={transactionModalRef}
-                        />
-                    </Suspense>
+                    <div className="dashboard-content-row recent-transactions-row">
+                        <DashboardRecentTransactions />
+                    </div>
 
-                </ModalWrapper>
 
-                <Button
-                    className='add-txn-button'
-                    size='large'
-                    shape='circle'
-                    icon={<PlusOutlined />}
-                    onClick={handleButtonClick}
-                >
-                </Button>
+                    <ModalWrapper
+                        ref={transactionModalRef}
+                    >
+                        {/* <Suspense>
+                            <TransactionModal
+                                modalRef={transactionModalRef}
+                            />
+                        </Suspense> */}
+
+                        <h2>This is the Modal Content</h2>
+
+                    </ModalWrapper>
+
+                    <Button
+                        className='add-txn-button'
+                        size='large'
+                        shape='circle'
+                        icon={<PlusOutlined />}
+                        onClick={handleButtonClick}
+                    >
+                    </Button>
+
+                </div>
+
             </div>
 
-        </div>
+        </ActiveTimeframeContextProvider>
     )
 }

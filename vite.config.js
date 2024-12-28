@@ -7,4 +7,12 @@ export default defineConfig({
   define: {
     "process.env": {},
   },
+  resolve: {
+    alias: {
+
+      '@dashboard_styles': '/src/features/PrivateLayout/pages/Dashboard/styles',
+      '@app_styles': '/src/styles',
+      '@assets':'/assets'
+    }
+  }
 })

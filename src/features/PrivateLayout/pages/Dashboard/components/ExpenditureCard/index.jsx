@@ -1,38 +1,65 @@
 import { useSelector } from "react-redux";
-import { selectNewTransactionData_expenditure, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
+import { selectNewTransactionData_wrapper, selectTransactionsInitializer_wrapper } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
-import { selectActiveTimeframe } from "../../redux/selectors";
 
-import { changeType, transactionType } from "../../../../../../enums";
-import useInsightState from "../../../../../../custom_hooks/useInsightState";
+import { transactionType } from "../../../../../../enums";
 import useDynamicAmount from "../../../../../../custom_hooks/useDynamicAmount";
-import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../../../utils";
+import { checkDisplayUI } from "../../../../utils";
 
 import DashboardTransactionCard from "../DashboardTransactionCard";
-import { useContext } from "react";
-import userAuthContext from "../../../../context/userAuthContext";
-import { consoleDebug } from "../../../../../../console_styles";
+import { useContext, useMemo } from "react";
+import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
+import activeTimeframeContext from "../../context/ActiveTimeframeContext";
 
 
 export default function ExpenditureCard() {
 
-    consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);    
+    consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);
+    const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
     const initializer = useSelector(
-        wrapper_selectTransactionsInitializer(transactionType.EXPENDITURE)
+        selectTransactionsInitializer_wrapper(transactionType.EXPENDITURE, timeframe)
     )
+    const newTransactionData = useSelector(
+        selectNewTransactionData_wrapper(transactionType.EXPENDITURE, timeframe)
+    );
     const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransactionData = useSelector(selectNewTransactionData_expenditure);
 
-    const timeframe = useSelector(selectActiveTimeframe);
+
+    consoleInfo(`EXPENDITURE CARD DEPENDENCIES:\n
+        initializer: ${JSON.stringify(initializer)}\n
+        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
+        newTransactions: ${JSON.stringify(newTransactionData)}
+        timeframe: ${timeframe}`)
+
+
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
         defaultCurrency.code, 
         newTransactionData, 
-        transactionType.EXPENDITURE);
+        transactionType.EXPENDITURE, 
+        timeframe);
 
     const showCardUI = checkDisplayUI([status]);
+
+
+    /* ----------------- UI OPTIMISATIONS FOR MEMOIZED COMPONENT ------------------- */
+    const card_data = useMemo(()=>{
+        return {
+            defaultCurrency: defaultCurrency, 
+            amount: amount, 
+            timeframe: timeframe,
+        }
+    }, [defaultCurrency, amount, timeframe])
+
+    const insight_data = useMemo(()=>{
+        return {
+            aggregateTransactionAmt: amount, 
+            defaultCurrencyCode: defaultCurrency.code, 
+            activeTimeframe: timeframe
+        }
+    }, [amount, defaultCurrency.code, timeframe])
 
     return (
         <DashboardTransactionCard 
@@ -40,19 +67,22 @@ export default function ExpenditureCard() {
             id={'expenditure_card'}
             title={'EXPENDITURE'}
             showUI={showCardUI}
-            data={{
+            /* data={{
                 defaultCurrency: defaultCurrency, 
                 amount: amount, 
                 timeframe: timeframe,
                 type: transactionType.EXPENDITURE
-            }}
+            }} */
 
-            insights={{
+            data={card_data}
+            insights={insight_data}
+
+            /* insights={{
                 aggregateTransactionAmt: amount, 
                 defaultCurrencyCode: defaultCurrency.code,
                 activeTimeframe: timeframe, 
                 type: transactionType.EXPENDITURE,
-            }}
+            }} */
         />
     )
 }

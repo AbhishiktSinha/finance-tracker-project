@@ -1,7 +1,7 @@
 import { DatePicker, Form } from "antd";
-import { range } from "../../../../../../../utils";
+import { range } from "../../../features/PrivateLayout/utils";
 import dayjs from "dayjs";
-import { consoleDebug, consoleInfo } from "../../../../../../../../../console_styles";
+import { consoleDebug, consoleInfo } from "../../../console_styles";
 
 
 export default function DateTimePicker({name}) {

@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
-import { wrapper_selectTagsOfType } from "../../../../../../../redux/selectors";
+import { wrapper_selectTagsOfType } from "../../../features/PrivateLayout/redux/selectors";
 import { Divider, Form, Select } from "antd";
-import CreateTagCompact from "../../../../../../../components/CreateTagCompact";
+import CreateTagCompact from "../../../features/PrivateLayout/components/CreateTagCompact";
 
 export default function TagsDropdown({type}) {
 

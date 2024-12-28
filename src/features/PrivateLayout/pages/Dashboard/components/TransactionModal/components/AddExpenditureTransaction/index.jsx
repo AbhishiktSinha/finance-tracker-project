@@ -1,12 +1,12 @@
 import { useSelector } from "react-redux";
-import AddTransactionForm from "../AddTransactionForm";
-import { selectBalance } from "../../../../../../redux/selectors";
+import TransactionMangementForm from "../../../../../../../../components_common/TransactionManangementForm";
+import { selectBalanceData } from "../../../../../../redux/selectors";
 import { transactionType } from "../../../../../../../../enums";
 import { consoleDebug } from "../../../../../../../../console_styles";
 
 export default function AddExpenditureTransaction({onFinishDispatch}) {
 
-    const balanceData = useSelector(selectBalance);
+    const balanceData = useSelector(selectBalanceData);
 
     consoleDebug('EXPENDITURE FORM BALANCE DATA');
     console.log(balanceData)
@@ -31,7 +31,7 @@ export default function AddExpenditureTransaction({onFinishDispatch}) {
     }
 
     return (
-        <AddTransactionForm 
+        <TransactionMangementForm 
             transactionType={transactionType.EXPENDITURE}
             onFinishDispatch={onFinishDispatch}
             onFinishCheck={onFinishCheck}

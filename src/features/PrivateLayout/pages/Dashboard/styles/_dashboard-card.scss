@@ -1,0 +1,29 @@
+@use '../../../../../styles/colors' as colors ;
+
+$card-base-width:480px;
+$card-min-width: 300px;
+$card-height: 200px;
+$card-border-radius: 12px;
+$card-padding-block: 12px;
+$card-padding-inline: 12px;
+$card-background-color: colors.$bg-light-grey;
+
+
+%dashboard-card-base {
+    width: $card-base-width;
+    // max-width: $card-base-width; 
+    min-width: $card-min-width;
+    flex-shrink: 1 !important;
+    
+    border-radius: $card-border-radius;
+    padding-block: $card-padding-block;
+    padding-inline: $card-padding-inline;
+
+    transition: 0.25s ease all;
+    cursor: pointer;
+
+    background-color: $card-background-color;
+
+    min-height: $card-height;    
+    // padding-bottom: 12px;
+}

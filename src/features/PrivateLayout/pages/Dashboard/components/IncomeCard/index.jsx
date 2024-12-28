@@ -1,33 +1,34 @@
 import { useSelector } from "react-redux";
 
-import { selectNewTransactionData_income, wrapper_selectTransactionsInitializer } from "../../redux/selectors";
+import { selectNewTransactionData_wrapper, selectTransactionsInitializer_wrapper } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
-import { selectActiveTimeframe } from "../../redux/selectors"
 
-import { asyncStatus, changeType, transactionType } from "../../../../../../enums";
-import useInsightState from "../../../../../../custom_hooks/useInsightState";
+import { transactionType } from "../../../../../../enums";
 import useDynamicAmount from "../../../../../../custom_hooks/useDynamicAmount";
-import { checkDisplayUI, getChangeType, getValueChangePercentage } from "../../../../utils";
+import { checkDisplayUI } from "../../../../utils";
 import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
 
 import DashboardTransactionCard from "../DashboardTransactionCard";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import userAuthContext from "../../../../context/userAuthContext";
+import activeTimeframeContext from "../../context/ActiveTimeframeContext";
 
 
 export default function IncomeCard() {
 
     consoleDebug(`------- INCOME CARD RENDERED ------`)
 
-    const {user: {uid} } = useContext(userAuthContext);
+    const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
+    // always a new reference due to filtering the list of transactions
     const initializer = useSelector(
-        wrapper_selectTransactionsInitializer(transactionType.INCOME)
+        selectTransactionsInitializer_wrapper(transactionType.INCOME, timeframe)
+    );
+    const newTransactionData = useSelector(
+        selectNewTransactionData_wrapper(transactionType.INCOME, timeframe)
     )
-    const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransactionData = useSelector(selectNewTransactionData_income);
+    const defaultCurrency = useSelector(selectDefaultCurrency);    
 
-    const timeframe = useSelector(selectActiveTimeframe);
     
 
     consoleInfo(`INCOME CARD DEPENDENCIES:\n
@@ -40,9 +41,27 @@ export default function IncomeCard() {
         initializer, 
         defaultCurrency.code, 
         newTransactionData, 
-        transactionType.INCOME);
+        transactionType.INCOME,
+        timeframe);
 
     const showCardUI = checkDisplayUI([status]);
+
+    const card_data = useMemo(()=>{
+        return {
+            defaultCurrency: defaultCurrency, 
+            amount: amount, 
+            timeframe: timeframe,
+        }
+    }, [defaultCurrency, amount, timeframe])
+
+    const insight_data = useMemo(()=>{
+        return {
+            aggregateTransactionAmt: amount, 
+            defaultCurrencyCode: defaultCurrency.code, 
+            activeTimeframe: timeframe
+        }
+    }, [amount, defaultCurrency.code, timeframe])
+
 
     return (
         <DashboardTransactionCard 
@@ -50,19 +69,9 @@ export default function IncomeCard() {
             id={'income_card'}
             title={'INCOME'}
             showUI={showCardUI}
-            data={{
-                defaultCurrency: defaultCurrency, 
-                amount: amount, 
-                timeframe: timeframe,
-                type: transactionType.INCOME
-            }}
+            data={card_data}
 
-            insights={{
-                defaultCurrencyCode: defaultCurrency.code, 
-                aggregateTransactionAmt: amount, 
-                type: transactionType.INCOME,
-                activeTimeframe: timeframe
-            }}
+            insights={insight_data}
         />
     )
 }

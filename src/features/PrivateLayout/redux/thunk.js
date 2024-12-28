@@ -1,5 +1,6 @@
 import { FETCH_USERDOC, UPDATE_USERDOC } from './actions/userDocActions'
 import { FETCH_BALANCE, UPDATE_BALANCE } from './actions/balanceActions';
+import { FETCH_PRIMARY_TRANSACTIONS } from './actions/primaryTransactionsActions';
 import { UPDATE_NEW_TRANSACTION } from './actions/newTransactionActions'
 import { FETCH_TAG, UPDATE_TAG } from './actions/tagActions';
 
@@ -13,11 +14,13 @@ import UserDocError from '../../../custom_errors/UserDocError'
 import BalanceError from '../../../custom_errors/BalanceError'
 import TagError from '../../../custom_errors/TagError'
 import InitializerError from '../../../custom_errors/InitializerError'
+import PrimaryTransactionsError from '../../../custom_errors/PrimaryTransactionsError'
 import endpoints from '../../../network/endpoints';
 import request from '../../../network/request';
 import { rules } from 'eslint-plugin-react';
-import { transactionType } from '../../../enums';
+import { dayJsUnits, transactionType } from '../../../enums';
 import { batch } from 'react-redux';
+import { DayJSUtils } from '../../../dayjs';
 
 export const fetchUserDocThunk = (uid) => {
 
@@ -116,7 +119,8 @@ export const updateExchangeRateThunk = (flag)=>{
 
     consoleInfo('updateExchangeRate ----T H U N K---- WRAPPER')
 
-    function priorCheck() {
+    function check_update_required() {
+        // if pre-existing exchangeRate data is found in localStorage
         if (Boolean(localStorage.getItem('exchangeRate'))) {
 
             const time_next_update = JSON.parse(localStorage.getItem('exchangeRate'))?.time_next_update;
@@ -131,6 +135,10 @@ export const updateExchangeRateThunk = (flag)=>{
                 return true;
             }
         }
+        // otherwise, fetching of data is necessary 
+        else {
+            return true;
+        }
     }
 
     return async (dispatch, getState)=> {
@@ -139,7 +147,7 @@ export const updateExchangeRateThunk = (flag)=>{
 
         // prior check by default
         if (flag != 'force') {
-            const update_required = priorCheck();
+            const update_required = check_update_required();
             
             // abort if update is not required
             if (!update_required) {
@@ -301,6 +309,36 @@ export const stateInitializerThunk = (uid)=> {
             throw new TagError('Failed to retrieve "tags"')
         }
     }
+    
+    async function fetchPrimaryTransactions() {
+        try {
+            const previousTimestampLimit = DayJSUtils.getValueAfterInterval(
+                DayJSUtils.getLoginTimeStamp(), 
+                {intervalType: dayJsUnits.YEAR, intervalDuration: 1}, 
+                false);
+            
+            return await new FirestoreCRUD().
+                getDocsData(
+                    `users/${uid}/transactions`, 
+                    [
+                        {
+                            key: 'timestamp.occurredAt', 
+                            relationship: '<=', 
+                            value: DayJSUtils.getLoginTimeStamp()
+                        }, 
+                        {
+                            key: 'timestamp.occurredAt', 
+                            relationship: '>=', 
+                            value: previousTimestampLimit
+                        }
+                    ]
+                )
+        }
+        catch(e) {
+            consoleError(e.message);
+            throw new PrimaryTransactionsError(e.message);
+        }
+    }
 
 
     /* throw any error back to the caller to facilitate ui update */
@@ -318,23 +356,31 @@ export const stateInitializerThunk = (uid)=> {
             FETCH_BALANCE_DATA_SUCCESS, 
             FETCH_BALANCE_DATA_ERROR } = FETCH_BALANCE
 
+        const { FETCH_PRIMARY_TRANSACTIONS_REQUEST, 
+            FETCH_PRIMARY_TRANSACTIONS_SUCCESS, 
+            FETCH_PRIMARY_TRANSACTIONS_ERROR } = FETCH_PRIMARY_TRANSACTIONS;
+
         try {
             /* ------- loading ------------ */
             dispatch( { type: FETCH_BALANCE_DATA_REQUEST } );
             dispatch( { type: FETCH_TAG_DATA_REQUEST } );
             dispatch( { type: FETCH_USERDOC_DATA_REQUEST } );
+            dispatch( { type: FETCH_PRIMARY_TRANSACTIONS_REQUEST})
 
-            const [userDocData, tagData, balanceData] = await Promise.all([
+            const [userDocData, tagData, balanceData, primaryTransactionsData] = await Promise.all([
                 fetchUserDoc(),
                 fetchTags(),
                 fetchBalance(),
+                fetchPrimaryTransactions()
             ])
 
             /* ------- success ---------------- */
-            consoleSucess(`FETCHED: USERDOC, TAG & BALANCE`);
+            consoleSucess(`FETCHED: USERDOC, TAG, PRIMARY_TRANSACTIONS & BALANCE`);
+
             dispatch( { type: FETCH_USERDOC_DATA_SUCCESS, payload: userDocData } );
             dispatch( { type: FETCH_BALANCE_DATA_SUCCESS, payload: balanceData });
             dispatch( { type: FETCH_TAG_DATA_SUCCESS, payload: tagData } );
+            dispatch( {type: FETCH_PRIMARY_TRANSACTIONS_SUCCESS, payload: primaryTransactionsData});
         }
         /* ----------- error ------------------ */
         catch(e) {
@@ -348,7 +394,10 @@ export const stateInitializerThunk = (uid)=> {
             else if (e instanceof UserDocError) {
                 dispatch( {type: FETCH_USERDOC_DATA_ERROR, payload: e.message});
             }
-
+            else if (e instanceof PrimaryTransactionsError) {
+                dispatch( {type: FETCH_PRIMARY_TRANSACTIONS_ERROR, payload: e.message})
+            }
+            
             throw new InitializerError('State Initialization Failed');
         }
     }
@@ -432,12 +481,16 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
 
                         transactionConditionFunction: (docSnapDependencies)=>{
 
+                            // EDIT/CREATE --> Both: id & data are needed.
+                            payloadObject.transactionData = {
+                                    id: transactionId, 
+                                    data: transactionData
+                                }
+
                             const [transactionDocSnap, ...restDocSnaps] = docSnapDependencies; 
 
                             // if existing financial transaction doc is being updated
-                            if (transactionDocSnap.exists()) {
-
-                                payloadObject.transactionData = transactionData;
+                            if (transactionDocSnap.exists()) {                                
 
                                 return {
                                     commit: true, 
@@ -448,11 +501,7 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
                                 }
                             }
                             // if new financial Transaction is being created
-                            else {
-                                payloadObject.transactionData = {
-                                    id: transactionId, 
-                                    data: transactionData
-                                }
+                            else {                                
                                 
                                 return {
                                     commit: true, 
@@ -536,6 +585,7 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
                 })
 
                 // use the parametric callback to update transactions
+                // could be update, could be create
                 dispatchCallback && dispatchCallback(dispatch, payloadObject.transactionData)
             })
         }
@@ -544,4 +594,12 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
             throw e;
         }
     }
+}
+
+
+
+
+export const transactionManagementThunk = (uid, modification, formFields, modifiedFields)=> {
+
+    
 }

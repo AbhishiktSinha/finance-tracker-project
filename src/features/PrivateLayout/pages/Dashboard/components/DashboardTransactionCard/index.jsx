@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import CardDetailsSkeleton from '../CardDetailsSkeleton'
 
 import { consoleDebug, consoleError } from '../../../../../../console_styles';
-import './styles.css'
+import './styles.scss'
 import { asyncStatus, changeType } from '../../../../../../enums';
 import { DashOutlined, FallOutlined, RiseOutlined } from '@ant-design/icons';
 import InsightChip from '../InsightChip';
@@ -15,7 +15,7 @@ Appropriate change in balance card
 create separate jsx for skeleton card to show conditionally based on status
 */
 
-export default function DashboardTransactionCard({
+function DashboardTransactionCard({
     rootClassname, id, title, type, orientation, styles,
     showUI, data, chart, insights,
 }) {
@@ -123,4 +123,6 @@ export default function DashboardTransactionCard({
             </div>
         )
     }
-    }
+}
+
+export default memo(DashboardTransactionCard)

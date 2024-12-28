@@ -1,15 +1,17 @@
 import { useSelector } from 'react-redux';
 
-import { selectBalance, selectDefaultCurrency } from '../../../../redux/selectors';
-import { selectActiveTimeframe, selectNewTransactionData_balance } from '../../redux/selectors';
+import { selectBalanceData, selectDefaultCurrency } from '../../../../redux/selectors';
+import { selectNewTransactionData_wrapper } from '../../redux/selectors';
 
 import useDynamicAmount from '../../../../../../custom_hooks/useDynamicAmount';
 import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
 import { checkDisplayUI } from '../../../../utils';
 
 import DashboardTransactionCard from '../DashboardTransactionCard';
-import './styles.css'
 import { asyncStatus, transactionType } from '../../../../../../enums';
+import { useContext, useMemo } from 'react';
+import activeTimeframeContext from '../../context/ActiveTimeframeContext';
+import './styles.scss'
 
 /**
  * # TODO: 
@@ -29,11 +31,13 @@ import { asyncStatus, transactionType } from '../../../../../../enums';
 export default function BalanceCard() {
 
     consoleDebug('------ BALANCE CARD RENDERD --------')
-    
-    const initializer = useSelector(selectBalance);
+    // const timeframe = useSelector(selectActiveTimeframe)
+    const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
+
+    const initializer = useSelector(selectBalanceData);
     const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransactionData = useSelector(selectNewTransactionData_balance);
-    const timeframe = useSelector(selectActiveTimeframe)
+    const newTransactionData = useSelector(
+        selectNewTransactionData_wrapper(transactionType.ALL, timeframe));
 
     consoleInfo(`BALANCE CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
@@ -51,6 +55,15 @@ export default function BalanceCard() {
     const showCardUI = checkDisplayUI([status]);
 
 
+    // AMOUNT CHANGE IS THE REASON FOR RE-RENDER OF BALANCE CARD (mostly)
+    const card_data = useMemo(()=>{
+        return {
+            defaultCurrency: defaultCurrency, 
+            amount: amount,             
+        }
+    }, [defaultCurrency, amount, timeframe])
+
+
     return (
         
         <DashboardTransactionCard 
@@ -59,10 +72,7 @@ export default function BalanceCard() {
             title={'balance'}
             showUI={showCardUI}
             
-            data={{
-                amount: amount, 
-                defaultCurrency: defaultCurrency,                 
-            }}
+            data={card_data}
 
         />
     )

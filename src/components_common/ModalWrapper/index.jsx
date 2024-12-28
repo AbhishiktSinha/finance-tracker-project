@@ -18,8 +18,22 @@ const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
 
     // exposing modal state
     useImperativeHandle(ref, ()=>{
-        return ({openModal, closeModal, isOpen})
+        return (
+            {
+                ...ref.current, 
+                openModal, closeModal, isOpen
+            }
+        )
     }, []);
+
+    /* ATTENTION  
+    Closing modal now destroys the node itself */
+    if (!isOpen) {
+        return (
+            <>
+            </>
+        )
+    }
 
     return (
         <div className="modal-wrapper">
@@ -34,7 +48,7 @@ const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
                 footer={null}
                 {...restProps}
             >
-                {/* context to allow children like forms to control closing the modal */}
+                {/* context to allow children - like forms to control closing the modal */}
                 <modalContext.Provider 
                     value={ { closeModal } }
                 >

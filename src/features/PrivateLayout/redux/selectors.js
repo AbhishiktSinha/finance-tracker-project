@@ -22,10 +22,10 @@ export const selectDefaultCurrency = createSelector([({userDoc})=>userDoc.data?.
 
 /* ------------ balance SELECTORS ---------------- */
 
-export const selectBalance = ({balance}) => balance.data;
+export const selectBalanceData = ({balance}) => balance.data;
 
 /* ------------ newTransaction SELECTORS --------------- */
-export const selectNewTransaction = ({newTransaction})=> newTransaction.data;
+export const selectNewTransactionData = ({newTransaction})=> newTransaction.data;
 
 /* -------------------- TAG SELECTORS -------------------- */
 export const selectTags = ({tags}) => tags.data;
@@ -39,4 +39,17 @@ export const wrapper_selectTagsOfType = (type) => {
             return (tagItem.data.category == type)
         })
     })
+}
+export const selectTag_wrapper = (tagId) => {
+    
+    return createSelector(selectTags, 
+        (tagsList=>{
+            return tagsList.filter(
+                ({id, data})=>{
+                    
+                    return id==tagId
+                }
+            )[0];
+        })
+    )
 }

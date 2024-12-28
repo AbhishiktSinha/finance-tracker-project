@@ -1,3 +1,5 @@
+@use '@app_styles/breakpoints' as breakpoints;
+
 #dashboard-page {    
     
     /* for multility button */
@@ -12,14 +14,13 @@
     flex-direction: column;
     align-items: center;
 
-    row-gap: 24px;
-
-    width: 100vw;
+    row-gap: 24px;    
     
     .page-contents-wrapper {
         
         /* makes flexible horizontally */
         width: 100%;
+        max-width: 984px;        
 
         display: flex;
         flex-direction: column;
@@ -41,7 +42,7 @@
             display: flex;
             justify-content: center ;
             /* align-items: center; */
-            flex-wrap: wrap;
+            /* flex-wrap: wrap; */
     
             gap: 24px;  
         }
@@ -114,14 +115,20 @@
     #dashboard
 } */
 
-@media screen and (width < 800px) {
-    .income-expenditure-row {
+@media screen and (min-width: breakpoints.$mobile-min-width) and (max-width: breakpoints.$large-screen-min-width) {
+    .income-expenditure-row, .balance-and-overview-row {
         flex-wrap: wrap !important;
-    }
-    .income-card, .expenditure-card {
+        
+        > div {            
+            max-width:none;
+            /* flex: 1 !important; */
+        }        
+    }    
+    /*.income-card, .expenditure-card {
         width: 640px !important;
-        max-width: 640px !important;
-    } 
+        max-width: auto !important;
+        flex: 1 !important;
+    }*/
     /* .income-expenditure-container {
         flex-wrap: wrap !important;
     }

@@ -10,7 +10,7 @@ import { timeframe as timeframeEnum } from '../enums';
  */
 export class DayJSUtils {
 
-    static #login_timestamp; //also works as now
+    static #login_timestamp = undefined; //also works as now
 
     static getCurrentISOWeek() {
         return dayjs(this.#login_timestamp).isoWeek();
@@ -33,8 +33,7 @@ export class DayJSUtils {
         return this.#login_timestamp;
     }
 
-    /**
-     * ## getFirstDayTimestamp
+    /**## getFirstDayTimestamp
      * Function that returns the timestamp in milliseconds of the first day of the timeframe 
      * enclosing the given timestamp.  
      * By default the timestamp is the `login_timestamp`.   
@@ -55,8 +54,7 @@ export class DayJSUtils {
         return firstDay.valueOf();
     }
 
-    /**
-     * ## getLastDayTimestamp
+    /**## getLastDayTimestamp
      * Function that returns the timestamp in milliseconds of the last day of the timeframe 
      * enclosing the given timestamp.  
      * By default the timestamp is the `login_timestamp`.   
@@ -76,7 +74,7 @@ export class DayJSUtils {
         return lastDay.valueOf();
     }
 
-    /**
+    /**DEPRECATED
      * ## isWithinTimeframe
      * Function that checks and returns whether a given instance represented by its corresponding timestamp 
      * lies within the given current timeframe or not.  
@@ -129,4 +127,30 @@ export class DayJSUtils {
         }
     }
 
+
+    /**## getValuesAfterInterval
+     * Function that returns the timestamp with the given interval of difference from the given `from_timestmap`
+     * 
+     * @param {number} from_timestamp Value of timestamp
+     * @param {{intervalType: string, intervalDuration: number}} interval Describes the gap interval
+     * @param {boolean} positive whether to add or subtract
+     * @returns The timeframe with the neccesrray difference
+     */
+    static getValueAfterInterval(from_timestamp = this.#login_timestamp, {intervalType, intervalDuration}, positive = true) {
+
+        const from = dayjs(from_timestamp).startOf('day');
+
+        if (positive) {
+            
+            return from.add(intervalDuration, intervalType).valueOf();
+        }
+        else {
+            return from.subtract(intervalDuration, intervalType).valueOf();
+        }
+
+    }
+
+    static format(timestamp, format_string) {
+        return dayjs(timestamp).format(format_string);
+    }
 }

@@ -13,6 +13,10 @@ export const getAllCurrencyCodeDropdownOptions = () => {
     })
 }
 
+export const getCurrencySymbol = (code)=> {
+    return currencyToSymbolMap[code];
+}
+
 /**
  * 
  * @param {Array<string>} statusList Array of all the `status` fields that the route depends on

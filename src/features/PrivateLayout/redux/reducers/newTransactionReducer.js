@@ -3,6 +3,8 @@ import { UPDATE_NEW_TRANSACTION } from "../actions/newTransactionActions";
 
 
 const initialState = { 
+    isModified: undefined, // true | false
+    modifiedFields: null, // { fieldName: prev_value, ...}
     id: undefined, 
     data: undefined
  };
@@ -16,12 +18,17 @@ export default function newTransactionReducer(state=initialState, action) {
         
         console.log(payload)
         
-        const { id: newTransID, data: newTransData} = payload;
+        const { id: newTransID, 
+            data: newTransData, 
+            isModified: newTransIsModified, 
+            modifiedFields: newTransModifiedFields} = payload;
 
         return {
             ...state, 
             data: newTransData, 
             id: newTransID, 
+            isModified: newTransIsModified, 
+            modifiedFields: newTransModifiedFields
         }
     }
     else {

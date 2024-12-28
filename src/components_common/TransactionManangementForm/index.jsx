@@ -1,21 +1,21 @@
 import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
-import ActionButton from '../../../../../../../../components_common/ActionButton'
+import ActionButton from '../ActionButton'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { selectDefaultCurrency } from '../../../../../../redux/selectors'
-import { getAllCurrencyCodeDropdownOptions } from '../../../../../../utils'
-import { transactionType } from '../../../../../../../../enums'
-import { selectBalance } from '../../../../../../redux/selectors'
+import { selectDefaultCurrency } from '../../features/PrivateLayout/redux/selectors'
+import { getAllCurrencyCodeDropdownOptions } from '../../features/PrivateLayout/utils'
+import { transactionType } from '../../enums'
+import { selectBalanceData } from '../../features/PrivateLayout/redux/selectors'
 import TagsDropdown from './components/TagsDropdown'
-import { useContext, useMemo, useRef } from 'react'
+import React, { useContext, useMemo, useRef } from 'react'
 
 import './styles.css'
 import DateTimePicker from './components/DateTimePicker'
 import dayjs from 'dayjs'
-import { updateTransactionThunk } from '../../../../../../redux/thunk'
-import { consoleError, consoleInfo } from '../../../../../../../../console_styles'
-import userAuthContext from '../../../../../../context/userAuthContext'
-import modalContext from '../../../../../../../../components_common/ModalWrapper/context'
+import { updateTransactionThunk } from '../../features/PrivateLayout/redux/thunk'
+import { consoleError, consoleInfo } from '../../console_styles'
+import userAuthContext from '../../features/PrivateLayout/context/userAuthContext'
+import modalContext from '../ModalWrapper/context'
 
 /*BASIC JSX STRUCTURE
 
@@ -37,11 +37,22 @@ Call addTransactionThunk to handle backend and frontend data updation
 onFinishDispatch is recieved as an argument instead of defining it within the form, because the form is meant to be reusable across the app
 */
 
-export default function AddTransactionForm({ transactionType: type, additionalFormItems, onFinishCheck, onFinishDispatch, formFieldRules }) {
+/**
+ * 
+ * @param {object} props
+ * @param {boolean} props.modification true | false, signifies whether this is modification case or creation case
+ * @param {object} props.defaults the default values for the form field
+ * @param {string} props.transactionType 'income' | 'expenditure' 
+ * @param {function} props.onFinishCheck additional validation before submit, can throw error
+ * @param {function} props.onFinishAction function to be called on submit, called with form data and modifiedFields data
+ * @returns {React.Component} TransactionManagementForm
+ */
+export default function TransactionMangementForm({ 
+  modification, defaults, transactionType: type, additionalFormItems, onFinishCheck, onFinishAction, formFieldRules }) {
 
   // ----------------------------- selectors -------------
   const currency = useSelector(selectDefaultCurrency);
-  const balanceList = useSelector(selectBalance);
+  const balanceList = useSelector(selectBalanceData);
 
   // ------------------------------ context --------------
   const { user: { uid } } = useContext(userAuthContext)
@@ -69,15 +80,25 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
   }, [])
 
   // -------------------------------- form submit handler -----
-  const onFinish = async (values) => {
+  const onFinish = async (fieldValues) => {
+
+    // find the modifiedFields
+    const modifiedFields = {}; 
+    for (let key in fieldValues) {
+      
+      if (defaults[key] != fieldValues[key]) {
+        // modifiedField: previousValue
+        modifiedFields[key] = defaults[key];
+      }
+    }
 
     try {
 
-      onFinishCheck && onFinishCheck(values);
+      onFinishCheck && onFinishCheck(fieldValues);
 
-      const { occurredAt, amount, ...restValues } = values;
       const now = dayjs().valueOf();
-
+      
+/*       const { occurredAt, amount, ...restValues } = fieldValues;
       const data = {
 
         timestamp: {
@@ -91,29 +112,20 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
         ...restValues,
 
       }
-      console.log(data);
+      console.log(data); */
+      
+      actionButtonRef.current.setButtonLoading();
+      
+      await onFinishAction(fieldValues, modifiedFields);
 
-      try {
-
-        actionButtonRef.current.setButtonLoading();
-        const transactionObject = await dispatch(updateTransactionThunk(uid, data, onFinishDispatch));
-
-        consoleInfo('TRANSACTION ADDED TO FIRESTORE using AddTransactionForm');
-        console.log(transactionObject);
-
-        closeModal();
-
-      }
-      catch (e) {
-        consoleError(`AddTransactionFormError:\n`);
-        console.log(e);
-      }
-      finally {
-        actionButtonRef.current.setButtonActive();
-      }
+      closeModal();
+      
     }
     catch (submitError) {
       consoleError(submitError)
+    }
+    finally {
+      actionButtonRef.current.setButtonActive();
     }
 
   } 
@@ -216,7 +228,7 @@ export default function AddTransactionForm({ transactionType: type, additionalFo
           htmlType='submit'
           ref={actionButtonRef}
         >
-          Create {type.toUpperCase()} Transaction
+          {modification ? 'Save Changes' : `Create ${type.toUpperCase()} Transaction`}
         </ActionButton>
       </Flex>
     </Form>

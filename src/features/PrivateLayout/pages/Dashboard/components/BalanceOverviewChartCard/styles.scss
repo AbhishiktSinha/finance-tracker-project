@@ -1,0 +1,15 @@
+@use '../../styles/dashboard-card' as card;
+
+.balance-overview-chart-card {
+
+    @extend %dashboard-card-base;
+    // width: 400px;
+    // min-width: 350px; 
+
+    width: auto;
+    flex-grow: 1;
+    min-width: 250px;
+    max-width: 350px;
+    flex-shrink: 2;
+
+}

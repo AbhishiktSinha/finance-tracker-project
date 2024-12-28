@@ -11,6 +11,7 @@ import OnboardingAction from "./components/OnboardingAction";
 import { Spin } from "antd";
 import { asyncStatus } from "../../enums";
 import ExchangeRateStatusContext from "./components/ExchangeRateStatusContext";
+import LatestTransactionContextWrapper from "./components/LatestTransactionContextWrapper";
 
 export default function PrivateContextProviderLayout() {
 
@@ -43,8 +44,12 @@ export default function PrivateContextProviderLayout() {
                                     <StateInitializer>
                                         <OnboardingAction>
                                             <ExchangeRateStatusContext>
+                                                
+                                                <LatestTransactionContextWrapper>
+                                                    
+                                                        <Outlet />
 
-                                                <Outlet />
+                                                </LatestTransactionContextWrapper>
                                             
                                             </ExchangeRateStatusContext>
                                         </OnboardingAction>

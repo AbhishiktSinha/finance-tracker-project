@@ -33,3 +33,21 @@ export const changeType = Object.freeze({
     NEGATIVE: 'negative', 
     NONE: 'none'
 })
+
+export const dayJsUnits = Object.freeze({
+    DAY: 'day', 
+    MONTH: 'month', 
+    YEAR: 'year', 
+    QUARTER: 'quarter',
+    WEEK: 'week', 
+    HOUR: 'hour', 
+    MINUTE: 'minute', 
+    SECOND: 'second',
+    MILLISECOND: 'millisecond'
+})
+
+export const balanceActions = Object.freeze({
+    ADD_AMOUNT: 'add_amount', 
+    SUBTRACT_AMOUNT: 'subtract_amouut',
+    CREATE_AMOUNT: 'create_amount'
+})

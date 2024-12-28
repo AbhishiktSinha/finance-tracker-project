@@ -1,21 +1,18 @@
+@use './styles/breakpoints' as breakpoints;
+@use './styles/colors' as colors;
+
 html {
-  background-color: var(--bg-light);
+  background-color: colors.$bg-light;
 }
 p, span, div, button, input::placeholder {
-  color: var(--text-dark);  
+  color: colors.$text-dark;  
 }
 h1, h2, h3, h4 {
   color: var(--black);
   font-weight: 500;
 }
 
-/* ---------- SASS DISPLAY BREAKPOINTS --------- */
-$small-screen-width: 350px;
-$mobile-width: 400px;
-$tablet-width: 800px;
-$intermediate-large-screen-width: 900px;
-$large-screen-width: 1080px;
-$desktop-width: 1440px;
+
 
 :root {
   --bg-light: #F6F8FC;
@@ -50,15 +47,14 @@ $desktop-width: 1440px;
 
 
 
-  /* ----- layouts constants ----------- */  
+  /* ----- padding constants ----------- */  
 
   --page-block-padding: 24px;
-  --page-inline-padding-desktops: 120px;
-  --page-inline-padding-large: 75px;
-  --page-inline-padding-intermediate-large: 50px;
-  --page-inline-padding-tablets: 30px;
-  --page-inline-padding-mobiles: 10px;
-  --page-inline-padding-small-screen: 5px;
+  --page-inline-padding-desktops: 60px;
+  --page-inline-padding-large-screen: 40px;
+  --page-inline-padding-tablets: 15px;
+  --page-inline-padding-mobiles: 7px;
+  --page-inline-padding-small-screen: 2px;
 
 }
 
@@ -111,41 +107,48 @@ a[class*='disabled'] {
 
 /* -------- PAGE INLINE PADDING & MEDIA QUERIES -------------- */
 .route-page {
-  // default behaviour for very small screens
-  padding-inline: var(--page-inline-padding-small-screen);
+  // mobile first behavior
+  padding-inline: var(--page-inline-padding-mobiles);
+  
 }
-
-// greater than small-screen: mobile-width
-@media screen and (min-width: $small-screen-width) {
+// max-width ---> in small screen range 
+@media (max-width:breakpoints.$small-screen-width) {
   .route-page {
-    padding-inline: var(--page-inline-padding-mobiles);
+    padding-inline: var(--page-inline-padding-small-screen);
   }
 }
 
-// greater than mobile: tablet-width
-@media screen and (min-width: $mobile-width) {
+// min width ----> in tablet range
+@media (min-width: breakpoints.$tablet-min-width) {
   .route-page {
-    padding-inline: var(--page-inline-padding-tablets)
+    padding-inline: var(--page-inline-padding-tablets);
   }
 }
 
-// greater than tablet width: intermediate-large-screen-width
-@media screen and (min-width: $tablet-width) {
+// min-width --------> in large screen range
+@media (min-width: breakpoints.$large-screen-min-width) {
   .route-page {
-    padding-inline: var(--page-inline-padding-intermediate-large);
+    padding-inline: var(--page-inline-padding-large-screen);
   }
 }
 
-// greater than intermediate large screen width: large-screen-width
-@media screen and (min-width: $intermediate-large-screen-width) {
-  .route-page {
-    padding-inline: var(--page-inline-padding-large);
-  }
-}
-
-// greater than large-screen-width: desktop-width
-@media screen and (min-width: $large-screen-width) {
+// min-width ---------------> in desktop range
+@media (min-width: breakpoints.$desktop-min-width) {
   .route-page {
     padding-inline: var(--page-inline-padding-desktops);
   }
+}
+
+/* ------------------------------------------------------- */
+// some common style rules for some common elements
+.divider {
+  height: 0;
+  min-width: 20px;
+  border: 1px solid colors.$text-dark;
+}
+
+ul {
+  
+  list-style-position: inside;
+  list-style-type: none;  
 }

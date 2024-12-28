@@ -7,13 +7,12 @@ import { asyncStatus, transactionType } from "../enums";
 import exchangeRateStatusContext from "../features/PrivateLayout/components/ExchangeRateStatusContext/context";
 
 /**## useDynamicAmount
- * Hook that gives a dynamic amount value for dashboard transaction cards  
+ * Hook that gives a dynamic amount value to be consumed in dashboard transaction cards  
  * This amount value is responsive to changes in: 
  * - initializer
  * - newTransactionData
  * - defaultCurrency
  * 
- * FIXME: Make responsive to timeframe change ✅
  * 
  * @param {Array<object>} initializer List of transaction objects
  * @param {string} defaultCurrencyCode INR | USD | EUR etc
@@ -27,12 +26,18 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
     // const status = useExchangeRateAPIStatus(defaultCurrencyCode);
     const {exchangeRateStatus: status} = useContext(exchangeRateStatusContext)
     
+    // don't need a stateful variable,
+    // this hook runs as a consequence of render of parent, it does not trigger re-render on its own    
+    // it calculates the required data for every render
     const amount = useRef({
         'status': status,
         data: undefined,
         error: ''
     })
     
+    /* ------------- UPDATING DATA DURING RENDER --------- */
+    
+    // UPDATES --> STATUS
     useMemo(()=>{
         amount.current.status = status;
     }, [status])
@@ -43,10 +48,11 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
              'Balance'}: ${amount.current.status}`);
 
     
-             /* recompute amount on every defaultCurrencyCode change for success
+    /* recompute amount on every defaultCurrencyCode change for success
         recompute also when the activeTimeframe changes, 
-        consequently changing the initializer without changing newTransactionData 
-    */
+        consequently changing the initializer without changing newTransactionData */
+    
+    // INITIALIZES: ---> AMOUNT.DATA
     useMemo(()=>{
         if (amount.current.status == asyncStatus.SUCCESS) {
             
@@ -59,6 +65,7 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
     newTransactionData is already provided according to the card type
     for income card only new income transactions within the timeframe are provided
     for balance card all newly created transactions are provided */
+    // UPDATES ----> AMOUNT.DATA, with every distinct newTransaction 
     useMemo(() => {
         // handle initial case
         if (Boolean(newTransactionData)) {
