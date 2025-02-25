@@ -1,3 +1,5 @@
+@use '@app_styles/colors-alt' as colors-alt;
+
 .balance-card {
     width: 640px;
     max-width: 640px;
@@ -8,6 +10,11 @@
         var(--color-primary) 50%,
         var(--accent-color)
     ); 
+
+    background-image: linear-gradient(to bottom right, 
+        colors-alt.$light-accent-primary 50%, 
+        colors-alt.$light-accent-neutral
+    );
 
     box-shadow: 0 10px 20px -10px var(--color-primary);
 

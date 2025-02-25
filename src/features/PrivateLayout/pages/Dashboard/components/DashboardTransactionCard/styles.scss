@@ -1,5 +1,7 @@
 @use '@dashboard_styles/dashboard-card' as card;
 @use '@app_styles/breakpoints' as breakpoints;
+@use '@app_styles/colors' as colors;
+@use '@app_styles/fonts' as fonts;
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
 
@@ -22,15 +24,15 @@
 
         .title {
             text-transform: uppercase;
-            color: var(--text-dark) !important;
+            color: colors.$text-dark !important;
 
-            font-size: 18px;
+            font-size: fonts.$title-default-size;
             letter-spacing: calc(0.1vw + 4px);
         }
 
         .timeframe-details {
             margin-top: 8px !important;
-            font-size: 16px;
+            font-size: fonts.$text-large-size;
             text-transform: capitalize;
         }
     }
@@ -39,7 +41,7 @@
     .card-details-skeleton {
 
         display: flex;
-        column-gap: clamp(5px, 1vw, 15px);
+        // column-gap: clamp(5px, 1vw, 15px);
 
         /* padding: 0 12px; */
         padding-inline: clamp(0px, 0.5vw, 12px);
@@ -73,6 +75,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+
+                font-size: inherit;
 
                 width: 40px !important;
                 aspect-ratio: 1 !important;

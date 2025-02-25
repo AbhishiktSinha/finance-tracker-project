@@ -26,7 +26,7 @@ const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
         )
     }, []);
 
-    /* ATTENTION  
+    /* ATTENTION   ----------- looky here ⤵
     Closing modal now destroys the node itself */
     if (!isOpen) {
         return (

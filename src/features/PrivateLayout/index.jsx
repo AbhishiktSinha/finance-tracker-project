@@ -5,21 +5,32 @@ import useIsLoggedIn from "../../custom_hooks/useIsLoggedIn";
 import Header from "../../components_common/Header";
 
 import userAuthContext from "./context/userAuthContext";
+import ExchangeRateStatusContext from "./components/ExchangeRateStatusContext";
 
 import StateInitializer from "./components/StateInitializer";
 import OnboardingAction from "./components/OnboardingAction";
+import NavigationDrawer from './components/NavigationDrawer/index.jsx'
+
 import { Spin } from "antd";
+
 import { asyncStatus } from "../../enums";
-import ExchangeRateStatusContext from "./components/ExchangeRateStatusContext";
-import LatestTransactionContextWrapper from "./components/LatestTransactionContextWrapper";
+import { consoleDebug, consoleInfo } from "../../console_styles";
+
+import './styles.scss'
+import ROUTES from "../../routes.config.js";
 
 export default function PrivateContextProviderLayout() {
 
-    const { status, data: user, error } = useIsLoggedIn();
+    const { status: userLoginStatus, data: user, error } = useIsLoggedIn();
+
+    consoleInfo('USER LOGIN STATUS ------- ⤵');
+    console.log(userLoginStatus, user, error);  
 
     // user is not signed in
-    if ( status == asyncStatus.ERROR ) {
-        return <Navigate to={'../auth.financly/login'}/>
+    if ( userLoginStatus == asyncStatus.ERROR ) {
+
+        consoleDebug(' ------- Navigating to AUTH.FINANCELY --------')
+        return <Navigate to={ROUTES.auth.__route__} replace/>
     }
 
     else {
@@ -30,31 +41,28 @@ export default function PrivateContextProviderLayout() {
                     <div className="app-page">
 
                         <Header
-                            userAuthDetails={{status, user, error}}
+                            userAuthDetails={{userLoginStatus, user, error}}
                         />
 
                         <div className="main">
                             {
-                                (status == asyncStatus.INITIAL || status == asyncStatus.LOADING) ? 
-                                (
-                                    <h2>{`<PrivateContextProviderLayout />:`}<Spin/></h2>
-                                ) : 
-                                (
+                                (userLoginStatus == asyncStatus.INITIAL || userLoginStatus == asyncStatus.LOADING) ?
+                                    (
+                                        <h2>{`<PrivateContextProviderLayout />:`}<Spin /></h2>
+                                    ) :
+                                    (
 
-                                    <StateInitializer>
-                                        <OnboardingAction>
-                                            <ExchangeRateStatusContext>
-                                                
-                                                <LatestTransactionContextWrapper>
+                                        <StateInitializer>
+                                            <OnboardingAction>
+                                                <ExchangeRateStatusContext>
                                                     
-                                                        <Outlet />
+                                                    <NavigationDrawer />
 
-                                                </LatestTransactionContextWrapper>
-                                            
-                                            </ExchangeRateStatusContext>
-                                        </OnboardingAction>
-                                    </StateInitializer>
-                                )
+                                                    <Outlet />
+                                                </ExchangeRateStatusContext>
+                                            </OnboardingAction>
+                                        </StateInitializer>
+                                    )
                             }
                         </div>
                     </div>

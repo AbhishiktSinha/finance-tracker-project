@@ -1,7 +1,14 @@
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/colors' as colors;
+
 .quick-actions-island {
     height: 90%;
 
-    background-color: var(--shadow-dark-accent);
+    /* background-color: var(--shadow-dark-accent);
+    background-color: colors-alt.$light-bg-blue-alt; */
+
+    background: transparent;
+    border: 1px solid colors.$bg-light-grey;
     display: flex;
     align-items: center;
 

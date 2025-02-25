@@ -1,4 +1,5 @@
 @use '@app_styles/breakpoints' as breakpoints;
+@use '@app_styles/fonts' as fonts;
 
 #dashboard-page {    
     
@@ -6,8 +7,11 @@
     position: relative;
 
     /* for html scrollbar */
-    height: fit-content;
+    // height: fit-content;
+    /* height: var(--main-height);
     min-height: var(--main-height);
+
+    overflow: auto; */
 
     /* does not make content flexible horizontally */
     display: flex;
@@ -27,6 +31,8 @@
         align-items: center;
     
         row-gap: 24px;
+        padding-bottom: 24px;
+
 
         /* width: 724px; */
         /* max-width: 872px; */
@@ -34,6 +40,18 @@
         /* width: 872px; */
         /* min-width: 400px; */
         /* flex-shrink: 1 !important; */
+
+        .page-title-bar {
+            margin-top: 24px !important;
+
+            justify-content: space-between;
+
+            .page-title {
+                font-size: fonts.$title-huge-size;
+                font-family: fonts.$stylised-font-family !important;
+                // font-weight: 600;
+            }
+        }
 
 
         .dashboard-content-row {

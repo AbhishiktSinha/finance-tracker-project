@@ -1,5 +1,5 @@
 import { consoleError, consoleInfo } from "../../../../console_styles";
-import { asyncStatus, transactionType } from "../../../../enums";
+import { asyncStatus, balanceOperations, transactionType } from "../../../../enums";
 import { FETCH_BALANCE, UPDATE_BALANCE as UPDATE } from "../actions/balanceActions"
 
 const { FETCH_BALANCE_DATA_REQUEST: FETCH_DATA_REQUEST,
@@ -7,7 +7,7 @@ const { FETCH_BALANCE_DATA_REQUEST: FETCH_DATA_REQUEST,
     FETCH_BALANCE_DATA_ERROR: FETCH_DATA_ERROR
 } = FETCH_BALANCE;
 
-const {INITIALIZE_BALANCE, UPDATE_BALANCE} = UPDATE;
+const {INITIALIZE_BALANCE, UPDATE_BALANCE_DATA, UPDATE_BALANCE_DATA_2} = UPDATE;
 
 const initialState = {
     status: asyncStatus.INITIAL,
@@ -65,7 +65,7 @@ export default function balanceReducer(state = initialState, action) {
          *          }
          *  }
          */
-        case UPDATE_BALANCE: {
+        case UPDATE_BALANCE_DATA: {
             consoleInfo('UPDATE_BALANCE call')
             console.log(payload)
 
@@ -150,16 +150,55 @@ export default function balanceReducer(state = initialState, action) {
         
         /**
          * payload structure: 
-         * [
-         *      {
-         *          operation: balanceOperation.ADD_AMOUNT | balanceOperation.SUBTRACT_AMOUNT, 
-         *          currency: ---------, 
-         *          amount: -----------,
-         *      }
-         * ]
+            * {
+            *   balanceOperation: ADD_AMOUNT, SUBTRACT_AMOUNT, CREATE_AMOUNT, 
+            *   id: ----, 
+            *   amount: ---, 
+            * }
          */
-        case UPDATE_BALANCE: {
-            
+        case UPDATE_BALANCE_DATA_2: {
+
+            if (payload.balanceOperation == balanceOperations.CREATE_AMOUNT) {
+
+                return {
+                    ...state, 
+                    data: [
+                        ...state.data, 
+                        {
+                            id: payload.id, 
+                            data: {
+                                currency: payload.id, 
+                                amount: payload.amount,
+                            }
+                        }
+                    ]
+                }
+            }
+            else {
+                
+                return {
+                    ...state, 
+                    data: state.data.map( balanceObject => {
+
+                        if (balanceObject.id == payload.id) {
+
+                            return {
+                                ...balanceObject, 
+                                data: {
+                                    ...balanceObject.data, 
+                                    amount: (payload.balanceOperation == balanceOperations.ADD_AMOUNT ?
+                                        balanceObject.data.amount + payload.amount : 
+                                        balanceObject.data.amount - payload.amount
+                                    )
+                                }
+                            }
+                        }
+                        else {
+                            return balanceObject
+                        }
+                    })
+                }
+            }
         }
         
         default : {

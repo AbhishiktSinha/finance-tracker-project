@@ -2,13 +2,10 @@ export const timeframe = Object.freeze({
     WEEK: 'week', 
     MONTH: 'month',
     YEAR: 'year',
-    
-    DAYS_7: '7d', 
-    DAYS_15: '15d',
-    DAYS_30: '30d',
-    MONTHS_3: '3m', 
-    MONTHS_6: '6m', 
-    YEAR_1: '1y',
+
+    WEEK_DURATION: 'week_d', 
+    MONTH_DURATION: 'month_d', 
+    YEAR_DURATION: 'year_d',
 
 })
 
@@ -46,8 +43,14 @@ export const dayJsUnits = Object.freeze({
     MILLISECOND: 'millisecond'
 })
 
-export const balanceActions = Object.freeze({
+export const balanceOperations = Object.freeze({
     ADD_AMOUNT: 'add_amount', 
     SUBTRACT_AMOUNT: 'subtract_amouut',
     CREATE_AMOUNT: 'create_amount'
+})
+
+export const transactionOperations = Object.freeze({
+    MODIFICATION: 'modification', 
+    CREATION: 'creation', 
+    DELETION: 'deletion',
 })

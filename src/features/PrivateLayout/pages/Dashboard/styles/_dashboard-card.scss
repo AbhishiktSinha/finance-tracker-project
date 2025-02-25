@@ -1,4 +1,5 @@
 @use '../../../../../styles/colors' as colors ;
+@use '@app_styles/colors-alt' as colors-alt;
 
 $card-base-width:480px;
 $card-min-width: 300px;
@@ -6,7 +7,10 @@ $card-height: 200px;
 $card-border-radius: 12px;
 $card-padding-block: 12px;
 $card-padding-inline: 12px;
-$card-background-color: colors.$bg-light-grey;
+// $card-background-color: colors.$bg-light-grey;
+$card-background-color-primary: colors-alt.$light-bg-blue-primary;
+$card-background-color-secondary: colors-alt.$light-bg-blue-secondary;
+
 
 
 %dashboard-card-base {
@@ -22,7 +26,7 @@ $card-background-color: colors.$bg-light-grey;
     transition: 0.25s ease all;
     cursor: pointer;
 
-    background-color: $card-background-color;
+    background-color: $card-background-color-primary;
 
     min-height: $card-height;    
     // padding-bottom: 12px;

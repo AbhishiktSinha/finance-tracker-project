@@ -2,15 +2,17 @@ import { useRef, useMemo, useContext } from "react";
 
 import { consoleDebug, consoleError, consoleInfo, consoleSucess } from "../console_styles";
 import ExchangeRateConvertor from "../exchangeRate_api/convertor";
-import { asyncStatus, transactionType } from "../enums";
+import { asyncStatus, transactionOperations, transactionType } from "../enums";
 
 import exchangeRateStatusContext from "../features/PrivateLayout/components/ExchangeRateStatusContext/context";
+import { DayJSUtils } from "../dayjs";
+import latestTransactionContext from "../features/PrivateLayout/pages/Dashboard/context/LatestTransactionContext";
 
 /**## useDynamicAmount
  * Hook that gives a dynamic amount value to be consumed in dashboard transaction cards  
  * This amount value is responsive to changes in: 
  * - initializer
- * - newTransactionData
+ * - latestTransaction
  * - defaultCurrency
  * 
  * 
@@ -20,11 +22,14 @@ import exchangeRateStatusContext from "../features/PrivateLayout/components/Exch
  * @param {string} cardTransactionType 'income' | 'expenditure' | undefined
  * @returns {status, data, error} amount.current
  */
-export default function useDynamicAmount(initializer, defaultCurrencyCode, newTransactionData, cardTransactionType, activeTimeframe) {
+export default function useDynamicAmount(initializer, defaultCurrencyCode, cardTransactionType, activeTimeframe) {
 
     // re-render on status change
     // const status = useExchangeRateAPIStatus(defaultCurrencyCode);
     const {exchangeRateStatus: status} = useContext(exchangeRateStatusContext)
+    const {selectLatestTransaction, getNewAmount} = useContext(latestTransactionContext)
+    
+    const latestTransaction = selectLatestTransaction(cardTransactionType, activeTimeframe, 0);
     
     // don't need a stateful variable,
     // this hook runs as a consequence of render of parent, it does not trigger re-render on its own    
@@ -34,6 +39,12 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
         data: undefined,
         error: ''
     })
+    
+    
+    // #region DEBUG-LOGS
+    consoleDebug(`Latest >> ${cardTransactionType} << Transaction for CURRENT >> ${activeTimeframe} << -----${status} || ${amount.current.data} `);
+    console.log(latestTransaction);
+    // #endregion
     
     /* ------------- UPDATING DATA DURING RENDER --------- */
     
@@ -50,7 +61,7 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
     
     /* recompute amount on every defaultCurrencyCode change for success
         recompute also when the activeTimeframe changes, 
-        consequently changing the initializer without changing newTransactionData */
+        consequently changing the initializer without changing latestTransaction */
     
     // INITIALIZES: ---> AMOUNT.DATA
     useMemo(()=>{
@@ -61,34 +72,25 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, newTr
         }
     }, [defaultCurrencyCode, status, activeTimeframe])
 
-    /* update amount with every distinct newTransactionData
-    newTransactionData is already provided according to the card type
-    for income card only new income transactions within the timeframe are provided
-    for balance card all newly created transactions are provided */
+    /* update amount with every distinct latestTransaction
+    ATTENTION: latestTransaction is already NOT provided according to the card type
+    */
     // UPDATES ----> AMOUNT.DATA, with every distinct newTransaction 
     useMemo(() => {
         // handle initial case
-        if (Boolean(newTransactionData)) {
+        if (Boolean(latestTransaction)) {
 
-            const transactionValue = new ExchangeRateConvertor().
-                convertAmount(defaultCurrencyCode, newTransactionData);
+            const {id: transactionId, transactionOperation: operation, 
+                transactionData, modifiedFields
+            } = latestTransaction;
 
-            const { type } = newTransactionData;
+            const newAmount = getNewAmount(amount.current.data, defaultCurrencyCode, 
+                cardTransactionType, activeTimeframe, 0, latestTransaction);
             
-            // for income & expenditure cards
-            // newTransactionData is of the specific type
-            // increase income or expenditure amount
-            if (Boolean(cardTransactionType)) { 
-                amount.current.data += transactionValue;
-            }
-            // for balance card, no cardTransactionType is provided
-            else { 
-                if (type == transactionType.INCOME) { amount.current.data += transactionValue}
-                else if (type == transactionType.EXPENDITURE) { amount.current.data -= transactionValue }
-            }
+            amount.current.data = newAmount;
         }
 
-    }, [newTransactionData])
+    }, [latestTransaction])
 
 
     return amount.current;

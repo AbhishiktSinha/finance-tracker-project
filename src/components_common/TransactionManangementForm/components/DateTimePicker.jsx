@@ -17,9 +17,9 @@ export default function DateTimePicker({name}) {
         const currentHours = currentTime.hour();
         const currentMinutes = currentTime.minute();
     
+        
         if (selectedDate == currentDate) {
-          /* consoleInfo(`currentHour:${currentHours} \tselectedHour:${selectedHours}\n
-            currentDate: ${currentDate} \tselectedDate: ${selectedDate}`); */
+          // consoleInfo(`currentHour:${currentHours} \tselectedHour:${selectedHours}\n currentDate: ${currentDate} \tselectedDate: ${selectedDate}`);
           return {
             disabledHours: () => {
               return range(currentHours + 1, 24);
@@ -33,7 +33,8 @@ export default function DateTimePicker({name}) {
             },
           };
         }
-    
+                        
+
         return {
           disabledHours: () => {
             return [];

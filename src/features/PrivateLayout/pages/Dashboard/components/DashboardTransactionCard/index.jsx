@@ -17,7 +17,7 @@ create separate jsx for skeleton card to show conditionally based on status
 
 function DashboardTransactionCard({
     rootClassname, id, title, type, orientation, styles,
-    showUI, data, chart, insights,
+    showUI, data, chart, insights
 }) {
 
     const { defaultCurrency, amount, timeframe } = data;

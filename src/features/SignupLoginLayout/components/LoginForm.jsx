@@ -9,6 +9,7 @@ import ActionButton from "../../../components_common/ActionButton";
 import { consoleError, consoleInfo } from "../../../console_styles";
 
 import '../styles/LoginForm.css';
+import ROUTES from "../../../routes.config";
 
 
 export default function LoginForm() {
@@ -21,15 +22,27 @@ export default function LoginForm() {
         console.log(values);
 
         buttonRef.current.setButtonLoading();
-        const {success, message} =  await new FirebaseLogin().emailAndPassword(values) ;
-        
-        if (success) {
-            navigate('../../')
+        try {
+            
+            const {success, message} =  await new FirebaseLogin().emailAndPassword(values) ;
+            
+            if (success) {
+                navigate('../../')
+            }
+            else {
+                buttonRef.current.setButtonActive();
+                consoleError(`Error: ${message}`);
+            }
+            
         }
-        else {
+        catch(e) {
             buttonRef.current.setButtonActive();
-            consoleError(`Error: ${message}`);
+            consoleError(`GOTCHA Error: ${message}`);            
         }
+
+            /* setTimeout(()=>{
+                buttonRef.current.setButtonActive()
+            }, [20000]) */
     })
 
     consoleInfo("LogIn form Rendered");
@@ -72,7 +85,7 @@ export default function LoginForm() {
                 >
                     <ActionButton 
                         htmlType="submit"
-                        type="default"  
+                        type="primary"  
                         className="form-button"  
                         ref={buttonRef}
                     >
@@ -81,7 +94,7 @@ export default function LoginForm() {
                 </Form.Item>   
 
             </Form>
-            <div className="auth-form-redirect">New here? <Link to={'../signup'}>Sign up now!</Link></div>
+            <div className="auth-form-redirect">New here? <Link to={ROUTES.auth.signup}>Sign up now!</Link></div>
         </>
     )
 }

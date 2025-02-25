@@ -54,7 +54,7 @@ function CardDetailsUI ({ transactionObj, openModal }) {
                 ]
             )
 
-        }, [])
+        }, [transactionObj.data])
         
 
         return (
@@ -97,7 +97,7 @@ function CardDetailsUI ({ transactionObj, openModal }) {
 
                 <div
                     className="transaction-card-hor-accent"
-                    style={{ borderColor: tagColor }}>
+                    style={{ borderColor: tagColor, backgroundColor: tagColor }}>
 
                 </div>
 

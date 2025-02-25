@@ -1,18 +1,19 @@
 import { useState, useEffect, useMemo } from 'react'
 
-import { Skeleton } from 'antd';
+import { Skeleton } from '@mui/material';
 
 import AvatarComponent from '../AvatarComponent';
 import QuickActionsIsland from './components/QuickActionsIsland'
+import NavbarActionsContainer from './components/NavbarActionsContainer'
 
 import Logo_main from '../../assets/logo-main.png'
 import Logo_small from '../../assets/logo-small.png'
 import { consoleInfo } from '../../console_styles';
 
-import './styles.css'
+import './styles.scss'
 import { asyncStatus } from '../../enums';
 
-export default function Header({userAuthDetails: {status, user, error}}) {    
+export default function Header({userAuthDetails: {userLoginStatus, user, error}}) {    
 
     // to make header icon dynamically respond to change in width
     const [smallThreshold, setSmallThreshold] = useState(()=>{
@@ -51,42 +52,20 @@ export default function Header({userAuthDetails: {status, user, error}}) {
                     />
             </div>
             {
-                Boolean(status != asyncStatus.ERROR) && (
+                Boolean(userLoginStatus != asyncStatus.ERROR) && (
                     (() => {
 
                         return (
 
                             <div className="header-right-container">
 
-                                {/* quick actions island */}
+                                <NavbarActionsContainer userLoginStatus = {userLoginStatus} />
+
                                 {
-                                    (status == asyncStatus.LOADING || status == asyncStatus.INITIAL) ?
+                                    (userLoginStatus == asyncStatus.LOADING || userLoginStatus == asyncStatus.INITIAL) ? 
                                         (
-                                            /* quickActions island skeleton */
-                                            <Skeleton
-                                                paragraph={false}
-                                                title={true}
-                                                round={true}
-                                                rootClassName='quick-actions-island-skeleton'
-                                                active
-                                            />
-                                        ) :
-                                        (
-                                            <QuickActionsIsland/>
-                                        )
-                                }
-                                {/* avatar  */}
-                                {
-                                    (status == asyncStatus.LOADING || status == asyncStatus.INITIAL) ? 
-                                        (
-                                            <Skeleton
-                                                paragraph={false}
-                                                title={false}
-                                                avatar={true} 
-                                                round
-                                                active
-                                                rootClassName='avatar-skeleton'
-                                            />
+                                            <Skeleton variant='circular' className='avatar-skeleton' />
+                                            
                                         ) : 
                                         (
                                             <AvatarComponent

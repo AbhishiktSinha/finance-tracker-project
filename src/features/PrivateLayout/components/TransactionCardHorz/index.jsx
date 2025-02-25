@@ -1,22 +1,28 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectTag_wrapper } from '../../redux/selectors';
-import { DayJSUtils } from '../../../../dayjs';
+
+import { Button } from 'antd';
+import { DeleteFilled, EditFilled, MoreOutlined, ShareAltOutlined } from '@ant-design/icons';
 
 import TransactionSum from './components/TransactionSum';
 import ConvertedSum from './components/ConvertedSum.jsx';
 
-import './styles.scss'
-import { Button } from 'antd';
-import { DeleteFilled, EditFilled, MoreOutlined, ShareAltOutlined } from '@ant-design/icons';
-import TwoArrowsImage from '@assets/two-arrows.png';
-import { consoleInfo } from '../../../../console_styles/index.js';
+import EditModal from './components/EditModal.jsx';
 import CardDetailsUI from './components/CardDetailsUI.jsx';
 import ModalWrapper from '../../../../components_common/ModalWrapper/index.jsx';
+
+import TwoArrowsImage from '@assets/two-arrows.png';
+
+import { consoleInfo } from '../../../../console_styles/index.js';
+import { DayJSUtils } from '../../../../dayjs';
 import defaults from './defaults.js';
 
+import './styles.scss'
+import DeleteModal from './components/DeleteModal.jsx';
 
-function TransactionCardHorz({transactionObj}) {
+
+function TransactionCardHorz({transactionObj, onEdit, onDelete}) {
 
     /* ---------- modal stuff ---------- */
     const [modalKey, setModalKey] = useState('');
@@ -39,12 +45,20 @@ function TransactionCardHorz({transactionObj}) {
             <ModalWrapper ref={modalRef}>
                 {
                     modalKey == defaults.cardPopoverActions.EDIT && (
-                        <h2>Edit Modal</h2>
+                        // <h2>Edit Modal</h2>
+                        <EditModal 
+                            transactionObject={transactionObj} 
+                            {...(onEdit && {'onEdit': onEdit})}                            
+                        />
                     )
                 }
                 {
                     modalKey == defaults.cardPopoverActions.DELETE && (
-                        <h2>Delete Modal</h2>
+                        // <h2>Delete Modal</h2>
+                        <DeleteModal 
+                            transactionObject={transactionObj}
+                            {...(onDelete && {'onDelete': onDelete})}
+                        />
                     )
                 }
                 {

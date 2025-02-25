@@ -1,0 +1,15 @@
+
+
+.default-currency-modal {
+    
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 24px;
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        row-gap:12px;
+    }
+}

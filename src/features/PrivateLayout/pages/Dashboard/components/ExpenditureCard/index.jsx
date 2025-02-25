@@ -20,24 +20,20 @@ export default function ExpenditureCard() {
     const initializer = useSelector(
         selectTransactionsInitializer_wrapper(transactionType.EXPENDITURE, timeframe)
     )
-    const newTransactionData = useSelector(
-        selectNewTransactionData_wrapper(transactionType.EXPENDITURE, timeframe)
-    );
+
     const defaultCurrency = useSelector(selectDefaultCurrency);
 
 
     consoleInfo(`EXPENDITURE CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
-        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
-        newTransactions: ${JSON.stringify(newTransactionData)}
+        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n        
         timeframe: ${timeframe}`)
 
 
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
-        defaultCurrency.code, 
-        newTransactionData, 
+        defaultCurrency.code,        
         transactionType.EXPENDITURE, 
         timeframe);
 
@@ -57,7 +53,8 @@ export default function ExpenditureCard() {
         return {
             aggregateTransactionAmt: amount, 
             defaultCurrencyCode: defaultCurrency.code, 
-            activeTimeframe: timeframe
+            activeTimeframe: timeframe, 
+            type: transactionType.EXPENDITURE,
         }
     }, [amount, defaultCurrency.code, timeframe])
 

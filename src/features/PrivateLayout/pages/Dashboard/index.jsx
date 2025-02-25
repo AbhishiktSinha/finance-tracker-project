@@ -17,12 +17,15 @@ import ExpenditureCard from './components/ExpenditureCard'
 
 import Skeleton from './components/Skeleton/index.jsx';
 
-import { checkDisplayUI } from '../../utils.js';
-
-import './stlyes.scss';
 import BalanceOverviewChartCard from './components/BalanceOverviewChartCard/index.jsx';
 import DashboardRecentTransactions from './components/RecentTransactionsList/index.jsx'
 import ActiveTimeframeContextProvider from './context/ActiveTimeframeContext/Provider.jsx';
+import LatestTransactionContextProvider from './context/LatestTransactionContext/Provider.jsx';
+
+import SelectTimeframe from './components/SelectTimeframe/index.jsx'
+
+import { checkDisplayUI } from '../../utils.js';
+import './stlyes.scss';
 
 /*TODO: 
 Redux to handle the Dashboard internal state of `dashboardTransactions`
@@ -61,54 +64,64 @@ export default function Dashboard() {
     const TransactionModal = lazy(()=>import('./components/TransactionModal'));
 
     return (
-        <ActiveTimeframeContextProvider >
+        <LatestTransactionContextProvider >
+            
+            <ActiveTimeframeContextProvider >
 
-            <div id="dashboard-page" className='route-page'>
-                <h1 style={{ width: '100%' }}>Dashboard</h1>
+                <div id="dashboard-page" className='route-page'>
 
-                <div className='page-contents-wrapper'>
+                    <div className='page-contents-wrapper'>
 
-                    <div className="dashboard-content-row balance-and-overview-row">
-                        <BalanceCard />
-                        <BalanceOverviewChartCard />
+                        <div className="page-title-bar">
+                            <h1 className="page-title">Dashboard</h1>
+                            <SelectTimeframe />
+                        </div>
+
+                        <div className="dashboard-content-row balance-and-overview-row">
+                            <BalanceCard />
+                            <BalanceOverviewChartCard />
+                        </div>
+
+                        <div className="dashboard-content-row income-expenditure-row">
+                            <IncomeCard />
+                            <ExpenditureCard />
+                        </div>
+
+                        <div className="dashboard-content-row recent-transactions-row">
+                            <DashboardRecentTransactions />
+                        </div>
+
+
+                        <ModalWrapper
+                            ref={transactionModalRef}
+                        >
+                            <Suspense>
+                                <TransactionModal
+                                    modalRef={transactionModalRef}
+                                />
+                            </Suspense>
+
+                            {/* <h2>This is the Modal Content</h2> */}
+
+                        </ModalWrapper>
+
+                        <Button
+                            className='add-txn-button'
+                            size='large'
+                            shape='circle'
+                            type='primary'
+                            icon={<PlusOutlined />}
+                            onClick={handleButtonClick}
+                        >
+                        </Button>
+
                     </div>
-
-                    <div className="dashboard-content-row income-expenditure-row">
-                        <IncomeCard />
-                        <ExpenditureCard />
-                    </div>
-
-                    <div className="dashboard-content-row recent-transactions-row">
-                        <DashboardRecentTransactions />
-                    </div>
-
-
-                    <ModalWrapper
-                        ref={transactionModalRef}
-                    >
-                        {/* <Suspense>
-                            <TransactionModal
-                                modalRef={transactionModalRef}
-                            />
-                        </Suspense> */}
-
-                        <h2>This is the Modal Content</h2>
-
-                    </ModalWrapper>
-
-                    <Button
-                        className='add-txn-button'
-                        size='large'
-                        shape='circle'
-                        icon={<PlusOutlined />}
-                        onClick={handleButtonClick}
-                    >
-                    </Button>
 
                 </div>
 
-            </div>
 
-        </ActiveTimeframeContextProvider>
+            </ActiveTimeframeContextProvider>
+
+        </LatestTransactionContextProvider>
     )
 }

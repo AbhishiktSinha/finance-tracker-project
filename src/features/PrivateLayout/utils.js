@@ -1,8 +1,13 @@
 import currencyToSymbolMap from 'currency-symbol-map/map';
+import currencyCodes from 'currency-codes/data.js'
+
+
 import { changeType, transactionType } from '../../enums';
 
 import { DayJSUtils } from '../../dayjs';
 import { FirestoreCRUD } from '../../firebase/firestore';
+import getSymbolFromCurrency from 'currency-symbol-map';
+
 
 export const getAllCurrencyCodeDropdownOptions = () => {
     return Object.keys(currencyToSymbolMap).map(code => {
@@ -134,4 +139,76 @@ export async function fetchPreviousTimeframeTransactions(uid, activeTimeframe, t
             error: e
         }
     }
+}
+
+
+
+/**## flatten
+ * This function takes a multi-level nested object and creates a flattened clone
+ * 
+ * @param {object} obj 
+ * @returns flattened object clone
+ */
+export function flatten(obj) {
+
+    let flat = {}; 
+
+    for (let key in obj)  {
+
+        if (typeof obj[key] == 'object') {
+
+            const miniObj = flatten(obj[key]);
+            flat = {...flat, ...miniObj};
+        }
+        else {
+            flat[key] = obj[key];
+        }
+    }
+
+    return flat;
+}
+
+
+/**
+ * 
+ * @returns { {code: { code: string, name: string, symbol:string>}} } fiatCurrencies
+ */
+export default function getAllFiatCurrencies() {
+
+    const fiatCurrencies = {};
+
+    currencyCodes.forEach( 
+        ({code, currency}) => {
+
+            fiatCurrencies[code] = {
+                code: code, 
+                name: currency, 
+                symbol: getSymbolFromCurrency(code)
+            }
+        }
+    )
+
+    return fiatCurrencies;    
+}
+
+
+/**
+ * 
+ * @param {Array<object>} list list of identically-structured objects
+ * @param {string} primary_key the primary-key for every object in the list
+ * @returns 
+ */
+export function convertListToObejct(list, primary_key) {
+    const obj = {};
+
+    list.forEach(
+        (listObject)=>{
+
+          const { [primary_key]: key, ...restObject} = listObject
+
+          obj[key]= flatten(restObject);
+        }
+    )
+
+    return obj;
 }

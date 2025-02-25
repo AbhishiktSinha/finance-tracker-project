@@ -1,21 +1,26 @@
-import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
-import ActionButton from '../ActionButton'
-
-import { useDispatch, useSelector } from 'react-redux'
-import { selectDefaultCurrency } from '../../features/PrivateLayout/redux/selectors'
-import { getAllCurrencyCodeDropdownOptions } from '../../features/PrivateLayout/utils'
-import { transactionType } from '../../enums'
-import { selectBalanceData } from '../../features/PrivateLayout/redux/selectors'
-import TagsDropdown from './components/TagsDropdown'
 import React, { useContext, useMemo, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-import './styles.css'
-import DateTimePicker from './components/DateTimePicker'
+import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
 import dayjs from 'dayjs'
-import { updateTransactionThunk } from '../../features/PrivateLayout/redux/thunk'
-import { consoleError, consoleInfo } from '../../console_styles'
+
+import { selectBalanceData } from '../../features/PrivateLayout/redux/selectors'
+import { selectDefaultCurrency } from '../../features/PrivateLayout/redux/selectors'
+
+
 import userAuthContext from '../../features/PrivateLayout/context/userAuthContext'
 import modalContext from '../ModalWrapper/context'
+
+import ActionButton from '../ActionButton'
+import TagsDropdown from './components/TagsDropdown'
+import DateTimePicker from './components/DateTimePicker'
+import TypeAndTags from './components/TypeAndTags.jsx'
+import SelectCurrency from './components/SelectCurrency.jsx'
+
+import { consoleError, consoleInfo } from '../../console_styles'
+import { getAllCurrencyCodeDropdownOptions } from '../../features/PrivateLayout/utils'
+import { transactionType } from '../../enums'
+import './styles.css'
 
 /*BASIC JSX STRUCTURE
 
@@ -82,37 +87,35 @@ export default function TransactionMangementForm({
   // -------------------------------- form submit handler -----
   const onFinish = async (fieldValues) => {
 
+    // change `occurredAt` from a dayjs instance to a timestamp
+    // no one likes to see dayjs when they are expecting a timestamp
+    fieldValues['occurredAt'] = fieldValues.occurredAt.valueOf();
+
+    // change the amount from string to a number
+    fieldValues['amount'] = Number(fieldValues.amount);
+
     // find the modifiedFields
     const modifiedFields = {}; 
-    for (let key in fieldValues) {
+    if (modification) {
       
-      if (defaults[key] != fieldValues[key]) {
-        // modifiedField: previousValue
-        modifiedFields[key] = defaults[key];
+      for (let key in fieldValues) {
+        
+        if (defaults[key] != fieldValues[key]) {
+          // modifiedField: previousValue        
+          modifiedFields[key] = defaults[key];
+        }
       }
     }
 
     try {
 
+      consoleInfo('Form Field Values');
+      console.log(fieldValues);
+
       onFinishCheck && onFinishCheck(fieldValues);
 
       const now = dayjs().valueOf();
-      
-/*       const { occurredAt, amount, ...restValues } = fieldValues;
-      const data = {
 
-        timestamp: {
-          createdAt: now,
-          occurredAt: occurredAt.valueOf(),
-          modifiedAt: now,
-        },
-
-        amount: Number(amount),
-
-        ...restValues,
-
-      }
-      console.log(data); */
       
       actionButtonRef.current.setButtonLoading();
       
@@ -123,16 +126,21 @@ export default function TransactionMangementForm({
     }
     catch (submitError) {
       consoleError(submitError)
+        console.log(submitError);
     }
     finally {
+      console.log(actionButtonRef);
       actionButtonRef.current.setButtonActive();
     }
 
   } 
 
+  const [form] = Form.useForm();
 
   return (
     <Form
+      form={form}
+
       rootClassName={`add-transaction-form ${transactionType}-form`}
       scrollToFirstError
       layout='vertical'
@@ -141,8 +149,33 @@ export default function TransactionMangementForm({
       initialValues={{
         currency: currency.code,
         type: type,
+
+        ...(defaults && {
+          ...defaults, 
+          occurredAt: dayjs(defaults.occurredAt)
+        })
       }}
     >
+      
+      {/* ---------- Transaction ID for MODIFICATION case ------------------- */}
+      {
+        modification && defaults.id && (
+          <Flex rootClassName='transaction-form-row transaction-id-row'>
+            <Form.Item 
+              hidden
+              name="id"
+              label="Transaction ID"
+            >
+              <Input disabled />
+            </Form.Item>
+
+            <p className="transaction-id-container">Transaction Id: 
+              <span className="transaction-id">{defaults.id}</span>
+            </p>
+          </Flex>          
+        )
+      }
+
       {/* ---------------------------------------TITLE------------------------- */}
       <Form.Item
         name='title'
@@ -157,7 +190,7 @@ export default function TransactionMangementForm({
       {/* ----------------------CURRENCY AND AMOUNT------------------------- */}
       <Flex rootClassName='transaction-value-section transaction-form-row'>
         {/* CURRENCY */}
-        <Form.Item
+        {/* <Form.Item
           name='currency'
           label='Currency'
           rules={[
@@ -168,7 +201,8 @@ export default function TransactionMangementForm({
             options={currencyOptions}
             showSearch
           />
-        </Form.Item>
+        </Form.Item> */}
+        <SelectCurrency defaultType={type} form={form}/>
 
         {/* AMOUNT */}
         <Form.Item
@@ -207,13 +241,13 @@ export default function TransactionMangementForm({
               }
             ]}
 
-            {...(type && { disabled: true })}
+            {...(type && !modification && { disabled: true })}
           />
 
         </Form.Item>
 
         {/* TAG */}
-        <TagsDropdown type={type} />
+        <TagsDropdown defaultType={type} form={form}/>
 
       </Flex>
 

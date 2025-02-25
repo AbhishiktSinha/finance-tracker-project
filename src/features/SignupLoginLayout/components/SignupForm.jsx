@@ -9,6 +9,7 @@ import '../styles/SignupForm.css';
 
 import { FirebaseSignUp } from "../../../firebase/auth";
 import ActionButton from '../../../components_common/ActionButton'
+import ROUTES from "../../../routes.config";
 
 export default function SignupForm() {
 
@@ -112,7 +113,7 @@ export default function SignupForm() {
                 >
                     <ActionButton 
                         htmlType="submit"
-                        type="default"  
+                        type="primary"  
                         className="form-button"   
                         ref={buttonRef}                 
                     >
@@ -120,7 +121,7 @@ export default function SignupForm() {
                     </ActionButton>                    
                 </Form.Item>                
             </Form>
-            <div className="auth-form-redirect">Already have an account? <Link to={'../login'}>Log in here.</Link></div>
+            <div className="auth-form-redirect">Already have an account? <Link to={ROUTES.auth.login}>Log in here.</Link></div>
         </>
     )
 }

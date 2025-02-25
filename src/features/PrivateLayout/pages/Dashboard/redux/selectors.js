@@ -15,7 +15,7 @@ export const selectActiveTimeframe = ({dashboardTransactions})=>dashboardTransac
 
 export const selectDashboardTransactionStatus = ({dashboardTransactions: state})=> state.status;
 
-const selectPrimaryTransactionsList = ({primaryTransactions: state})=> state.data;
+export const selectPrimaryTransactionsList = ({primaryTransactions: state})=> state.data;
 
 
 

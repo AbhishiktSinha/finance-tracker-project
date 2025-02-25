@@ -5,6 +5,7 @@ import { consoleDebug, consoleInfo } from '../console_styles';
 import { timeframe as timeframeEnum } from '../enums';
 
 
+dayjs.extend(isoWeek);
 /**
  * Uses the `login_timestamp` as a frame of reference **(now)** for any computations
  */
@@ -92,7 +93,10 @@ export class DayJSUtils {
 
     /**## isWithinTimeframe
      * Function that checks whether the given `timestamp` 
-     * lies within `x` weeks/months/years from the current week/month/year
+     * lies within `x` timeframes from the corresponding timeframe of `now`  
+     * 
+     * i.e: if timestamp lies within the ±x <sup>th</sup> `month` from current `month`  
+     * or:  if timestamp lies within the ±x th `month_duration` from the current `month_duration`
      * 
      * @param {string} timeframe week | month | year are the only accepted values
      * @param {number} timestamp millisecond value
@@ -103,28 +107,61 @@ export class DayJSUtils {
         const now = dayjs(this.getLoginTimeStamp());
         const target = dayjs(timestamp);
 
-        if (timeframe == timeframeEnum.YEAR) {
+        /* ------ standard timeframe: current year, month, week ------- */
+        if ( !timeframe.endsWith('_d')) {
 
-            return (target.year() == (now.year() + difference) );
-        }
-        else {
 
-            // check month or isoWeek if timestamp lies in the current year
-            if (target.year() == now.year()) {
-
-                if (timeframe == timeframeEnum.MONTH) {
-
-                    return (target.month() == ( now.month() + difference ))
-                }
-                else if (timeframe == timeframeEnum.WEEK) {
-
-                    return (target.isoWeek() == ( now.isoWeek() + difference ))
-                }
+            if (timeframe == timeframeEnum.YEAR) {
+    
+                return (target.year() == (now.year() + difference) );
             }
             else {
-                return false;
+    
+                // check month or isoWeek if timestamp lies in the current year
+                if (target.year() == now.year()) {
+    
+                    if (timeframe == timeframeEnum.MONTH) {
+    
+                        return (target.month() == ( now.month() + difference ))
+                    }
+                    else if (timeframe == timeframeEnum.WEEK) {
+    
+                        return (target.isoWeek() == ( now.isoWeek() + difference ))
+                    }
+                }
+                else {
+                    return false;
+                }
             }
+            
         }
+
+        /* ----------- rolling duration timeframes: year_d, month_d, week_d --------- */
+            else if ( timeframe.endsWith('_d') ) {
+
+                const duration = timeframe.substring(0, timeframe.indexOf('_'));
+                const x = Math.abs(difference);
+                
+                let leftLimit, rightLimit; 
+                
+                if (difference < 0) {
+
+                    rightLimit = now.subtract(x, duration).endOf('day');
+                    leftLimit = now.subtract(x - 1, duration).startOf('day');
+                }
+                else if (difference > 0) {
+                    rightLimit = now.add(x, duration).endOf('day');
+                    leftLimit = now.add(x - 1, duration).startOf('day');
+                }
+                else {
+                    rightLimit = now.endOf('day'); // now is the moment of login
+                    leftLimit = now.subtract(1, duration).startOf('day');
+                }
+
+                return ( timestamp >= leftLimit.valueOf() && timestamp <= rightLimit.valueOf());
+
+            }
+
     }
 
 

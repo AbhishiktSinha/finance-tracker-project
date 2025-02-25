@@ -6,11 +6,13 @@ import CardDetailsSkeleton from "../CardDetailsSkeleton";
 import { useSelector } from "react-redux";
 import userAuthContext from "../../../../context/userAuthContext";
 import { DashOutlined, FallOutlined, RiseOutlined } from "@ant-design/icons";
+import useSimpleInsights from "../../../../../../custom_hooks/useSimpleInsights";
 
 export default function InsightChip({ aggregateTransactionAmt, activeTimeframe, 
     defaultCurrencyCode, type }) {
           
-        const newTransactionData = useSelector( ({newTransaction})=> {
+        // #region DEPRECATED useInsightState
+        /* const newTransactionData = useSelector( ({newTransaction})=> {
 
             if ( Boolean(newTransaction.id) ) {
 
@@ -23,20 +25,12 @@ export default function InsightChip({ aggregateTransactionAmt, activeTimeframe,
 
         const {status, 
             data,
-            error} = useInsightState( activeTimeframe, defaultCurrencyCode, newTransactionData, type)
-
+            error} = useInsightState( activeT imeframe, defaultCurrencyCode, newTransactionData, type) */
+        // #endregion
         
-        /* WARNING: 
-            Directly mutating stateful values is a bad practice, 
-            direct mutation of data recieved from any hook (even custom hooks) should be avoided
-            
-            // DATA IS RELATIVE IN CASE OF BALANCE CARD
-            if (type = transactionType.ALL) {
-                
-                // current_balance + change_during_previous_timeframe
-                data.amount = aggregateTransactionAmt + data.amount;
-            } 
-        */
+        /* INSIGHTS ARE NOT USED FOR BALANCE CARD, FOR NOW. */
+
+        const {status, data, error} = useSimpleInsights(type, activeTimeframe, defaultCurrencyCode)
         
 
         if (status == asyncStatus.INITIAL || status == asyncStatus.LOADING) {

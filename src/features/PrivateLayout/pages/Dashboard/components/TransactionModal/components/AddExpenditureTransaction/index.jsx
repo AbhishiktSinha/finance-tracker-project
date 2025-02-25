@@ -4,7 +4,7 @@ import { selectBalanceData } from "../../../../../../redux/selectors";
 import { transactionType } from "../../../../../../../../enums";
 import { consoleDebug } from "../../../../../../../../console_styles";
 
-export default function AddExpenditureTransaction({onFinishDispatch}) {
+export default function AddExpenditureTransaction({onFinishAction}) {
 
     const balanceData = useSelector(selectBalanceData);
 
@@ -33,7 +33,7 @@ export default function AddExpenditureTransaction({onFinishDispatch}) {
     return (
         <TransactionMangementForm 
             transactionType={transactionType.EXPENDITURE}
-            onFinishDispatch={onFinishDispatch}
+            onFinishAction={onFinishAction}
             onFinishCheck={onFinishCheck}
         />
     )

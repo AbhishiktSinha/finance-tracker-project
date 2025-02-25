@@ -1,23 +1,59 @@
 @use '@dashboard_styles/dashboard-card';
 @use '@app_styles/fonts' as fonts;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/colors' as colors;
 
 .dashboard-recent-transactions-container {
     width: 100%;
     min-height: 480px;
 
-    background-color: dashboard-card.$card-background-color;
+    background-color: dashboard-card.$card-background-color-primary;
+    // background-color: transparent;
 
     border-radius: dashboard-card.$card-border-radius;
+    // border: 1px solid colors.$grey;
 
     padding-block: dashboard-card.$card-padding-block;
     padding-inline: dashboard-card.$card-padding-inline;
 
     display:flex;
     flex-direction: column;
+    align-items: center;
     row-gap: 16px;
 
     .section-title {
         font-size: fonts.$title-large-size;
         margin-bottom: 12px !important;
+        width: 100%;
+    }
+    
+    & .transaction-card-hor  {
+
+        // background-color: transparent;
+        // border: 1px solid colors.$light-grey;
+        // border: 1px solid colors.$white;
+        // background-color: dashboard-card.$card-background-color-primary;
+        background-color: colors.$white;
+
+        
+    }
+
+    & .transaction-card-hor:hover {
+        box-shadow: 0 0 3px 2px colors-alt.$light-shadow;
+    }
+
+    .no-transactions-container {
+        margin-top: 100px !important;
+        max-width: 240px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 12px;
+
+        text-align: center;
+        >p {
+            color: colors.$text-dark-tertiary;
+        }
     }
 }

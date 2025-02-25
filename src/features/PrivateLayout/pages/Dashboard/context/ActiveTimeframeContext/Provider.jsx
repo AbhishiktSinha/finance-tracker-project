@@ -7,13 +7,8 @@ export default function ActiveTimeframeContextProvider({children}) {
 
     const [activeTimeframe, setActiveTimeframe] = useState(defaults.activeTimeframe);
 
-    function changeActiveTimeframe(newTimeframe) {
-
-        // is a valid timeframe enum
-        if (timeframeEnum[newTimeframe] != undefined) {
-
-            setActiveTimeframe(newTimeframe)
-        }
+    function changeActiveTimeframe(newTimeframe) {                
+        setActiveTimeframe(newTimeframe)
     }
 
     return (

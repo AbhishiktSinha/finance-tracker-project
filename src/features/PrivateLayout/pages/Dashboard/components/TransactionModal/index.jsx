@@ -4,14 +4,18 @@ import { Tabs } from "antd";
 // import AddIncomeTransaction from './components/AddIncomeTransaction'
 
 import "./styles.css"
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useContext, useMemo } from "react";
 import { DayJSUtils } from "../../../../../../dayjs"; 
 import { UDPATE_PRIMARY_TRANSACTIONS } from "../../../../redux/actions/primaryTransactionsActions";
-import { timeframe, transactionType } from "../../../../../../enums";
+import { timeframe, transactionOperations, transactionType } from "../../../../../../enums";
 import { consoleDebug, consoleError, consoleInfo } from "../../../../../../console_styles";
 import dayjs from "dayjs";
+import latestTransactionContext from "../../context/LatestTransactionContext";
+import { useDispatch } from "react-redux";
+import { createTransactionThunk } from "../../../../redux/thunk";
+import userAuthContext from "../../../../context/userAuthContext";
 
-export default function TransactionModal({modalRef}) {
+export default function CreateTransactionModal({modalRef}) {
     
     
     const onFinshDispatch = (dispatch, transactionData)=>{
@@ -35,6 +39,27 @@ export default function TransactionModal({modalRef}) {
         
     }
 
+    const {latestTransaction, setLatestTransaction} = useContext(latestTransactionContext)
+    const {user: {uid}} = useContext(userAuthContext);
+    const dispatch = useDispatch();
+
+    async function onFinishAction(formFields, modifiedFields) {
+
+        const latest_transaction_update = (transactionObject)=>{
+
+            consoleInfo(`updating latest transaction [CREATION] ---> ${transactionObject.data.title}`)
+            
+            setLatestTransaction({
+                id: transactionObject.id, 
+                transactionOperation: transactionOperations.CREATION, 
+                transactionData: transactionObject.data
+            })
+        }
+
+        await dispatch(createTransactionThunk(uid, formFields, modifiedFields, latest_transaction_update))
+    }
+
+
     const AddIncomeTransaction = lazy(()=>import('./components/AddIncomeTransaction'));
     const AddExpenditureTransaction = lazy(()=>import('./components/AddExpenditureTransaction'));
 
@@ -44,12 +69,12 @@ export default function TransactionModal({modalRef}) {
                 {
                     key: transactionType.INCOME,
                     label: 'Income',
-                    children: <Suspense><AddIncomeTransaction onFinshDispatch={onFinshDispatch}/></Suspense>
+                    children: <Suspense><AddIncomeTransaction onFinishAction={onFinishAction}/></Suspense>
                 }, 
                 {
                     key: transactionType.EXPENDITURE,
                     label: 'Expenditure',
-                    children: <Suspense><AddExpenditureTransaction onFinishDispatch={onFinshDispatch}/></Suspense>
+                    children: <Suspense><AddExpenditureTransaction onFinishAction={onFinishAction}/></Suspense>
                 }
             ]
         )

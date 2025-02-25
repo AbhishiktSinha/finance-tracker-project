@@ -12,7 +12,8 @@ export default defineConfig({
 
       '@dashboard_styles': '/src/features/PrivateLayout/pages/Dashboard/styles',
       '@app_styles': '/src/styles',
-      '@assets':'/assets'
+      '@assets':'/assets',
+      '@components_common':'/src/components_common'
     }
-  }
+  },   
 })

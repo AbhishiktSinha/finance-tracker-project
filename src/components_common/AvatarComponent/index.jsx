@@ -35,12 +35,12 @@ export default function AvatarComponent({ size, shape, displayName, photoUrl, em
 
                 <div className="user-actions-container">
                     <Button 
-                        type="default" 
+                        type="primary" 
                         content="Log Out"
                         onClick={logOutUser}
                     >Log Out
                     </Button>
-                    <Button type="default" shape="circle"><SettingFilled /></Button>
+                    <Button type="outlined" shape="circle"><SettingFilled /></Button>
                 </div>
             </div>
         )

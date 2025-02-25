@@ -4,12 +4,12 @@ import Header from '../../components_common/Header'
 import './sytles.css'
 import { asyncStatus } from '../../enums'
 
-export default function SignupLogin() {
+export default function SignupLoginLayout() {
     
     return (
         <div id="auth_page">
             <Header userAuthDetails={{
-                status: asyncStatus.ERROR
+                userLoginStatus: asyncStatus.ERROR
             }}/>
             <div id="main">
 

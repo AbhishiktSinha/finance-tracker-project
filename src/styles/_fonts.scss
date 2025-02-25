@@ -1,13 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
 
 
+$title-default-size: 22px;
+$title-large-size: 28px;
+$title-huge-size: 42px;
 
-$title-default-size: 18px;
-$title-large-size: 24px;
-
-$text-large-size: 16px;
-$text-default-size: 14px;
-$text-small-size: 12px;
+$text-large-size: 18px;
+$text-default-size: 16px;
+$text-small-size: 14px;
 
 
 
@@ -15,3 +16,4 @@ $text-small-size: 12px;
 
 $default-font-family: 'Roboto';
 $default-mono-font-family: 'Noto Sans Mono';
+$stylised-font-family: 'Quicksand';

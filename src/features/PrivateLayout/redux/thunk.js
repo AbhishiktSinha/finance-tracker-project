@@ -1,10 +1,10 @@
 import { FETCH_USERDOC, UPDATE_USERDOC } from './actions/userDocActions'
 import { FETCH_BALANCE, UPDATE_BALANCE } from './actions/balanceActions';
-import { FETCH_PRIMARY_TRANSACTIONS } from './actions/primaryTransactionsActions';
+import { FETCH_PRIMARY_TRANSACTIONS, UDPATE_PRIMARY_TRANSACTIONS } from './actions/primaryTransactionsActions';
 import { UPDATE_NEW_TRANSACTION } from './actions/newTransactionActions'
 import { FETCH_TAG, UPDATE_TAG } from './actions/tagActions';
 
-import { selectDefaultCurrency } from './selectors';
+import { selectDefaultCurrency, selectUserSettings } from './selectors';
 
 import { FirestoreCRUD } from '../../../firebase/firestore';
 import { consoleDebug, consoleError, consoleInfo, consoleSucess } from '../../../console_styles';
@@ -18,9 +18,13 @@ import PrimaryTransactionsError from '../../../custom_errors/PrimaryTransactions
 import endpoints from '../../../network/endpoints';
 import request from '../../../network/request';
 import { rules } from 'eslint-plugin-react';
-import { dayJsUnits, transactionType } from '../../../enums';
+import { balanceOperations, dayJsUnits, timeframe, transactionType } from '../../../enums';
 import { batch } from 'react-redux';
 import { DayJSUtils } from '../../../dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { flushSync } from 'react-dom';
+import defaults from '../defaults';
+import { selectPrimaryTransactionsList, selectTransactionsInitializer_wrapper } from '../pages/Dashboard/redux/selectors';
 
 export const fetchUserDocThunk = (uid) => {
 
@@ -83,7 +87,7 @@ export const updateOnboardingDataThunk = function (uid, data) {
             ])
 
             dispatch({
-                type: UPDATE_BALANCE.UPDATE_BALANCE,
+                type: UPDATE_BALANCE.UPDATE_BALANCE_DATA,
                 payload: {
                     id: currency, 
                     data: {
@@ -270,6 +274,8 @@ export const fetchTagsThunk = (uid)=>{
  * @returns thunk to fetch the essential stateful data from the Firestore
  */
 export const stateInitializerThunk = (uid)=> {
+
+    consoleDebug('----------------- initializer THUNK fired 🚀--------------')
     
     async function fetchUserDoc() {
         try {
@@ -431,6 +437,41 @@ export const createTagThunk = (uid, data)=>{
 }
 
 
+export const changeDefaultCurrencyThunk = (uid, data)=> {
+
+    const { UPDATE_USERDOC_SETTINGS } = UPDATE_USERDOC;
+
+    return async function thunkFunction(dispatch, getState) {
+        
+        const currentSettings = selectUserSettings(getState());
+
+        try {
+            
+            await new FirestoreCRUD().updateDocData(
+                `users/${uid}`, 
+                {
+                    'settings.defaultCurrency': data
+                }
+            )
+
+            dispatch({
+                type: UPDATE_USERDOC_SETTINGS, 
+                payload: {
+                    defaultCurrency: data
+                }
+            })
+        }
+        catch(e) {
+            consoleError(e);
+            console.info(e);
+            return e;
+        }
+
+    }
+}
+
+
+
 /**THUNK to handle creating / updating financial transactions  
  * This thunk uses Firestore Transactions to read data from `balance` and `transactions` collections and udpates data accordingly  
  *   
@@ -448,7 +489,7 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
 
     // RECIEVED DATA DOESN'T REQUIRE FURTHER MODIFICATION
 
-    const {UPDATE_BALANCE: UPDATE_BALANCE_DATA} = UPDATE_BALANCE;
+    const {UPDATE_BALANCE_DATA: UPDATE_BALANCE_DATA} = UPDATE_BALANCE;
 
     const payloadObject = {};
     
@@ -597,9 +638,641 @@ export const updateTransactionThunk = (uid, data, dispatchCallback)=>{
 }
 
 
+// TODO: ------->>> newTransaction <<<----------- //
+/* ------------- separate : createTransactionThunk & modifyTransactionThunk ------------ */
+
+export const createTransactionThunk = (uid, formFields, modifiedFields, extraWork)=>{
+
+    const { INITIALIZE_BALANCE, UPDATE_BALANCE_DATA, UPDATE_BALANCE_DATA_2 } = UPDATE_BALANCE;
+    const { UPDATE_PRIMARY_TRANSACTION, ADD_PRIMARY_TRANSACTION } = UDPATE_PRIMARY_TRANSACTIONS;
+
+    const now = dayjs().valueOf();
+
+    return async function thunkFunction(dispatch, getState) {
+
+        const getTransactionData = ()=>{
+            
+            const transactionData = { ...formFields };
+            delete transactionData['occurredAt'];
+
+            transactionData.timestamp = {
+                createdAt: now, 
+                modifiedAt: now, 
+                occurredAt: formFields.occurredAt
+            }
+            return transactionData;
+        }
+
+        const getTransactionId = ()=>{
+            return new FirestoreCRUD().getRandomDocID(`users/${uid}/transactions`);
+        }
+        
+        //#region DEPRECATED
+        /* const payloadObj = {
+            transactionPayload: null, 
+            balancePayload: null, 
+        } */
+        //#endregion
 
 
-export const transactionManagementThunk = (uid, modification, formFields, modifiedFields)=> {
+        const actionObject = {
+            transactionActionObject: null, 
+            balanceActionObject: null
+        }
+        
+        const transactionData = getTransactionData();
+        const transactionId = getTransactionId();
 
+        /* -------------- FIRESTORE UDPATE ====== firestore transaction ===== ---------- */
+        try {
+            
+            await new FirestoreCRUD().firestoreTransaction([
+                
+                /* ---------- financial-transaction -------- */
+                {
+                    docPathDependencies: [ `users/${uid}/transactions/${transactionId}`], 
+
+                    transactionConditionFunction(docSnapDependencies) {
+
+                        const [transactionDocSnap, ...rest] = docSnapDependencies;
+
+                        // creation case ---> transaction doc does not exist
+
+                        
+                        // if the created transaction qualifies as a primary_transaction
+                        if (DayJSUtils.isWithinTimeframe( defaults.primaryTransactionsTimeframe, 
+                            transactionData.timestamp.occurredAt, 0 )) {
+
+                                
+                                actionObject.transactionActionObject = {
+                                    type: ADD_PRIMARY_TRANSACTION, 
+                                    payload: {
+                                        id: transactionId, 
+                                        data: transactionData
+                                    }
+                            }
+                        }
+                        
+                        return {
+                            commit: true, 
+                            operation: 'set', 
+                            data: transactionData, 
+                            targetDocPath: `users/${uid}/transactions/${transactionId}`
+                        }
+                    }
+                }, 
+
+                /* --------------- balance update ---------- */
+                {
+                    docPathDependencies: [`users/${uid}/balance/${transactionData.currency}`], 
+                    
+                    transactionConditionFunction(docSnapDependencies) {
+                        
+                        const [balanceDocSnap, ...rest] = docSnapDependencies;
+
+                        // ----------------------- balance doc EXISTS
+                        if (balanceDocSnap.exists()) {
+                            // update balance case
+
+                            const balanceData = balanceDocSnap.data();
+
+                            const currentAmount = balanceData.amount;
+                            const newAmount = transactionData.type == transactionType.INCOME ? 
+                                currentAmount + transactionData.amount : 
+                                currentAmount - transactionData.amount ;
+
+                            //#region DEPRECATED
+                            /* payloadObj.balancePayload = {
+                                
+                                ...(transactionData.type == transactionType.INCOME ? 
+                                    {balanceAction: balanceOperations.ADD_AMOUNT} : 
+                                    {balanceAction: balanceOperations.SUBTRACT_AMOUNT}
+                                ), 
+                                amount: transactionData.amount
+                            } */
+                           //#endregion
+
+                            actionObject.balanceActionObject = {
+                                type: UPDATE_BALANCE_DATA_2, 
+                                payload: {
+                                    id: transactionData.currency, 
+
+                                    balanceOperation: (transactionData.type == transactionType.INCOME ?
+                                        balanceOperations.ADD_AMOUNT :
+                                        balanceOperations.SUBTRACT_AMOUNT
+                                    ), 
+
+                                    amount: transactionData.amount
+                                }
+                            }
+
+                            return {
+                                commit: true, 
+                                operation: 'set', 
+                                option: {merge: true}, 
+                                data: {amount: newAmount},
+                                targetDocPath: `users/${uid}/balance/${transactionData.currency}`
+                            }
+                        }
+                        // --------------------- balance doc DOES NOT EXIST
+                        else {
+
+                            // #region DEPRECATED
+                            /* payloadObj.balancePayload = {
+                                balanceAction: balanceOperations.CREATE_AMOUNT, 
+                                amount: transactionData.amount
+                            } */
+                            //#endregion
+
+                            // DON'T ACCEPT expenditure transaction for non-existent balance doc
+                            if (transactionData.type == transactionType.EXPENDITURE) {
+                                throw new Error(`Balance Does not exist for ${transactionData.currency}, Expenditure not possible`)
+                            }
+
+                            actionObject.balanceActionObject = {
+                                type: UPDATE_BALANCE_DATA_2,
+                                payload: {
+                                    id: transactionData.currency,
+
+                                    balanceOperation: balanceOperations.CREATE_AMOUNT,
+
+                                    amount: transactionData.amount
+                                }
+                            }
+
+                            return {
+                                commit: true,
+                                operation: 'set',
+                                data: {
+                                    currency: transactionData.currency,
+                                    amount: transactionData.amount,
+                                },
+                                targetDocPath: `users/${uid}/balance/${transactionData.currency}`,
+                            }
+                        }
+                    }
+                }
+            ])
+
+            // #region DEPRECATED
+            /* dispatch({
+                type: UPDATE_BALANCE_DATA, 
+                payload: payloadObj.balancePayload
+            })
+            dispatch({
+                type: UPDATE_PRIMARY_TRANSACTION, 
+                payload: payloadObj.transactionPayload, 
+            }) */
+           // #endregion
+
+           flushSync(()=>{
+
+                // created transaction may or may not be a primary transaction
+               actionObject.transactionActionObject && dispatch(actionObject.transactionActionObject);
+               dispatch(actionObject.balanceActionObject);
+               extraWork && extraWork({
+                id: transactionId, 
+                data: transactionData
+               })
+           })
+           
+
+        }
+        catch(e) {
+            consoleError(`WHOOPSIE! Your transaction was not saved. Your data is lost lol.`);
+            console.log(e);
+            throw e;
+        }
+    }
+}
+
+
+export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWork)=>{
+
+    // action types extraction
+    const {INITIALIZE_BALANCE, UPDATE_BALANCE_DATA_2} = UPDATE_BALANCE; 
+    const {UPDATE_PRIMARY_TRANSACTION, REMOVE_PRIMARY_TRANSACTION} = UDPATE_PRIMARY_TRANSACTIONS;
+
+    const now = dayjs().valueOf();
     
+    return async function thunkFunction(dispatch, getState) {
+
+        const getTransactionId = ()=> formFields.id
+        const getModifiedData = ()=>{
+            
+            const modifiedData = {};
+            modifiedData.timestamp = {
+                modifiedAt: now
+            }
+
+            for (let key in modifiedFields) {
+                
+                if (key == 'occurredAt') {
+                    modifiedData.timestamp.occurredAt = formFields.occurredAt;
+                }
+                else {
+                    modifiedData[key] = formFields[key]
+                }
+            }
+
+            return modifiedData;
+
+        }
+        const getTransactionData = ()=>{
+            const transactionData = { ...formFields };
+            delete transactionData['occurredAt'];
+
+            transactionData.timestamp = {
+                createdAt: now, 
+                modifiedAt: now, 
+                occurredAt: formFields.occurredAt
+            }
+            return transactionData;
+        }
+        
+
+        const modifiedData = getModifiedData(); 
+        const transactionId = getTransactionId();
+        const transactionData = getTransactionData();
+
+        const previous_currency = modifiedFields.currency || transactionData.currency;
+        const new_currency = transactionData.currency;
+
+        const actionObject = {
+            transactionActionObject : null, 
+            balanceActionObjectList: [], 
+        }
+
+        /* ------------ RUNNING FIRESTORE TRANSACTION --------- */
+        // #region ATTENTION
+        /* 
+        FIXME:
+        prev-currency-balance & new-currency-balance
+        need to be modified in application state 
+        --> UPDATE_BALANCE_DATA, should take an array as payload
+        --> payload: [ {balanceAction, amount, id}, {balanceAction, amount, id}]
+
+        - each firestore-transaction-creator-object is designed to target just one document
+        - we need the payload array made in payloadObj.balanceData
+        - if currency is changed, we will need
+        - FS-transaction-creator-object for prev-curr-balance
+        - FS-transaction-creator-object for new-curr-balance
+
+        We will have to split initializing the payloadObj.balanceData 
+        accross these 2 FS-transaction-creator-objects
+        */
+       //#endregion
+
+        try { 
+
+            // to hold intermediate state of targetDocs
+            const pendingUpdates = {};
+
+            const updateBalance = Boolean(modifiedFields.currency) ||
+                Boolean(modifiedFields.amount) ||
+                Boolean(modifiedFields.type);
+
+            await new FirestoreCRUD().firestoreTransaction([
+
+                /* ----------- financial-transaction -------- */
+                {
+                    docPathDependencies: [`users/${uid}/transactions/${transactionId}`], 
+                    
+                    transactionConditionFunction(docSnapDependencies) {
+
+                        /* ----------- transaction already exists ------------ */
+
+                        // if transaction is modified -> out of the current year-duration 
+                        // transaction is no longer a valid primary transaction
+                        if ( !DayJSUtils.isWithinTimeframe( defaults.primaryTransactionsTimeframe, 
+                            transactionData.timestamp.occurredAt, 0 )) {
+
+                                consoleDebug(`${transactionData.title} -- no longer Primary Transaction`);
+                                
+                                actionObject.transactionActionObject = {
+
+                                    type: REMOVE_PRIMARY_TRANSACTION, 
+                                    payload: {
+                                        id: transactionId
+                                    }
+                                }
+
+                        }
+                        else {
+
+                            actionObject.transactionActionObject = {
+                                type: UPDATE_PRIMARY_TRANSACTION, 
+                                payload: {
+                                    id: transactionId, 
+                                    modifiedData: modifiedData                                
+                                }
+                            }
+                        }
+
+                        return {
+                            commit: true, 
+                            operation: 'set', 
+                            option: {merge: true}, 
+                            data: modifiedData, 
+                            targetDocPath: `users/${uid}/transactions/${transactionId}`
+                        }
+                    }
+                },
+
+                /* ------------------------- updating balance --------------------- */
+                
+                ...(updateBalance ? 
+                    [
+                        /* -------------- prev currency balance ------------ */
+                        {
+                            docPathDependencies: [
+                                `users/${uid}/balance/${previous_currency}`, 
+                                `users/${uid}/transactions/${transactionId}`
+                            ], 
+
+                            transactionConditionFunction(docSnapDependencies) {
+
+                                const [
+                                    balanceDocSnap, 
+                                    transactionDocSnap
+                                ] = docSnapDependencies;
+
+                                // prev currency balance exists already.
+                                const balanceDocData = balanceDocSnap.data();
+                                const transactionDocData = transactionDocSnap.data();
+                                
+                                // #region ESSENTIAL VARIABLES
+                                const balance_prevAmount = balanceDocData.amount;
+                                const transaction_prevAmount = transactionDocData.amount;                                 
+                                const transaction_prevType = transactionDocData.type;
+                                // #endregion
+                                
+                                const balance_newAmount = transaction_prevType == transactionType.INCOME ?
+                                    balance_prevAmount - transaction_prevAmount :
+                                    balance_prevAmount + transaction_prevAmount;
+                                
+                                const targetDocPath = `users/${uid}/balance/${previous_currency}`
+                                const operationManifest = {
+                                    commit: true, 
+                                    operation: 'update', 
+                                    data: {amount: balance_newAmount},                                     
+                                }
+
+                                // update the --- pendingUpdates ---
+                                pendingUpdates[targetDocPath] = operationManifest;
+
+                                // [APPLICATION STATE] ----- remove contribution of transaction_prevAmount ---
+                                actionObject.balanceActionObjectList.push({
+                                    type: UPDATE_BALANCE_DATA_2, 
+                                    payload: {
+                                        balanceOperation: transaction_prevType == transactionType.INCOME ?
+                                            balanceOperations.SUBTRACT_AMOUNT : balanceOperations.ADD_AMOUNT, 
+                                        
+                                        id: previous_currency, 
+                                        amount: transaction_prevAmount,
+                                    }
+                                })
+
+                                // return the writeManifest
+                                return {
+                                    ...operationManifest, 
+                                    targetDocPath: targetDocPath
+                                }
+                                
+                            }
+                        }, 
+
+                        /* -------------- new currency balance ------------- */
+                        {
+                            docPathDependencies: [
+                                `users/${uid}/balance/${new_currency}`
+                            ], 
+
+                            transactionConditionFunction(docSnapDependencies) {
+
+                                const [balanceDocSnap] = docSnapDependencies;
+
+                                // ----- balance doc snap EXISTS ----- 
+                                if (balanceDocSnap.exists() ) {
+
+                                    const balanceDocData = balanceDocSnap.data();
+                                    const balanceDocPath = balanceDocSnap.ref.path;
+
+                                    // #region ESSENTIAL VARIABLES
+                                    // if there is a pending update to the amount of this balance doc
+                                    const balance_prevAmount = pendingUpdates[balanceDocPath]?.data?.amount || balanceDocData.amount;                                    
+                                    const transaction_newAmount = transactionData.amount; 
+                                    const transaction_newType = transactionData.type;
+                                    // #endregion
+
+                                    const balance_newAmount = transaction_newType == transactionType.INCOME ?
+                                        balance_prevAmount + transaction_newAmount :
+                                        balance_prevAmount - transaction_newAmount
+                                    ;
+
+                                    const targetDocPath = balanceDocPath; 
+                                    const operationManifest = {
+                                        commit: true, 
+                                        operation: 'update', 
+                                        data: {amount: balance_newAmount}, 
+                                    }
+
+                                    pendingUpdates[targetDocPath] = operationManifest;
+
+                                    // [APP STATE] ---- include contribution of the transaction_newAmount
+                                    actionObject.balanceActionObjectList.push({
+                                        type: UPDATE_BALANCE_DATA_2, 
+                                        
+                                        payload: {
+                                            balanceOperation: transaction_newType == transactionType.INCOME ?
+                                                balanceOperations.ADD_AMOUNT : balanceOperations.SUBTRACT_AMOUNT,
+                                            
+                                            id: new_currency, 
+                                            amount: transaction_newAmount
+                                        }
+                                    })
+
+                                    return {
+                                        ...operationManifest, 
+                                        targetDocPath: targetDocPath,
+                                    }
+                                }
+                                /* ------- balance doc snap DOES NOT EXIST ---- */
+                                else {
+
+                                    // creation of new doc in balance sub-C with transaction_newAmount
+                                    // error if transaction type is EXPENDITURE --> can't deduct from 0
+
+                                    const transaction_newType = transactionData.type;
+                                    const transaction_newAmount = transactionData.amount; 
+                                    // const balance_prevAmount = 0
+
+                                    if (transaction_newType == transactionType.EXPENDITURE) {
+                                        throw new BalanceError(`Balance not available for ${new_currency} Expenditure Transaction`);
+                                    }
+
+                                    const targetDocPath = balanceDocSnap.ref.path;
+                                    const operationManifest = {
+                                        commit: true, 
+                                        operation: 'set', 
+                                        data: {
+                                            currency: new_currency, 
+                                            amount: transaction_newAmount
+                                        }
+                                    }
+
+                                    pendingUpdates[targetDocPath] = operationManifest;
+
+                                    // [APP STATE] --- create balance object from transaction_newAmount
+                                    actionObject.balanceActionObjectList.push({
+                                        type: UPDATE_BALANCE_DATA_2, 
+                                        payload: {
+                                            balanceOperation: balanceOperations.CREATE_AMOUNT, 
+                                            id: new_currency, 
+                                            amount: transaction_newAmount
+                                        }
+                                    })
+
+                                    return {
+                                        ...operationManifest, 
+                                        targetDocPath: targetDocPath
+                                    }
+                                }
+                            }
+                        }
+                    ] :
+                    []
+                )
+            ])
+
+            flushSync(()=>{
+
+                for (let balanceActionObejct of actionObject.balanceActionObjectList) {                
+                    dispatch(balanceActionObejct);
+                }
+    
+                dispatch(actionObject.transactionActionObject);
+
+                extraWork && extraWork({
+                    id: transactionId, 
+                    data: transactionData, 
+                    modifiedFields: modifiedFields
+                })
+            })
+
+        }
+        catch(e) {
+            consoleError(e.message)
+            throw e;            
+        }
+    }
+}
+
+
+export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
+
+    const { REMOVE_PRIMARY_TRANSACTION } = UDPATE_PRIMARY_TRANSACTIONS;
+    const { UPDATE_BALANCE_DATA_2 } = UPDATE_BALANCE;
+
+    return async function thunkFunction(dispatch, getState) {
+
+        const { id: transactionId, data: transactionData} = transactionObj;   
+        
+        const actionObject = {
+            transactionActionObject: null, 
+            balanceActionObject: null
+        }
+    
+        try {
+
+            await new FirestoreCRUD().firestoreTransaction([
+
+                {
+                    docPathDependencies: [`users/${uid}/transactions/${transactionId}`], 
+                    
+                    transactionConditionFunction(docSnapDependencies) {
+
+                        const [transactionDocSnap] = docSnapDependencies;
+
+                        // if transaction was part of primary_transactions --- REMOVE
+                        if (DayJSUtils.isWithinTimeframe(defaults.primaryTransactionsTimeframe, 
+                            transactionData.timestamp.occurredAt, 0) ) {
+
+                                actionObject.transactionActionObject = {
+                                    type: REMOVE_PRIMARY_TRANSACTION, 
+                                    payload: {id: transactionId}
+                                }
+                        }
+
+                        return {
+                            commit: true, 
+                            operation: 'delete', 
+                            targetDocPath: transactionDocSnap.ref.path,
+                        }
+                    }
+                }, 
+
+                {
+                    docPathDependencies: [`users/${uid}/balance/${transactionData.currency}`], 
+
+                    transactionConditionFunction(docSnapDependencies) {
+
+                        const [balanceDocSnap] = docSnapDependencies;
+
+                        const balanceData = balanceDocSnap.data();
+
+                        /* ---- the transaction has to be deleted ----- */
+                        // remove its existing influence
+                        
+                        // #region ESSENTIAL VARIABLES
+                        const currentBalanceAmount = balanceData.amount;
+                        const newBalanceAmount = transactionData.type == transactionType.INCOME ?
+                            currentBalanceAmount - transactionData.amount :
+                            currentBalanceAmount + transactionData.amount ;
+                        // #endregion
+
+                        
+                        actionObject.balanceActionObject = {
+                            type: UPDATE_BALANCE_DATA_2, 
+                            payload: {
+
+                                balanceOperation: transactionData.type == transactionType.INCOME ?
+                                    balanceOperations.SUBTRACT_AMOUNT : balanceOperations.ADD_AMOUNT, 
+
+                                id: transactionData.currency, 
+                                amount: transactionData.amount
+                            }
+                        }
+
+                        return {
+                            commit: true, 
+                            operation: 'update', 
+                            data: {amount: newBalanceAmount}, 
+                            targetDocPath: balanceDocSnap.ref.path
+                        }
+
+                    }
+                }
+            ])
+
+            flushSync(()=>{
+
+                actionObject.transactionActionObject && dispatch(actionObject.transactionActionObject);
+
+                dispatch(actionObject.balanceActionObject);
+
+                extraWork && extraWork({
+                    id: transactionId, 
+                    data: transactionData
+                })
+
+            })
+        }
+        catch(e) {
+            consoleError(e);
+            console.log(e);
+            throw e;
+        }
+    }
+
 }

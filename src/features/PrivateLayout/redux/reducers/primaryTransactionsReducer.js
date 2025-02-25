@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { asyncStatus } from "../../../../enums";
 import { FETCH_PRIMARY_TRANSACTIONS, UDPATE_PRIMARY_TRANSACTIONS } from "../actions/primaryTransactionsActions";
 
@@ -10,6 +12,7 @@ const {
 const {
     ADD_PRIMARY_TRANSACTION: ADD_TRANSACTION, 
     UPDATE_PRIMARY_TRANSACTION: UPDATE_TRANSACTION,
+    REMOVE_PRIMARY_TRANSACTION: REMOVE_TRANSACTION,
 } = UDPATE_PRIMARY_TRANSACTIONS
 
 
@@ -35,7 +38,8 @@ export default function primaryTransactionsReducer(state = initialState, action)
             // payload must be an array of objects with {id, data} fields
             return { 
                 ...state, 
-                data: payload
+                data: payload, 
+                status: asyncStatus.SUCCESS,
             }
         }
         case FETCH_ERROR: {
@@ -54,6 +58,48 @@ export default function primaryTransactionsReducer(state = initialState, action)
                     payload
                 ]
             }
+        }
+
+        /*  ATTENTION: lodash.merge ⤵ 
+            merges the sources, 
+            with overwriting in the order they are encountered, 
+            to the destination 
+        */
+        case UPDATE_TRANSACTION: {
+            const { id, modifiedData } = payload;
+
+            return {
+                ...state, 
+
+                data: state.data.map(transaction => {
+
+                    if (id == transaction.id) {
+
+                        return {
+                            id: transaction.id,  
+                            data: _.merge({}, transaction.data, modifiedData)
+                        }
+                    }
+                    else {
+                        return transaction
+                    }
+                })
+            }
+        }
+
+        /*  payload: { id }
+        */
+        case REMOVE_TRANSACTION: {
+
+            const { id: transactionId } = payload;
+
+            // filter it out
+            return ({
+                ...state,
+                data: state.data.filter(
+                    ({id})=> (id != transactionId)
+                )
+            })
         }
 
         default: {

@@ -122,8 +122,7 @@ export class FirestoreCRUD {
 
     }
 
-    /** 
-     * GetDocs --> Query docs from a collection
+    /**  GetDocs --> Query docs from a collection
      * @param {string} collectionPath - absolute path to the collection 
      * @param {Array<object>} queryBuilder<{key, relationship, value}> - array of where objects to build a query
      * @param {Array<object>} order<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
@@ -308,8 +307,11 @@ export class FirestoreCRUD {
                         }
                         case 'delete': {
                             transaction.delete(targetDocRef)
+                            break;
                         }
                         default: {
+                            consoleError('Operation not matched for Firestore Transaction');
+                            console.log(transactionData)
                             throw `Invalid transaction operation type: ${operation}`
                         }
                     }

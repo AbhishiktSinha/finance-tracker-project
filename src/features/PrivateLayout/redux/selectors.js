@@ -53,3 +53,6 @@ export const selectTag_wrapper = (tagId) => {
         })
     )
 }
+
+
+export const selectUserSettings = ({userDoc})=>userDoc.data?.settings;

@@ -12,6 +12,7 @@ import DashboardTransactionCard from "../DashboardTransactionCard";
 import { useContext, useMemo } from "react";
 import userAuthContext from "../../../../context/userAuthContext";
 import activeTimeframeContext from "../../context/ActiveTimeframeContext";
+import latestTransactionContext from "../../context/LatestTransactionContext";
 
 
 export default function IncomeCard() {
@@ -23,24 +24,18 @@ export default function IncomeCard() {
     // always a new reference due to filtering the list of transactions
     const initializer = useSelector(
         selectTransactionsInitializer_wrapper(transactionType.INCOME, timeframe)
-    );
-    const newTransactionData = useSelector(
-        selectNewTransactionData_wrapper(transactionType.INCOME, timeframe)
-    )
+    );    
     const defaultCurrency = useSelector(selectDefaultCurrency);    
-
     
 
     consoleInfo(`INCOME CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
-        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
-        newTransactions: ${JSON.stringify(newTransactionData)}
+        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n        
         timeframe: ${timeframe}`)
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
-        defaultCurrency.code, 
-        newTransactionData, 
+        defaultCurrency.code,         
         transactionType.INCOME,
         timeframe);
 
@@ -58,7 +53,8 @@ export default function IncomeCard() {
         return {
             aggregateTransactionAmt: amount, 
             defaultCurrencyCode: defaultCurrency.code, 
-            activeTimeframe: timeframe
+            activeTimeframe: timeframe, 
+            type: transactionType.INCOME,
         }
     }, [amount, defaultCurrency.code, timeframe])
 

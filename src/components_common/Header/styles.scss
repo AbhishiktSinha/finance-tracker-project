@@ -1,18 +1,28 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+
 #header {
     position: sticky;
     top: 0;
     left: 0;
 
-    background-color: var(--color-primary);
+    // background-color: colors.$color-primary-light;
+    // background-color: colors-alt.$light-bg-main;
+
+    // background-image: linear-gradient(to bottom, colors-alt.$light-bg-main, transparent, 16px );
+    
+    // background: -webkit-linear-gradient(bottom,transparent,#fff 25%);
+
+    // background-color: colors-alt.$light-bg-blue-secondary;
 
     display: flex;
     justify-content: space-between;
     align-items: center;
     
-    height: 55px;
+    height: 70px;
     /* max-height: 300px; */
     padding-inline: 40px;
-    padding-block: 5px;
+    padding-block: 15px;
 
     z-index: 1000;
 

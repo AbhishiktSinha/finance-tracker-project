@@ -1,0 +1,122 @@
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/colors' as colors;
+@use '@app_styles/fonts' as fonts;
+
+
+div, p, h1, h2, h3, label {
+    color: colors.$text-dark;
+}
+
+$global-text-size: fonts.$text-default-size;
+
+div, p, span, li, ul {
+    font-size: var(--global-text-size);
+}
+div span {
+    font-size: inherit;
+}
+
+// Define this variable globally
+:root {
+    --global-text-size: #{$global-text-size};
+}
+
+/* --------------------------- BUTTONS ------------------------ */
+
+.ant-btn {    
+    // border: 1px solid colors.$text-dark-tertiary;
+    transition: 150ms all !important;    
+    
+    background-color: colors-alt.$light-bg-main;
+    border: none;
+
+    >span {
+        color: colors.$text-dark-tertiary;
+
+        font-size: fonts.$text-default-size;
+    }
+}
+
+.ant-btn-outlined {
+    border: 1px solid colors.$text-dark-tertiary;
+}
+.ant-btn-outlined-blue {
+    border: 1px solid colors-alt.$light-accent-primary;
+    > span {
+        color: colors-alt.$light-accent-primary;
+    }
+}
+
+.ant-btn-background-ghost {
+    background: transparent;
+}
+
+
+.ant-btn-primary {
+    
+    background-color: colors-alt.$light-accent-primary;    
+    & span {
+        color: colors-alt.$light-accent-secondary;
+        pointer-events: none;
+    }
+    
+    
+}
+.ant-btn:hover {
+    background-color: colors-alt.$light-accent-active-bg !important; //antd override
+    
+    // border-color: colors-alt.$light-acccent-actve !important;
+    // background-color: black !important;
+    
+    > span {
+        // color: white !important;
+        color: colors-alt.$light-acccent-actve;
+    }
+}
+
+.ant-btn-outlined:hover {
+    border: 1px solid colors-alt.$light-accent-secondary;
+}
+
+.ant-btn-primary:hover {
+    
+    // background-color: colors-alt.$light-accent-active-bg !important;
+    background-color: colors-alt.$light-accent-primary !important; //override antd
+    > span {
+        // color: colors-alt.$light-acccent-actve !important;
+        color: colors-alt.$light-accent-secondary !important; //override antd
+        font-weight: 600;
+    }
+}
+
+    /* ------ DISABLED BUTTON ------ */
+
+.ant-btn:disabled {
+    background-color: inherit;
+    background-color: colors-alt.$light-bg-main;
+    
+    >span {
+        color: inherit;
+    }
+}
+.ant-btn:disabled:hover { 
+
+    background-color: colors-alt.$light-bg-main;
+    // border-color: colors.$text-dark-tertiary;
+    border-color: inherit !important;
+
+    > span {
+        // color: colors.$text-dark-tertiary;
+        color: inherit;
+    }
+}
+
+.ant-btn-primary:disabled {
+    background: inherit;
+    background-color: colors-alt.$light-accent-primary;
+    // background-color: colors-alt.$light-bg-main;
+
+    > span {
+        color: colors-alt.$light-accent-secondary;
+    }
+}

@@ -23,14 +23,6 @@
 
         >button:first-child{
             flex: 1
-        }
-
-        >button:hover {
-            color: var(--color-primary);
-            border-color: var(--color-primary);
-            >span {
-                color: var(--color-primary)
-            }
-        }
+        }        
     }
 }

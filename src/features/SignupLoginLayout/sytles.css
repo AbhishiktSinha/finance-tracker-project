@@ -51,7 +51,7 @@
                     }
                 }
                 
-                .form-button {
+                /* .form-button {
                     width: 100%;
                     border-color: var(--color-primary);
                     >span {
@@ -63,7 +63,7 @@
                     >span {
                         color: var(--white) !important;
                     }
-                }
+                } */
             }
             .auth-form-redirect {
                 font-size: 14px;

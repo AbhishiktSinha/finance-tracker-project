@@ -1,0 +1,40 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/fonts' as fonts;
+
+
+.select-dashboard-timeframe .ant-select {
+    background: transparent !important;
+}
+
+.select-dashboard-timeframe .ant-select-selector {
+    font-size: fonts.$text-large-size;
+    background: transparent !important;  // Removes background color
+    border: none !important;            // Removes the border
+    box-shadow: none !important;        // Removes focus outline
+    display: flex;
+    align-items: center;
+    // padding-right: 24px;  // Adjust space for the dropdown arrow
+
+    > span {
+        font-size: inherit;
+    }
+}
+
+.select-dashboard-timeframe .ant-select-arrow {
+    top: 50% !important;
+    transform: translateY(-50%);    
+}
+
+.select-dashboard-timeframe .ant-select-selection-item, .ant-select-item-option{
+    border-radius: 24px !important;
+}
+
+.select-dashboard-timeframe {
+    background-color: colors.$bg-light-grey;
+    background-color: colors-alt.$light-accent-tertiary;
+    border-radius: 24px;
+    padding: 4px;
+}
+
+

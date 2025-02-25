@@ -12,6 +12,7 @@ import { asyncStatus, transactionType } from '../../../../../../enums';
 import { useContext, useMemo } from 'react';
 import activeTimeframeContext from '../../context/ActiveTimeframeContext';
 import './styles.scss'
+import latestTransactionContext from '../../context/LatestTransactionContext';
 
 /**
  * # TODO: 
@@ -35,19 +36,16 @@ export default function BalanceCard() {
     const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
     const initializer = useSelector(selectBalanceData);
-    const defaultCurrency = useSelector(selectDefaultCurrency);
-    const newTransactionData = useSelector(
-        selectNewTransactionData_wrapper(transactionType.ALL, timeframe));
+    const defaultCurrency = useSelector(selectDefaultCurrency); 
 
     consoleInfo(`BALANCE CARD DEPENDENCIES:\n
         initializer: ${JSON.stringify(initializer)}\n
-        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n
-        newTransactions: ${JSON.stringify(newTransactionData)}`)
+        defaultCurrency: ${JSON.stringify(defaultCurrency)}\n`)
 
     const {status, data: amount, error} = useDynamicAmount(
         initializer, 
-        defaultCurrency.code, 
-        newTransactionData);
+        defaultCurrency.code,         
+        transactionType.ALL);
 
     consoleDebug(`BALANCE CARD STATUS: ${status}\n
         BALANCE CARD AMOUNT: ${amount}`);

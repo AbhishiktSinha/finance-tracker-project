@@ -1,0 +1,178 @@
+@use '@app_styles/default-dimensions' as default-dimensions;
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+
+
+$drawer-padding-block: 36px;
+
+$nav-link-padding: 10px;
+$nav-link-border-radius: 24px;
+$nav-link-item-container-padding-inline: 13px;
+
+$nav-accordion-content-padding-left: 8px;
+
+.navigation-drawer {
+    // position: absolute;
+    position: fixed;
+    left: 0;
+    top: default-dimensions.$header-height;
+    bottom: 0;
+
+    z-index: 1;
+
+    background-color: colors-alt.$light-bg-blue-secondary;
+
+    transition: 0.2s all;
+
+    padding-block: $drawer-padding-block;
+
+    .navigation-drawer-list {
+
+        li, 
+        .nav-link-item-container, 
+        .nav-accordion-header-item-container, 
+        & li {
+
+            display: flex;
+            align-items: center;
+            // justify-content: center;
+            
+            padding-inline: $nav-link-item-container-padding-inline;
+            
+            a, p {
+                text-transform: capitalize;
+
+                display: flex;
+                align-items: center;
+                // justify-content: center;
+                gap: 12px;
+
+                padding: $nav-link-padding;
+                border-radius: $nav-link-border-radius;
+
+                color: colors.$text-dark-secondary;
+
+                .nav-link-icon {
+                    display: inline-flex;
+                    width: 24px;
+                    height: 24px;
+
+                    object-fit: contain;
+                    overflow: hidden; 
+
+                    >img {
+
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                    }
+                }
+                
+            }
+            a.selected {
+                background-color: colors-alt.$light-accent-tertiary;
+                color: colors.$text-dark;
+            }
+            a:hover:not(.selected), p:hover {
+                background-color: colors-alt.$light-bg-blue-primary;
+            }
+
+            .accordion-header {
+                cursor: pointer;
+                border: 1px solid colors.$text-dark-tertiary;
+
+                & .accordion-action {
+                    display: flex; 
+                    align-items: center;
+                    justify-content: center;  
+                                       
+
+                    width: 16px;
+                    height: 16px;
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit:cover;
+                    }      
+                    svg {
+                        width: 100%;
+                        height: 100%;
+                        object-fit:fill;
+                    }          
+                }
+            }
+            
+        }
+    }
+}
+
+.navigation-drawer.closed {
+    width: default-dimensions.$navigation-drawer-width-closed;
+
+    /* & .nav-link-title {        
+        display:none;
+    } */
+
+    .nav-accordion-header-item-container.open {
+        
+        
+        .accordion-content {
+            padding: 0;
+        }
+    }
+    .nav-accordion-header-item-container .accordion-header {
+        flex-direction: column;
+        border: 1px solid colors.$text-dark-tertiary;
+
+        row-gap: 5px;
+    }
+    
+    
+}
+
+
+.navigation-drawer.open {
+
+    width: default-dimensions.$navigation-drawer-width-opened;
+    // border-right: 1px solid colors.$text-dark-tertiary;
+
+    .navigation-drawer-list {
+
+        & li {
+
+            a, p {
+
+                width: 100%;
+                justify-content: start;
+            }
+        }
+    }
+
+    .nav-accordion-header-item-container.open {
+        flex-direction: column;
+        align-items: stretch;
+        row-gap: 0;                
+        
+        .accordion-content {
+            
+            padding-left: $nav-accordion-content-padding-left;
+
+            & li {
+                padding-inline: 0
+            }
+        }
+    }
+
+    & .accordion-header {
+        position: relative;
+
+        & .accordion-action {
+            position: absolute;
+            right: $nav-link-item-container-padding-inline;
+        }
+    }
+
+    /* & .nav-link-title {
+        display: inline;        
+    } */
+}
