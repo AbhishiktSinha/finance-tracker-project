@@ -26,7 +26,14 @@
         .page-contents-wrapper {
 
             width: 100%;
-            max-width: default-dimensions.$route-page-content-wrapper-max-width;            
+            max-width: default-dimensions.$route-page-content-wrapper-max-width;       
+            
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        
+            row-gap: 24px;
+            padding-bottom: 24px;
 
             .page-title-bar {
                 margin-top: default-dimensions.$route-page-header-margin-top !important;

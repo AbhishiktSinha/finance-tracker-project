@@ -1,4 +1,6 @@
 @use '@app_styles/default-dimensions' as default-dimensions;
+@use '@app_styles/fonts' as fonts;
+@use '@app_styles/colors-alt' as colors-alt;
 
 
 #transactions-page {
@@ -10,6 +12,33 @@
         .page-title-bar {
             // margin: 0 !important;
             margin-top: default-dimensions.$route-page-header-margin-top - 10px !important;
+            
+            .page-title {
+                font-size: fonts.$title-large-size;
+                font-weight: 600;
+            }
+        }
+
+        .transactions-list-container {
+
+            width: inherit;
+
+            .transactions-list-header {
+
+                display: flex;
+                align-items: center;
+                column-gap: 8px;
+                width: 100%;
+                
+                .search-transactions-container {
+                    flex: 1;
+
+                    .search-transactions-input {
+                        border-radius: 24px;
+                        background-color: colors-alt.$light-bg-grey;
+                    }
+                }
+            }
         }
     }
 }

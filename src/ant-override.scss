@@ -65,15 +65,25 @@ div span {
         color: colors-alt.$light-accent-secondary;
         pointer-events: none;
     }
-    
-    
 }
+.ant-btn-primary-inverted {
+
+    background-color: colors-alt.$light-accent-active-bg;
+    color: colors-alt.$light-accent-strong;
+
+    >span {
+        color: inherit; 
+    }
+}
+    
+
 .ant-btn:hover {
     background-color: colors-alt.$light-accent-active-bg !important; //antd override
     
     // border-color: colors-alt.$light-acccent-actve !important;
     // background-color: black !important;
     
+    color: colors-alt.$light-acccent-actve !important;
     > span {
         // color: white !important;
         color: colors-alt.$light-acccent-actve;
@@ -92,10 +102,19 @@ div span {
     
     // background-color: colors-alt.$light-accent-active-bg !important;
     background-color: colors-alt.$light-accent-primary !important; //override antd
+    color: colors-alt.$light-accent-secondary !important; //override antd
     > span {
         // color: colors-alt.$light-acccent-actve !important;
         color: colors-alt.$light-accent-secondary !important; //override antd
         font-weight: 600;
+    }
+}
+
+.ant-btn-primary-inverted:hover {
+    background-color: colors-alt.$light-accent-primary !important;
+    color: colors-alt.$light-accent-secondary !important;
+    >span {
+        color: inherit;
     }
 }
 
@@ -139,4 +158,12 @@ div span {
     height: inherit;
     max-height: inherit;
     overflow:auto;
+}
+
+.ant-input-affix-wrapper {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+
+    font-size: fonts.$text-default-size;
 }

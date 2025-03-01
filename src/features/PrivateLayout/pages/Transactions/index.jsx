@@ -8,6 +8,7 @@ import statusContext from "../../components/StateInitializer/context";
 import onboardingStatusContext from "../../components/OnboardingAction/context";
 
 import FilterModal from "./components/FilterModal";
+// import FilterDisplaySection from './components/FilterDisplaySection/index.jsx'
 
 import ModalWrapper from "../../../../components_common/ModalWrapper";
 
@@ -15,8 +16,9 @@ import { checkDisplayUI } from "../../utils";
 
 
 import './styles.scss'
-import { Button } from "antd";
-import { Filter, Filter2, FilterAltOutlined } from "@mui/icons-material";
+import { Button, Input } from "antd";
+import { FilterAltOutlined, FilterAltRounded, FilterListRounded, UploadFileOutlined } from "@mui/icons-material";
+import { SearchOutlined } from "@ant-design/icons";
 
 export default function Transactions() {
     
@@ -29,14 +31,7 @@ export default function Transactions() {
     
     function openFilterModal() {
         filterModalRef.current.openModal();
-    }
-    
-    useEffect(()=>{
-        if (showUI) {
-            filterModalRef.current.openModal();
-        }
-        
-    }, [showUI])
+    }    
     
     // CONDITIONAL SKELETON RENDER
     if (!showUI) {
@@ -54,9 +49,41 @@ export default function Transactions() {
 
                         <div className="page-title-bar">
                             <h1 className="page-title">Transactions</h1>
+
+                            <Button shape="round" type="primary-inverted">
+                                <UploadFileOutlined />
+                                Export
+                            </Button>
                         </div>
 
-                        <Button onClick={openFilterModal}><FilterAltOutlined /></Button>
+
+                        <div className="transactions-list-container">
+
+                            <header className="transactions-list-header">
+                                <div className="search-transactions-container">
+                                    <Input className="search-transactions-input" variant="filled" prefix={<SearchOutlined />} placeholder="Search"/>
+                                </div>
+
+                                <Button 
+                                    className="transactions-filter-button transactions-action-button"
+                                    shape="round"
+                                    onClick={openFilterModal}
+                                >
+                                    <FilterAltRounded />
+                                    Filter
+                                </Button>
+                                <Button 
+                                    className="transactions-order-button transactions-action-button"
+                                    shape="round"
+                                >
+                                    <FilterListRounded />
+                                    Sort
+                                </Button>
+
+                            </header>
+
+                            
+                        </div>                        
 
                         <ModalWrapper ref={filterModalRef} className='transactions-filter-modal-container'>
                             <FilterModal />
