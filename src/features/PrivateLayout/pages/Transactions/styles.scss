@@ -1,0 +1,16 @@
+@use '@app_styles/default-dimensions' as default-dimensions;
+
+
+#transactions-page {
+
+    .page-contents-wrapper {
+
+        max-width: (default-dimensions.$route-page-content-wrapper-max-width + 124px);
+    
+        .page-title-bar {
+            // margin: 0 !important;
+            margin-top: default-dimensions.$route-page-header-margin-top - 10px !important;
+        }
+    }
+}
+

@@ -24,7 +24,7 @@ import { DayJSUtils } from '../../../dayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { flushSync } from 'react-dom';
 import defaults from '../defaults';
-import { selectPrimaryTransactionsList, selectTransactionsInitializer_wrapper } from '../pages/Dashboard/redux/selectors';
+// import { selectPrimaryTransactionsList, selectTransactionsInitializer_wrapper } from '../pages/Dashboard/redux/selectors';
 
 export const fetchUserDocThunk = (uid) => {
 

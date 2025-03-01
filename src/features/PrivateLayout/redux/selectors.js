@@ -19,6 +19,8 @@ export const selectDefaultCurrency = createSelector([({userDoc})=>userDoc.data?.
     return Boolean(defaultCurrency) ? {code: defaultCurrency, symbol: getSymbolFromCurrency(defaultCurrency)} : undefined;
 })
 
+/* ------------- primary transaction selecltor ------------ */
+export const selectPrimaryTransactionsList = ({primaryTransactions: state})=> state.data;
 
 /* ------------ balance SELECTORS ---------------- */
 

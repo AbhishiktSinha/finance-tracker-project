@@ -5,7 +5,7 @@ import { consoleError, consoleInfo } from "../../../../../console_styles";
 import { DayJSUtils } from "../../../../../dayjs";
 import { timeframe, transactionType } from "../../../../../enums";
 
-import { selectNewTransactionData } from "../../../redux/selectors";
+import { selectNewTransactionData, selectPrimaryTransactionsList } from "../../../redux/selectors";
 import defaults from "../defaults";
 
 
@@ -14,8 +14,6 @@ import defaults from "../defaults";
 export const selectActiveTimeframe = ({dashboardTransactions})=>dashboardTransactions.timeframe;
 
 export const selectDashboardTransactionStatus = ({dashboardTransactions: state})=> state.status;
-
-export const selectPrimaryTransactionsList = ({primaryTransactions: state})=> state.data;
 
 
 

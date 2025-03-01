@@ -5,7 +5,7 @@ import modalContext from './context'
 
 import './style.css'
 
-const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{
+const ModalWrapper = forwardRef(({children, ...restProps}, ref)=>{    
 
     const [isOpen, setIsOpen] = useState(false);
     

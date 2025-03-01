@@ -198,7 +198,7 @@ export default function getAllFiatCurrencies() {
  * @param {string} primary_key the primary-key for every object in the list
  * @returns 
  */
-export function convertListToObejct(list, primary_key) {
+export function convertListToObject(list, primary_key) {
     const obj = {};
 
     list.forEach(
@@ -211,4 +211,28 @@ export function convertListToObejct(list, primary_key) {
     )
 
     return obj;
+}
+
+
+/**
+ * 
+ * @param {Function} callback 
+ * @param {number} delay microseconds
+ * @returns 
+ */
+export function debounce( callback, delay ) {
+
+    let timeout = null;
+
+    return function debouncedCallback(...params) {
+
+        if (timeout) {
+            clearTimeout(timeout);            
+        }
+
+        timeout = setTimeout(()=>{
+            timeout = null;
+            callback(...params)
+        }, delay)
+    }
 }

@@ -27,11 +27,11 @@ div span {
     // border: 1px solid colors.$text-dark-tertiary;
     transition: 150ms all !important;    
     
-    background-color: colors-alt.$light-bg-main;
+    background-color: colors-alt.$light-bg-grey;
     border: none;
 
     >span {
-        color: colors.$text-dark-tertiary;
+        color: colors.$text-dark-secondary;
 
         font-size: fonts.$text-default-size;
     }
@@ -51,6 +51,12 @@ div span {
     background: transparent;
 }
 
+.ant-btn-link {
+    background-color: transparent;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-color: colors.$text-dark-secondary;
+}
 
 .ant-btn-primary {
     
@@ -76,6 +82,10 @@ div span {
 
 .ant-btn-outlined:hover {
     border: 1px solid colors-alt.$light-accent-secondary;
+}
+.ant-btn-link:hover {
+    background-color: transparent !important;
+    text-decoration-color: colors-alt.$light-acccent-actve;
 }
 
 .ant-btn-primary:hover {
@@ -119,4 +129,14 @@ div span {
     > span {
         color: colors-alt.$light-accent-secondary;
     }
+}
+
+
+
+
+/* --------------------------------------------- */
+.ant-tabs-content-holder {
+    height: inherit;
+    max-height: inherit;
+    overflow:auto;
 }

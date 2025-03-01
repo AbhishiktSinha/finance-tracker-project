@@ -54,3 +54,21 @@ export const transactionOperations = Object.freeze({
     CREATION: 'creation', 
     DELETION: 'deletion',
 })
+
+export const filterTypes = Object.freeze({
+    SINGLE_SELECT: 'single_select', 
+    MULTI_SELECT: 'multi_select'
+})
+
+
+export const timeframeDisplay = Object.freeze({
+    WEEK: 'This Week', 
+    MONTH: 'This month',
+    YEAR: 'this year',
+
+    WEEK_DURATION: 'current week duration', 
+    MONTH_DURATION: 'current month duration', 
+    YEAR_DURATION: 'current year duration',
+
+    CUSTOM: 'custom range'
+})

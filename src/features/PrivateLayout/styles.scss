@@ -1,6 +1,7 @@
 @use '@app_styles/default-dimensions' as default-dimensions;
 @use '@app_styles/colors' as colors;
 @use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/fonts' as fonts;
 
 
 
@@ -16,6 +17,30 @@
         overflow: auto;
         
         scroll-behavior: smooth;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+
+        .page-contents-wrapper {
+
+            width: 100%;
+            max-width: default-dimensions.$route-page-content-wrapper-max-width;            
+
+            .page-title-bar {
+                margin-top: default-dimensions.$route-page-header-margin-top !important;
+    
+                justify-content: space-between;
+    
+                .page-title {
+                    font-size: fonts.$title-huge-size;
+                    font-family: fonts.$stylised-font-family !important;
+                    // font-weight: 600;
+                }
+            }
+
+        }
         
     }
     .route-page::-webkit-scrollbar {

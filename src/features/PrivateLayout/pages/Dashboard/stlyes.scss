@@ -1,5 +1,6 @@
 @use '@app_styles/breakpoints' as breakpoints;
 @use '@app_styles/fonts' as fonts;
+@use '@app_styles/default-dimensions' as default-dimensions;
 
 #dashboard-page {    
     
@@ -13,18 +14,15 @@
 
     overflow: auto; */
 
-    /* does not make content flexible horizontally */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    /* does not make content flexible horizontally */    
 
     row-gap: 24px;    
     
     .page-contents-wrapper {
         
         /* makes flexible horizontally */
-        width: 100%;
-        max-width: 984px;        
+        width: 100%;    
+        max-width: default-dimensions.$route-page-content-wrapper-max-width;    
 
         display: flex;
         flex-direction: column;
