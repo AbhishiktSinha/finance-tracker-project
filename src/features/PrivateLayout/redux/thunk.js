@@ -1276,3 +1276,149 @@ export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
     }
 
 }
+
+
+/* ----------------------------- HANDLING TRANSACTION LISTS --------------------- */
+
+/**## deleteTransactionsListThunk
+ * Thunk function to delete a list of transactions from the backend  
+ * and reflect the changes in application state
+ * 
+ * @param {string} uid uid for the currently signed in user
+ * @param {Array<{id: string, data: object}>} transactionsList list of transactions to be deleted
+ * @param {Function} extraWork optional callback to be called within flushSync to sync the update of all states
+ */
+export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> {
+
+    const { UPDATE_BALANCE_DATA_2 } = UPDATE_BALANCE;
+    const { REMOVE_PRIMARY_TRANSACTION } = UDPATE_PRIMARY_TRANSACTIONS;
+
+    return async function thunkFunction(dispatch, getState) {
+
+        const actionObject = {
+            transactionActionObjectList: [], 
+            balanceActionObjectList: [], 
+        }
+
+        try {
+
+            const pendingUpdates = {};
+
+            await new FirestoreCRUD().firestoreTransaction([
+                
+                /* ------------------------ TRANSACTION DOCUMENTS -------------------- */
+                ...transactionsList.map(({id: transactionId, data: transactionData})=>{
+
+                    return {
+                        docPathDependencies: [
+                            `users/${uid}/transactions/${transactionId}`
+                        ], 
+
+                        transactionConditionFunction(docSnapDependencies) {
+
+                            const [transactionDocSnap] = docSnapDependencies; 
+
+                            const transactionDocPath = transactionDocSnap.ref.path;
+                            const {timestamp: {occurredAt}} = transactionData;
+
+                            // prepare for application state change
+                            if (DayJSUtils.isWithinTimeframe(
+                                defaults.primaryTransactionsTimeframe, occurredAt, 0)) {
+
+                                    actionObject.transactionActionObjectList.push({
+                                        type: REMOVE_PRIMARY_TRANSACTION, 
+                                        payload: { id: transactionId }
+                                    })
+                            }
+
+                            /* writeManifest -------- delete document at this path */
+                            return {
+                                commit: true, 
+                                operation: 'delete', 
+                                targetDocPath: transactionDocPath, 
+                            }
+                        }
+                    }
+                }), 
+
+
+                /* --------------------- BALANCE DOCUMENTS ------------------------------ */
+                ...transactionsList.map( ({id: transactionId, data: transactionData})=>{
+
+                    const balanceDocId = transactionData.currency;
+
+                    // ----- for each transaction object
+                    return {
+
+                        docPathDependencies: [`users/${uid}/balance/${balanceDocId}`], 
+
+                        transactionConditionFunction(docSnapDependencies) {
+
+                            const [balanceDocSnap] = docSnapDependencies;
+
+                            const balanceDocData = balanceDocSnap.data();
+                            const balanceDocPath = balanceDocSnap.ref.path;
+
+                            // balanceDoc always exists for DELETE case
+
+                            // #region ESSENTIAL-VARIABLES
+                            const previousBalanceAmount = pendingUpdates.balanceDocPath?.data?.amount || balanceDocData.amount;
+                            const transactionAmount = transactionData.amount; 
+                            const transactionIsIncome = transactionData.type == transactionType.INCOME;
+                            // #endregion
+
+                            const newBalanceAmount = transactionIsIncome ?
+                                previousBalanceAmount - transactionAmount :
+                                previousBalanceAmount + transactionAmount;
+
+                            
+                            // ----------- actionObject ------------
+                            actionObject.balanceActionObjectList.push({
+                                type: UPDATE_BALANCE_DATA_2, 
+                                payload: {
+                                    id: balanceDocId, 
+                                    
+                                    balanceOperation: transactionIsIncome ? balanceOperations.SUBTRACT_AMOUNT :
+                                        balanceOperations.ADD_AMOUNT, 
+                                    
+                                    amount: transactionAmount
+                                }
+                            })
+
+                            const operationManifest = {
+                                commit: true, 
+                                operation: 'update', 
+                                data: { amount: newBalanceAmount }
+                            }
+                            // -------- pendingUpdates ---------
+                            pendingUpdates[balanceDocPath] = operationManifest; 
+
+
+                            return {
+                                targetDocPath: balanceDocPath, 
+                                ...operationManifest
+                            }
+
+                        }
+                    }
+                })
+            ])
+
+            
+            // ------- application state change ----------
+            flushSync(()=>{
+                actionObject.transactionActionObjectList.
+                    forEach(transactionAction => dispatch(transactionAction))
+
+                actionObject.balanceActionObjectList.
+                    forEach(balanceAction => dispatch(balanceAction));
+
+                extraWork(transactionsList);
+            })
+        }
+        catch(e){ 
+            consoleError(e);
+            console.log(e);            
+        }
+    }
+}

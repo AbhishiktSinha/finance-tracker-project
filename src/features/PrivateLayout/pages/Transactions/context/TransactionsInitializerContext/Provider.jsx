@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectPrimaryTransactionsList } from "../../../../redux/selectors";
 import { asyncStatus, timeframe } from "../../../../../../enums";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -7,9 +7,12 @@ import { FirestoreCRUD } from "../../../../../../firebase/firestore";
 import userAuthContext from "../../../../context/userAuthContext";
 import { consoleDebug, consoleError, consoleInfo } from "../../../../../../console_styles";
 import TransactionsInitializerContext from ".";
+import { deleteTransactionsListThunk } from "../../../../redux/thunk";
 
 
 export default function TransationsInitializerContextProvider({children}) {
+
+    const dispatch = useDispatch();
 
     const {user: {uid}} = useContext(userAuthContext)
 
@@ -73,6 +76,40 @@ export default function TransationsInitializerContextProvider({children}) {
      */
     function getCustomTimeframe() {
         return customTransactionsSlice.timeframe;
+    }
+
+    /**## deleteTransactions
+     * Function that takes a set of Ids of target transactions,  
+     * and deletes them from firestore and application state
+     * 
+     * @param {Set<string>} targetTransactionsSet set of ids of transactions to be deleted
+     */
+    async function deleteTransactions(targetTransactionsSet) {
+        
+        const deleteCustomTransactions = ()=>{
+
+            // if custom transactions exist
+            if (Boolean(getCustomTimeframe()) && customTransactionsSlice.status == asyncStatus.SUCCESS) {
+                
+                setCustomTransactionsSlice(state => ({
+                    ...state, 
+                    data: state.data?.filter( ({id}) => !targetTransactionsSet.has(id) ) || undefined
+                }))
+            }
+        }
+
+        // create list of selected transaction objects, depending on source, from set
+        const selectedTransactionsList = isCustomSelected() ?
+            customTransactionsSlice.data.filter(({ id }) => targetTransactionsSet.has(id)) :
+            primaryTransactionsSlice.data.filter(({ id }) => targetTransactionsSet.has(id));
+
+        await dispatch(
+            deleteTransactionsListThunk(
+                uid, 
+                selectedTransactions, 
+                deleteCustomTransactions
+            )
+        )
     }
 
 
@@ -145,7 +182,7 @@ export default function TransationsInitializerContextProvider({children}) {
 
     /* --------------- return JSX ------------------- */
 
-    const selectedTransactions = isCustomSelected ? customTransactionsSlice : primaryTransactionsSlice;
+    const selectedTransactions = isCustomSelected() ? customTransactionsSlice : primaryTransactionsSlice;
 
     return (
         <TransactionsInitializerContext.Provider value={{

@@ -1,0 +1,234 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/fonts' as fonts;
+
+@use '@dashboard_styles/dashboard-card' as card;
+
+
+.transaction-card-hor {
+
+    
+    background-color: colors.$bg-light;
+    border-radius: calc(card.$card-border-radius + 8px); 
+       
+
+    .transaction-card-more-button,
+    .transaction-card-hor-accent {
+        visibility: hidden;
+    }
+    
+
+    width: 100%;
+    min-width: 300px;
+    min-height: 100px;
+
+    padding: card.$card-padding-block card.$card-padding-inline; 
+
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+
+    transition: all 0.1s ease;
+
+
+    position: relative;
+    
+
+    .transaction-card-hor-row {
+        display: flex;
+        align-items: center;
+        column-gap: 8px;
+        width: inherit;
+        min-width: 0;
+    }
+
+    .transaction-amount-row {
+
+        .transaction-card-sum {
+            font-size: fonts.$title-large-size;
+            font-family: fonts.$default-mono-font-family !important;
+        }
+        .transaction-sum-original-currency.income-transaction-sum {
+            color: colors.$income-green;
+        }
+        .transaction-sum-original-currency.expenditure-transaction-sum {
+            color: colors.$expenditure-red;
+        }
+        .converted-sum {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            .separator {
+                
+                margin-left: 8px !important;
+            }
+            .transaction-sum-default-currency {
+                color: colors.$text-dark-tertiary;
+            }
+        }
+        
+        .divider-dotted {
+            border: none;
+            // border-top: 1px dotted colors.$text-dark-tertiary;
+            min-width: clamp(50px, 5vw, 100px);
+            height: 15px;
+            overflow: hidden;
+            
+            >img {
+                height: 100%;
+                width: 100%;
+                object-position: center;
+                
+                object-fit:fill;
+
+                opacity: 0.5;
+            }
+        }
+    }
+
+    .transaction-title-row {
+        font-size: fonts.$title-default-size;
+        font-style: italic;
+
+        flex-shrink: 1;
+        min-width: 0; 
+        
+        // text-wrap: nowrap;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* date & tag-chip */
+    .transaction-card-hor-row:nth-child(3) {
+
+        .transaction-date {
+            font-size: fonts.$text-large-size;
+        }
+        .transaction-tag-chip {
+            font-size: fonts.$text-default-size;
+            font-weight: 600;
+            // -webkit-text-stroke: 1px colors.$text-dark;
+            color: colors.$white;
+
+            padding: 2px 8px;
+            border-radius: 16px;
+            border-width: 0.5px;
+            border-color: colors.$text-dark;
+            border-style: solid;
+
+        }
+    }
+
+
+    .transaction-card-more-button {
+
+        position: absolute;
+        right: card.$card-padding-inline;
+        top: card.$card-padding-block;
+
+        &:hover {
+            background-color: colors.$bg-light-grey !important;
+            // background-color: colors-alt.$light-accent-secondary;
+            >span {
+                color: colors.$text-dark !important;                
+            }
+        }
+    }
+
+    .transaction-card-hor-accent {
+
+        position: absolute;
+        left:  0 - card.$card-padding-inline;
+        top: card.$card-border-radius;
+        bottom: card.$card-border-radius;
+        // height: calc(120px - card.$card-border-radius);       
+
+        border-style: solid;
+        border-width: 3px;
+        border-radius: 8px;
+    }
+
+    /* -------------------------- H O V E R ------------------------- */
+    &:hover {
+        background-color: colors.$white;
+
+        .transaction-card-more-button,
+        .transaction-card-hor-accent {
+            visibility: visible;
+        }        
+
+        cursor: pointer;
+    }
+
+
+    /* ---------------------- P O P O V E R ------------------------------ */
+
+    .transaction-card-popover .ant-popover-inner {
+        // width: 100px;
+        // padding: 0;
+        overflow: hidden;
+        border-radius: card.$card-border-radius;
+        
+        padding: 8px;
+        .popover-menu-list {
+
+            .popover-menu-list-item {
+                min-width: 120px;
+
+                padding: 4px 8px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+
+                border-radius: 20px;
+
+                font-size: fonts.$text-default-size;
+                text-transform: capitalize;
+
+                &:hover {
+                    cursor: pointer;
+                    background-color: colors.$bg-light-grey;
+                }
+            }
+        }
+    }
+}
+
+
+/* --------------- MODALS ------------- */
+
+.delete-modal-content {
+
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 12px;
+
+    .modal-description {
+
+        & li {
+            font-weight: 600;
+            span {
+                font-weight: initial;
+            }
+        }
+    }
+
+    .buttons-container {
+
+        margin-top: 8px !important;
+
+        display: flex;
+        // padding-inline: 8px;
+
+        justify-content: space-between;
+
+        gap: 12px;
+
+        > button {
+            flex-grow: 1;
+        }
+    }
+}

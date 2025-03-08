@@ -236,3 +236,12 @@ export function debounce( callback, delay ) {
         }, delay)
     }
 }
+
+
+
+export function getKey(object, targetValue) {
+
+    return Object.entries(object).find(
+        ([key, value])=>value==targetValue
+    )[0];
+}

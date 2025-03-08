@@ -5,7 +5,7 @@ import FilterConditionsContext from "../../context/FilterConditionsContext";
 
 import { debounce } from "../../../../utils";
 import { filterDefaults } from "../../defaults";
-import { filterData } from "../../utils";
+import { searchThroughFilterOptions } from "../../utils";
 import { Button, Checkbox, Input } from "antd";
 import { SearchOutlined } from "@mui/icons-material";
 import { filterTypes, timeframeDisplay } from "../../../../../../enums";
@@ -41,7 +41,7 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
             setDisplayedOptionsEntries(allOptionsEntries);
         }
         else {
-            setDisplayedOptionsEntries(filterData(allOptionsEntries, null, searchConditions));
+            setDisplayedOptionsEntries(searchThroughFilterOptions(allOptionsEntries, null, searchConditions));
         }
 
     }, 300);

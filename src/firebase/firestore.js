@@ -258,7 +258,7 @@ export class FirestoreCRUD {
             consoleInfo('RUNNING FIRESTORE TRANSACTION');
             console.log(transactionOperationsList);
 
-            const transactionDataList = [];
+            const writeManifestList = [];
             
             // READ ------------------- retreive the data from each transactionOperation
             for (const transactionOperation of transactionOperationsList) {
@@ -277,12 +277,13 @@ export class FirestoreCRUD {
                     const docRef = this.#getDocRef(docPath);
                     return transaction.get(docRef);
                 }))
-
-                transactionDataList.push(transactionConditionFunction(docSnapDependencies));
+                
+                // PENDING-WRITE
+                writeManifestList.push(transactionConditionFunction(docSnapDependencies));
             }
 
             // CONDITIONAL WRITE ------------------- commit transactions
-            for (const transactionData of transactionDataList) {
+            for (const writeManifest of writeManifestList) {
 
                 const { 
                     commit, 
@@ -290,7 +291,7 @@ export class FirestoreCRUD {
                     option, 
                     data, 
                     targetDocPath,
-                } = transactionData;
+                } = writeManifest;
 
                 if (commit) {
     
@@ -311,7 +312,7 @@ export class FirestoreCRUD {
                         }
                         default: {
                             consoleError('Operation not matched for Firestore Transaction');
-                            console.log(transactionData)
+                            console.log(writeManifest)
                             throw `Invalid transaction operation type: ${operation}`
                         }
                     }

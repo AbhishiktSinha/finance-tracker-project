@@ -11,6 +11,7 @@ import EmptyBoxImage from '../../../../../../components_common/EmptyBoxImage';
 
 import { transactionOperations } from '../../../../../../enums';
 import './styles.scss'
+import TransactionCard from '../../../../components/TransactionUI/TransactionCard';
 
 export default function DashboardRecentTransactions() {
     
@@ -46,11 +47,11 @@ export default function DashboardRecentTransactions() {
                 recentTransactionsList.length > 0 ? recentTransactionsList.map(
                     (transactionObj)=>{
                         return (
-                            <TransactionCardHorz 
-                                key={transactionObj.id}
-                                transactionObj={transactionObj}
-                                onEdit={onEdit}
-                                onDelete={onDelete}
+                            <TransactionCard 
+                            key={transactionObj.id}
+                            transactionObj={transactionObj}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
                             />
                         )
                     }

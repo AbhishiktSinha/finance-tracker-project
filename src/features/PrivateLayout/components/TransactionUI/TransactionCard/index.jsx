@@ -1,28 +1,18 @@
 import { memo, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectTag_wrapper } from '../../redux/selectors.js';
 
-import { Button } from 'antd';
-import { DeleteFilled, EditFilled, MoreOutlined, ShareAltOutlined } from '@ant-design/icons';
-
-import TransactionSum from './components/TransactionSum.jsx';
-import ConvertedSum from './components/ConvertedSum.jsx';
-
-import EditModal from './components/EditModal.jsx';
 import CardDetailsUI from './components/CardDetailsUI.jsx';
-import ModalWrapper from '../../../../components_common/ModalWrapper/index.jsx';
+import ModalWrapper from '../../../../../components_common/ModalWrapper/index.jsx';
 
-import TwoArrowsImage from '@assets/two-arrows.png';
+import EditModal from '../components/EditModal/index.jsx';
+import DeleteModal from '../components/DeleteModal/index.jsx';
 
-import { consoleInfo } from '../../../../console_styles/index.js';
-import { DayJSUtils } from '../../../../dayjs/index.js';
+import { consoleInfo } from '../../../../../console_styles/index.js';
 import defaults from './defaults.js';
 
 import './styles.scss'
-import DeleteModal from './components/DeleteModal.jsx';
 
 
-function TransactionCardHorz({transactionObj, onEdit, onDelete}) {
+function TransactionCard({transactionObj, onEdit, onDelete}) {
 
     /* ---------- modal stuff ---------- */
     const [modalKey, setModalKey] = useState('');
@@ -72,4 +62,4 @@ function TransactionCardHorz({transactionObj, onEdit, onDelete}) {
 }
 
 
-export default memo(TransactionCardHorz);
+export default memo(TransactionCard);
