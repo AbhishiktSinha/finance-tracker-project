@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 
-import { selectNewTransactionData_wrapper, selectTransactionsInitializer_wrapper } from "../../redux/selectors";
+import { wrapper_selectTransactionsInitializer } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
 
 import { transactionType } from "../../../../../../enums";
@@ -10,9 +10,7 @@ import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
 
 import DashboardTransactionCard from "../DashboardTransactionCard";
 import { useContext, useMemo } from "react";
-import userAuthContext from "../../../../context/userAuthContext";
 import activeTimeframeContext from "../../context/ActiveTimeframeContext";
-import latestTransactionContext from "../../context/LatestTransactionContext";
 
 
 export default function IncomeCard() {
@@ -22,9 +20,13 @@ export default function IncomeCard() {
     const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
     // always a new reference due to filtering the list of transactions
+    // const initializer = useSelector(
+    //     selectTransactionsInitializer_wrapper(transactionType.INCOME, timeframe)
+    // );    
+
     const initializer = useSelector(
-        selectTransactionsInitializer_wrapper(transactionType.INCOME, timeframe)
-    );    
+        wrapper_selectTransactionsInitializer(transactionType.INCOME, timeframe))
+
     const defaultCurrency = useSelector(selectDefaultCurrency);    
     
 

@@ -11,7 +11,10 @@ const {INITIALIZE_BALANCE, UPDATE_BALANCE_DATA, UPDATE_BALANCE_DATA_2} = UPDATE;
 
 const initialState = {
     status: asyncStatus.INITIAL,
-    data: undefined, 
+    data: {
+        byId: {}, 
+        allIds: []
+    }, 
     error: '',
 }
 
@@ -42,7 +45,10 @@ export default function balanceReducer(state = initialState, action) {
             return {
                 ...state, 
                 status: asyncStatus.SUCCESS, 
-                data: payload,
+                data: {
+                    byId: payload.byId, 
+                    allIds: payload.allIds,
+                },
                 error: ''
             }
         }
@@ -55,95 +61,33 @@ export default function balanceReducer(state = initialState, action) {
         }
 
         /**
-         * payload strucutre:           
-         *  {
-         *      id: ----, 
-         *      data: {
-         *              type: //optional ,
-         *              currency: ----, 
-         *              amount: -------
-         *          }
-         *  }
+         * payload: {id, newAmount}
+         * This ACTION replaces the old amount with the new
+         * No computation happens here
          */
         case UPDATE_BALANCE_DATA: {
             consoleInfo('UPDATE_BALANCE call')
             console.log(payload)
 
-            const { id, data: {type, currency: transactionCurr, amount: transactionAmt} } = payload;
+            const { id, amount: newAmount } = payload;
             
-            // no type is provided --> Initialization case for the particular currency
-            if (! Boolean(type)) {
-                return {
-                    ...state, 
+            return {
+                ...state, 
+                data: {
+                    ...state.data, 
+                    
+                    byId: {
+                        ...state.data.byId, 
 
-                    data: [
+                        [id]: Boolean(state.data.byId[id]) ?
+                            { ...state.data.byId[id], amount: newAmount } :
+                            { currency: [id], amount: newAmount}
+                    }, 
 
-                        ...(state.data ? state.data: []), 
-
-                        payload,
-                    ]
+                    allIds: state.data.byId[id] ?
+                        state.data.allIds :
+                        [...state.data.allIds, id]
                 }
-            }
-            // INCOME Transaction
-            else if (type == transactionType.INCOME) {
-                // increase the value of the currency of transaction
-                return {
-                    ...state,
-                    data: state.data.map( balanceObj => {
-
-                        const { id: balanceId, data: { amount: balanceAmt } } = balanceObj;
-
-                        // update the data.amount of the target balance object
-                        if ( balanceId == id) {
-                            
-                            return {
-                                ...balanceObj, //unchanged field: balanceId
-
-                                data: {
-                                    ...balanceObj.data, //unchanged fields: currency, lastUpdateAt, ... etc
-                                    amount: balanceAmt + transactionAmt,
-                                }
-                            }
-                        }
-                        else {
-                            return balanceObj;
-                        }
-                    })
-                }
-            }
-            // EXPENDITURE Transaction
-            else if(type == transactionType.EXPENDITURE) {
-                
-                // decrease the value of the currency of transaction
-                // assume prior checks already executed
-                return {
-                    ...state, 
-
-                    data: state.data.map(balanceObj=>{
-
-                        const {id: balanceId, data : {amount : balanceAmt}} = balanceObj;
-
-                        // update the data.amount for the targeted balance object
-                        if (id == balanceId) {
-
-                            return {
-                                ...balanceObj, 
-                                
-                                data: {
-                                    ...balanceObj.data, 
-                                    amount: balanceAmt - transactionAmt,
-                                }
-                            }
-                        }
-                        else {
-                            return balanceObj;
-                        }
-                    } )
-                }
-            }
-            else {
-                consoleError(`balanceReducer UPDATE_BALANCE: Invalid 'type' property: ${type}`);
-                return state;
             }
         }
 
@@ -158,45 +102,31 @@ export default function balanceReducer(state = initialState, action) {
          */
         case UPDATE_BALANCE_DATA_2: {
 
+            const {balanceOperation, id, amount: operationAmount} = payload
+
             if (payload.balanceOperation == balanceOperations.CREATE_AMOUNT) {
 
                 return {
                     ...state, 
-                    data: [
+                    data: {
                         ...state.data, 
-                        {
-                            id: payload.id, 
-                            data: {
-                                currency: payload.id, 
-                                amount: payload.amount,
-                            }
+                        [id]: {
+                            currency: [id], 
+                            amount: operationAmount
                         }
-                    ]
+                    }
                 }
             }
             else {
                 
                 return {
                     ...state, 
-                    data: state.data.map( balanceObject => {
-
-                        if (balanceObject.id == payload.id) {
-
-                            return {
-                                ...balanceObject, 
-                                data: {
-                                    ...balanceObject.data, 
-                                    amount: (payload.balanceOperation == balanceOperations.ADD_AMOUNT ?
-                                        balanceObject.data.amount + payload.amount : 
-                                        balanceObject.data.amount - payload.amount
-                                    )
-                                }
-                            }
-                        }
-                        else {
-                            return balanceObject
-                        }
-                    })
+                    data: {
+                        ...state.data, 
+                        [id]: balanceOperation == balanceOperations.ADD_AMOUNT ? 
+                            {...state.data[id], amount: state.data[id].amount - operationAmount} :
+                            {...state.data[id], amount: state.data[id].amount + operationAmount}
+                    }
                 }
             }
         }

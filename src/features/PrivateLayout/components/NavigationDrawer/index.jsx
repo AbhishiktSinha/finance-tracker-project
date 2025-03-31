@@ -1,35 +1,50 @@
-import { useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
-import { AccountBalanceOutlined, AccountBalanceRounded, AccountBalanceWalletOutlined, AccountBalanceWalletRounded, BalanceOutlined, BarChartOutlined, BarChartRounded, DashboardOutlined, DashboardRounded, HistoryOutlined, HistoryRounded, ListAltOutlined, ListAltRounded } from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
 
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Button } from 'antd';
+import { CloseRounded } from '@mui/icons-material';
 
-import defaults from '../../defaults';
-import './styles.scss'
 import NavLinkItem from './NavLinkItem';
-import ROUTES from '../../../../routes.config';
 import { getRouteIcon } from './iconUtils';
 import NavLinkAccordion from './NavLinkAccordion';
 // import ROUTES from '../../../../routes.config';
 
-export default function NavigationDrawer() {
+import LogoMain from '../../../../../assets/logo-main.png';
+import ROUTES from '../../../../routes.config';
+
+import './styles.scss'
+
+
+
+const NavigationDrawer = forwardRef((props, ref) => {
 
     const [drawerState, setDrawerState] = useState('closed');
+    // const [drawerState, setDrawerState] = useState('open');
+
     const openTrigger = useRef(false)
 
     const location = useLocation();
-    const {pathname} = location;
-    
+    const { pathname } = location;
+
     console.log('location:', location)
+
+    
+    useImperativeHandle(ref, ()=>{
+        return {
+            openDrawer: ()=>{setDrawerState('open')},
+            closeDrawer: ()=>{setDrawerState('closed')}
+        }
+    }, [])
     
 
-    const {main: {settings, ...main_routes}} = ROUTES;
+    const { main: { settings, ...main_routes } } = ROUTES;
 
     function onMouseOver(e) {
-        
+
         openTrigger.current = true;
 
-        setTimeout(()=>{
+        setTimeout(() => {
             if (openTrigger.current == true) {
                 setDrawerState('open')
             }
@@ -43,7 +58,7 @@ export default function NavigationDrawer() {
     }
 
     function isSelected(link) {
-        
+
         if (link == 'dashboard') {
             return (pathname == '/' || pathname.endsWith(link))
         }
@@ -56,18 +71,35 @@ export default function NavigationDrawer() {
     }
 
     return (
-        <div 
+        <div
             className={"navigation-drawer" + " " + drawerState}
             onMouseOver={onMouseOver}
             onMouseLeave={onMouseLeave}
         >
+
+            {/* ------------------ HEADER -------------- */}
+            <div className="navbar-top-container">
+                <span className="logo-main-container">
+                    <img src={LogoMain} alt="Financely" className="logo-main" />
+                </span>
+                <Button 
+                    className='close-navbar-button'
+                    shape={'circle'}
+                    ghost
+                    onClick={()=>{setDrawerState('closed')}}
+                >
+                    <CloseRounded />
+                </Button>
+            </div>
+            
+            {/* --------------- LIST OF NAVIGABLE LINKS ---------------- */}
             <ul className="navigation-drawer-list">
-                
+
                 {
                     Object.keys(main_routes).map(
-                        (route_key)=>{
-                            
-                            if (route_key.startsWith('__')) return; 
+                        (route_key) => {
+
+                            if (route_key.startsWith('__')) return;
 
                             if (typeof main_routes[route_key] == 'string') {
 
@@ -76,7 +108,7 @@ export default function NavigationDrawer() {
                                 console.log(route, route_key);
 
                                 return (
-                                    <NavLinkItem 
+                                    <NavLinkItem
                                         key={route}
                                         title={route_key}
                                         route={route}
@@ -88,12 +120,12 @@ export default function NavigationDrawer() {
                                 )
                             }
                             else if (typeof main_routes[route_key] == 'object' && main_routes[route_key].emptyCategoryLayout) {
-                                
-                                const {__index__, emptyCategoryLayout, __route__, ...nested_routes} = main_routes[route_key]                                
-                                
+
+                                const { __index__, emptyCategoryLayout, __route__, ...nested_routes } = main_routes[route_key]
+
                                 return (
                                     <NavLinkAccordion
-                                        key={'nav-link-accordion/'+route_key}
+                                        key={'nav-link-accordion/' + route_key}
                                         route_key={route_key}
                                         title={route_key}
                                         drawerOpen={drawerState == 'open'}
@@ -129,86 +161,13 @@ export default function NavigationDrawer() {
                         }
                     )
                 }
-                
+
             </ul>
         </div>
     )
 
-    /* return (
-        <div 
-            className={'navigation-drawer' + " " + drawerState} 
-            onMouseOver={onMouseOver}
-            onMouseLeave={onMouseLeave}
-        >
-            
-            <ul className="navigation-drawer-list">
-                <li 
-                    className="navigation-link-item-container"
-                    key='dashboard-link-item'
-                >
-
-                    <Link to={'#'} 
-                        className={getClassName('dashboard')}>
-                        {
-                            isSelected('dashboard') ? <DashboardRounded /> : <DashboardOutlined />
-                        }
-                        
-                        {
-                            drawerState == 'open' && (
-                                <span>Dashboard</span>
-                            )
-                        }
-                    </Link>
-                </li>
-
-                <li key={'transactions-link-item'} className='navigation-link-item-container'>
-                    <Link to={'#'} className={getClassName('transactions')}>
-                        {
-                            isSelected('transactions') ?
-                                <ListAltRounded /> :
-                                <ListAltOutlined />
-                        }
-                        {
-                            drawerState == 'open' && (
-                                <span>Transactions</span>
-                            )
-                        }
-                    </Link>
-                </li>
-
-                <li className="navigation-link-item-container
-                ">
-                    <Link to={'#'} className={getClassName('analytics')}>
-                        {
-                            isSelected('analytics') ?
-                                <BarChartRounded /> :
-                                <BarChartOutlined />
-                        }
-                        {
-                            drawerState == 'open' && (
-                                <span>Analytics</span>
-                            )
-                        }
-                    </Link>
-                </li>
+})
 
 
-                <li className="navigation-link-item-container
-                ">
-                    <Link to={'#'} >
-                        {
-                            isSelected('balance') ? 
-                                <AccountBalanceWalletRounded /> :
-                                <AccountBalanceWalletOutlined />
-                        }
-                        {
-                            drawerState == 'open' && (
-                                <span>Balance</span>
-                            )
-                        }
-                    </Link>
-                </li>
-            </ul>
-        </div>
-    ) */
-}
+
+export default NavigationDrawer;

@@ -10,9 +10,13 @@ import { consoleInfo } from '../../../../../console_styles/index.js';
 import defaults from './defaults.js';
 
 import './styles.scss'
+import { useSelector } from 'react-redux';
+import { wrapper_selectPrimaryTransactionData } from '../../../redux/selectors.js';
 
 
-function TransactionCard({transactionObj, onEdit, onDelete}) {
+function TransactionCard({id: transactionId, onEdit, onDelete}) {
+
+    const transactionData = useSelector(wrapper_selectPrimaryTransactionData(transactionId))
 
     /* ---------- modal stuff ---------- */
     const [modalKey, setModalKey] = useState('');
@@ -29,7 +33,8 @@ function TransactionCard({transactionObj, onEdit, onDelete}) {
     return (
         <>
             <CardDetailsUI
-                transactionObj={transactionObj}
+                id={transactionId}
+                data={transactionData}
                 openModal={openModal}
             />
             <ModalWrapper ref={modalRef}>
@@ -37,7 +42,9 @@ function TransactionCard({transactionObj, onEdit, onDelete}) {
                     modalKey == defaults.cardPopoverActions.EDIT && (
                         // <h2>Edit Modal</h2>
                         <EditModal 
-                            transactionObject={transactionObj} 
+                            id={transactionId}
+                            data={transactionData}
+                            transactionObject={transactionData} 
                             {...(onEdit && {'onEdit': onEdit})}                            
                         />
                     )
@@ -46,7 +53,8 @@ function TransactionCard({transactionObj, onEdit, onDelete}) {
                     modalKey == defaults.cardPopoverActions.DELETE && (
                         // <h2>Delete Modal</h2>
                         <DeleteModal 
-                            transactionObject={transactionObj}
+                            id={transactionId}
+                            data={transactionData}                    
                             {...(onDelete && {'onDelete': onDelete})}
                         />
                     )

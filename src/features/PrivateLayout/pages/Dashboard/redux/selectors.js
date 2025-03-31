@@ -1,13 +1,11 @@
 
-import { createSelector, createSelectorCreator } from "reselect";
+import { createSelector } from "reselect";
 
 import { consoleError, consoleInfo } from "../../../../../console_styles";
 import { DayJSUtils } from "../../../../../dayjs";
-import { timeframe, transactionType } from "../../../../../enums";
+import { transactionType } from "../../../../../enums";
 
-import { selectNewTransactionData, selectPrimaryTransactionsList } from "../../../redux/selectors";
-import defaults from "../defaults";
-
+import { selectBalanceData, selectNewTransactionData, selectPrimaryTransactionsData, selectPrimaryTransactionsDataList, selectPrimaryTransactionsIdList, wrapper_selectDataAsList } from "../../../redux/selectors";
 
 
 /* --------------------------- dashboardTransactions SELECTORS ------------- */
@@ -17,34 +15,10 @@ export const selectDashboardTransactionStatus = ({dashboardTransactions: state})
 
 
 
-/**### Note: 
- * This selector returns a filtered array, which is always a new reference.
- * So this selected value will always be different between re-renders. 
- * 
- * Further optimisation is needed to avert re-painting UI
- * 
- * @param {string} type INCOME | EXPENDITURE
- * @param {string} activeTimeframe timeframeEnum: MONTH | WEEK | YEAR
- * @returns selector function to retrieve the transactions initializer
- */
-export const selectTransactionsInitializer_wrapper = (type, activeTimeframe)=> {
 
-    return createSelector(selectPrimaryTransactionsList, (primaryTransactionsData)=> {
-
-        // filter by type
-        // filter by timestamp.occurredAt within the current activeTimeframe -> within current MONTH/WEEK/YEAR
-        return primaryTransactionsData.filter(
-            ({id: transactionId, data: transactionData})=>{
-
-                const {type: transactionType, timestamp : {occurredAt}} = transactionData;
-
-                return ( transactionType == type && DayJSUtils.isWithinTimeframe(activeTimeframe, occurredAt) )
-        })
-    })
-}
 
 /* ------------------------------ newTransaction SELECTORS ------------ */
-
+// #region DEPRECATED
 
 /**## selectNewTransactionData_wrapper
  * Wrapper function that returns a selector that is transaction type, and activeTimeframe aware.
@@ -82,9 +56,14 @@ export const selectNewTransactionData_wrapper = (type, activeTimeframe)=>{
     )
 }
 
+// #endregion
+
+
+/* ---------------------- RECENT TRANSACTIONS SELECTORS ------------------ */
+
 export const selectRecentTransactionsList_wrapper = (activeTimeframe)=>{
 
-    return createSelector( selectPrimaryTransactionsList, 
+    return createSelector( selectPrimaryTransactionsDataList, 
         (primaryTransactionsData)=>{
             
             return primaryTransactionsData
@@ -99,17 +78,7 @@ export const selectRecentTransactionsList_wrapper = (activeTimeframe)=>{
                 .sort(
                     ({data: transaction_1_data}, {data: transaction_2_data}) => {
 
-                        return (transaction_2_data.timestamp.occurredAt - transaction_1_data.timestamp.occurredAt)
-
-                        if (transaction_1_data.timestamp.occurredAt > transaction_2_data.timestamp.occurredAt) {
-                            return 1;
-                        }
-                        else if (transaction_2_data.timestamp.occurredAt < transaction_1_data.timestamp.occurredAt) {
-                            return -1;
-                        }
-                        else {
-                            return 0;
-                        }
+                        return (transaction_2_data.timestamp.occurredAt - transaction_1_data.timestamp.occurredAt)                       
                     }
                 )
                 .slice(0, defaults.maxRecentTransactions);
@@ -117,43 +86,60 @@ export const selectRecentTransactionsList_wrapper = (activeTimeframe)=>{
     )
 }
 
-/* export const selectNewTransactionData_income = createSelector( selectNewTransactionData, selectActiveTimeframe,
-    (newTransactionData, activeTimeframe)=>{
+export const wrapper_selectRecentTransactionsIdList = (activeTimeframe, length)=>{
 
-        if (newTransactionData) {
-            
-            const { type, timestamp: {occurredAt} } = newTransactionData;
-    
-            if (type == transactionType.INCOME &&
-                DayJSUtils.isWithinTimeframe(activeTimeframe, occurredAt, 0)) {
-                return newTransactionData;
-            }
-            else {
-                return undefined;
-            }
-        }
-        else {
-            return undefined;
-        }
+    return createSelector(
+        [selectPrimaryTransactionsIdList, selectPrimaryTransactionsData], 
+        (allIds, byId)=>{
 
-    }
+            return allIds
+                .filter( id => {
+                        
+                        const {timestamp: {occurredAt}} = byId[id];
+                        return DayJSUtils.isWithinTimeframe(activeTimeframe, occurredAt)
+                    }                    
+                )
+                .sort(
+                    (id_1, id_2) => {
+                        
+                        const {timestamp: {occurredAt: transaction_1_occurredAt}} = byId[id_1]
+                        const {timestamp: {occurredAt: transaction_2_occurredAt}} = byId[id_2];
+
+                        return transaction_2_occurredAt - transaction_1_occurredAt
+                    }
+                )
+                .slice(0, length)
+        }
+    )
+}
+
+
+/* ------------------------ ACCUMULATOR SELECTORS ----------- */
+export const selectBalanceInitializer = createSelector(
+    [selectBalanceData], 
+    (balanceData)=>Object.values(balanceData)
 )
-export const selectNewTransactionData_expenditure = createSelector( selectNewTransactionData, selectActiveTimeframe,
-    (newTransactionData, timeframe)=>{
 
-        if (newTransactionData) {
-            
-            const { type, timestamp: {occurredAt} } = newTransactionData;
-    
-            if (type == transactionType.EXPENDITURE &&
-                DayJSUtils.isWithinTimeframe(timeframe, occurredAt)) {
-                return newTransactionData;
-            }
-            else {
-                return undefined;
-            }
+/**### Note: 
+ * This selector returns a filtered array, which is always a new reference.
+ * So this selected value will always be different between re-renders. 
+ * 
+ * Further optimisation is needed to avert re-painting UI
+ * 
+ * @param {string} type INCOME | EXPENDITURE
+ * @param {string} activeTimeframe timeframeEnum: MONTH | WEEK | YEAR
+ * @returns selector function to retrieve the transactions initializer
+*/
+export const wrapper_selectTransactionsInitializer = (type, activeTimeframe)=>{
+
+    return createSelector(
+        [selectPrimaryTransactionsData],
+        (transactionsData) => {
+
+            return Object.values(transactionsData).
+                filter(({ type: transactionType, timestamp: { occurredAt } }) => {
+                    return transactionType == type && DayJSUtils.isWithinTimeframe(activeTimeframe, occurredAt)
+                })
         }
-
-    }
-)
- */
+    )
+}

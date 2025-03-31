@@ -1,0 +1,264 @@
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/colors' as colors;
+@use '@app_styles/fonts' as fonts;
+@use '@app_styles/default-dimensions' as default-dimensions;
+@use '@app_styles/breakpoints' as breakpoints;
+
+@import '../../../../components/TransactionUI/TransactionListItem/placeholders';
+
+
+$round-border-radius: 24px;
+
+$list-container-padding: 0px;
+
+// mainHeight - headerMarginTop - rowGap - mastheadHeight paddingBottom
+$list-container-height: calc(default-dimensions.$main-height - 
+    12px - 
+    12px -
+    default-dimensions.$page-masthead-height - 
+    24px);
+
+
+$table-head-height: 40px;
+$table-row-gap: 12px;
+
+$scrollbar-track-width: 12px;
+
+.transactions-list-container {
+
+    width: inherit;
+
+    height: $list-container-height;
+    
+    // flex-grow: 1;    
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    
+    padding: $list-container-padding;
+
+
+    border: 1px solid colors.$grey;
+    border-radius: $round-border-radius;
+
+    overflow-x: hidden;
+
+
+    // #region DEPRECATED 
+    /* .transactions-table-container {
+        width: 100%;
+        
+        height: 100%;
+        max-height: 100%;
+
+    } */
+    // #endregion
+
+    
+    .table-wrapper {
+        width: 100%; // responsive width        
+
+        height: 100%; // in anticipation of scroll behaviour
+        max-height: 100%;            
+
+        .transactions-table {
+            
+            width: 100%; 
+            height: 100%;               
+
+            border-collapse: collapse;
+            table-layout: fixed;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            // row-gap: $table-row-gap;                
+
+            /* ATTENTION : ---------- TABLE-HEADER ---------- */
+            .table-head {
+                height: $table-head-height;
+                
+                .table-head-row {
+                    @extend %table-row;
+                    padding-block: 0;                    
+    
+                    height: 100%;
+                    
+                    background-color: colors-alt.$light-bg-grey;
+    
+                    // border-radius: $round-border-radius;
+                
+                    .amount-cell {
+                        @extend %amount-cell;
+                    }
+                    .tag-cell {
+                        @extend %tag-cell;
+                    }
+                    .title-cell {
+                        @extend %title-cell;
+                    }
+                    .date-cell {
+                        @extend %date-cell;
+                    }
+                    .select-all-transactions-cell {
+                        @extend %select-transaction-cell;
+    
+                        .select-all-transactions {
+                            height: fonts.$text-small-size + 3px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+    
+                            cursor: pointer;
+    
+                            
+                            >svg {
+                                height: 100%;
+                                object-fit: contain;                                
+                            }
+    
+                            &::before {
+    
+                               @extend %action-psuedo-element;
+                            }
+                    
+                            &:hover::before {
+                                @extend %action-psuedo-element-hover;
+                            }
+                        }
+                    }
+    
+                    .selected-transactions-action-cell {                        
+    
+                        .transaction-selection-action {
+                            font-size: fonts.$text-small-size;
+                            display: flex; 
+                            align-items: center;                           
+                            justify-self: start;
+    
+                            padding: 4px 12px;
+                            border-radius: 24px;
+    
+                            cursor: pointer;
+    
+                            >svg {
+                                height: fonts.$text-small-size + 3px;
+                            }
+                        }
+                        .transaction-selection-action:hover {
+                            background-color: colors-alt.$light-accent-active-bg;
+                        }
+                    } 
+    
+                    // to account for scrollbar width
+                    > .table-header-cell:last-child {
+                        margin-right: $scrollbar-track-width !important;
+                    }
+                }
+            }       
+
+
+            /* ℹ.INFO ---------- default scrolling container ---------- */
+            .table-body-wrapper {
+                width: 100% !important; //responsive width
+
+                /* height: calc($list-container-height 
+                    - $table-head-height 
+                    - $table-row-gap                  
+                ); */
+
+                height: calc(100% - $table-head-height);
+
+                overflow-y: auto;
+
+                /* &::-webkit-scrollbar {
+                    appearance: none;
+                    width: $scrollbar-track-width;
+                }
+                &::-webkit-scrollbar-track {
+                    width: $scrollbar-track-width;
+                    background-color: transparent;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background-color: colors-alt.$light-scrollbar-grey;
+                } */
+            }
+
+            .table-body {
+                // height determined by content
+                padding-bottom: 12px;
+                width: 100%;
+
+                display: flex;
+                flex-direction: column;
+            }
+            
+        }
+    }
+}
+
+
+/* ---------------------- BREAKPOINTS ------------------------ */
+
+
+@media (max-width: breakpoints.$tablet-width) {
+
+    .transactions-list-container {
+
+        padding: 0;
+        overflow-x: hidden;
+        
+        .table-wrapper {
+            
+            // scrollbar styles for descendants
+            ::-webkit-scrollbar {
+                display: none;
+            }
+
+            // scrollbar styles for self
+            &::-webkit-scrollbar {
+                display: none;
+            }
+
+            // make -scrolling -parent
+            height: 100%;
+            max-height: 100%;
+            overflow-y: auto;
+
+
+            
+            .transactions-table {
+
+                height: fit-content;
+                row-gap: 0;
+                
+                .table-head {
+                    height: $table-head-height;
+
+                    position: sticky;
+                    top: 0;
+
+                    z-index: 1;
+            
+                    > tr.table-head-row.list-actions-row {
+                        height: 100% ;
+                        border-radius: inherit;                           
+                        
+                    }
+                }
+
+                // ------ remove scroll behaviour -----
+                .table-body-wrapper {
+                    height: auto;
+                    overflow: unset;
+                }
+            }
+        }
+    }
+
+
+    
+
+}

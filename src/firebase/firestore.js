@@ -126,6 +126,8 @@ export class FirestoreCRUD {
      * @param {string} collectionPath - absolute path to the collection 
      * @param {Array<object>} queryBuilder<{key, relationship, value}> - array of where objects to build a query
      * @param {Array<object>} order<{key, trend: 'asc' | 'desc'}> - array for ordering the query, default trend is 'asc'
+     * 
+     * @returns {object} an object representation of the documents with id as key and the respective data as its property
     */
     async getDocsData(collectionPath, queryBuilder = [], order = []) {
         // Get collection reference
@@ -158,12 +160,21 @@ export class FirestoreCRUD {
         // Map the snapshot to an array of document data
         /*Firebase treats a nonexistent collection as an empty collection
         Mapping over an empty array gives an empty array */
-        return querySnapshot.docs.map(doc => {
+
+        /* return querySnapshot.docs.map(doc => {
             return {
                 id: doc.id,
                 data: doc.data(),
             }
-        });
+        }); */
+
+        /* ATTENTION: we using objects now */
+
+        return querySnapshot.docs.reduce((accumulator, doc) => {
+
+            accumulator[doc.id] = doc.data();
+            return accumulator;
+        }, {})
     }
 
 

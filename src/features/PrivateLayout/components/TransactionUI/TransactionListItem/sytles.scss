@@ -1,0 +1,221 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/fonts' as fonts;
+@use '@app_styles/breakpoints' as breakpoints;
+@use './placeholders' as cell-styles;
+
+@import './placeholders';
+
+.table-row {
+    user-select: none;
+    width: 100%;
+    
+    display: flex;
+    align-items: center;
+
+    @extend %table-row;    
+
+    // padding: 12px 8px;
+
+    // background-color: colors-alt.$light-bg-main;
+
+    td {
+        @extend %table-cell;
+    }
+
+    .select-transaction-cell {
+        @extend %select-transaction-cell;    
+        // color: colors.$text-dark-tertiary;  
+        position: relative;      
+    }
+
+    .amount-cell {
+        @extend %amount-cell;
+
+        .transaction-type, .transaction-amount {
+            font-weight: 600;
+        }           
+    }
+    .amount-cell.income {
+        .transaction-type, .transaction-amount {
+            color: colors.$income-green;
+        }
+    }
+    .amount-cell.expenditure {
+        .transaction-type, .transaction-amount {
+            color: colors.$expenditure-red;
+        }
+    }
+
+
+    .tag-cell {
+        @extend %tag-cell;
+
+        >span {
+            padding: 1px 8px;
+            border-radius: fonts.$text-small-size;
+            color: colors.$white;
+            font-weight: 600;
+            // -webkit-text-stroke: 0.5px colors.$text-dark-secondary
+        }
+    }
+
+    .date-cell {
+        @extend %date-cell;
+    }
+
+    .transaction-item-actions-cell {
+        @extend %transaction-item-actions-cell;
+        position: relative;        
+    }
+
+    .title-cell {
+        @extend %title-cell;
+    }
+    
+    & .transaction-item-action {        
+
+        &::before {
+
+            @extend %action-psuedo-element;            
+        }
+
+        &:hover::before {
+            @extend %action-psuedo-element-hover;            
+        }
+
+    }
+
+
+    & .transaction-item-action:not(.selected) {
+        color: colors.$text-dark-tertiary;
+    }
+    & .select-transaction-item.selected {
+        color: colors-alt.$light-accent-neutral;
+    }
+    
+}
+
+.table-row.selected {
+    background-color: colors-alt.$light-bg-blue-secondary
+}
+
+.table-row:not(.table-head-row):not(:last-child) {
+    border-bottom: 0.5px solid colors.$light-grey;
+}
+
+.table-row:not(.table-head-row):hover {
+    cursor: pointer;
+    // border-radius: 8px;
+    // border-bottom: none;
+
+    .date-cell {
+        display: none;
+    }
+
+    .transaction-item-actions-cell {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+    
+    // box-shadow: 0 0 3px 2px colors-alt.$light-shadow;
+
+    box-shadow: inset 1px 0 0 colors-alt.$light-shadow, 
+        inset -1px 0 0 colors-alt.$light-shadow,  
+        0 1px 2px 0 colors-alt.$light-shadow, 
+        0 1px 3px 1px colors-alt.$light-shadow;
+    
+    border-radius: 2px;
+
+    & .transaction-item-action {
+        color: colors.$text-dark;
+    }
+    & .select-transaction-item.selected {
+        color: colors-alt.$light-accent-strong;
+    }
+    
+}
+
+
+.transaction-item-action-tooltip {
+
+    & .ant-tooltip-inner {
+
+        margin-top: fonts.$text-small-size - 5px !important;
+        padding: 3px 8px;
+        font-size: fonts.$text-small-size;
+
+        min-width: auto;
+        min-height: auto;
+    }
+}
+
+
+
+/* ------------------ BREAKPOINTS ----------------- */
+
+@media (max-width: breakpoints.$tablet-width) {
+    
+    .transaction-list-item-card.table-row {            
+
+        // padding-block: 8px;
+
+        align-items: flex-start;
+
+        & .select-transaction-cell {
+            padding-inline-end: 6px;
+        }
+
+        .item-details-container {
+
+            // flex-grow: 1;
+            /* --------- needs a definite width to ellipsize ------- */
+            width: calc(100% - cell-styles.$select-transaction-cell-width);
+            display: flex;
+            flex-direction: column; 
+            row-gap: 8px;
+            
+            div.item-details-row {
+
+                width: 100%;                
+                min-width: 0;
+                
+                display: flex;
+                align-items: center;
+
+                gap: 12px;
+
+                &:first-child {
+                    justify-content: space-between;
+                }
+
+                &:last-child {
+                    display: block;
+                }
+            }
+                        
+            & .tag-cell {
+                min-width: fit-content !important;
+            }
+            & .title-cell {
+                // min-width: auto;
+                flex-basis: 100%;
+                flex-shrink: 1;   
+                min-width: 0 !important;
+                white-space: nowrap;             
+            }
+        }
+    }
+
+    
+    .transaction-list-item-card:hover {
+
+        & .date-cell {
+            display: inline !important;
+        }
+    }
+}
+
+
+

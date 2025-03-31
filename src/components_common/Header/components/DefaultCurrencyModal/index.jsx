@@ -8,7 +8,7 @@ import modalContext from "../../../ModalWrapper/context";
 import { useDispatch, useSelector } from "react-redux";
 import { changeDefaultCurrencyThunk } from "../../../../features/PrivateLayout/redux/thunk";
 import userAuthContext from "../../../../features/PrivateLayout/context/userAuthContext";
-import { selectBalanceData } from "../../../../features/PrivateLayout/redux/selectors";
+import { selectBalanceData, selectBalanceDataList } from "../../../../features/PrivateLayout/redux/selectors";
 
 
 
@@ -18,7 +18,7 @@ import { selectBalanceData } from "../../../../features/PrivateLayout/redux/sele
  */
 export default function DefaultCurrencyModal({defaultCurrency}) {
 
-    const balanceData = useSelector(selectBalanceData);
+    const balanceData = useSelector(selectBalanceDataList);
     const availableBalanceCurrencies = useMemo(()=>{
         
         const result = {};

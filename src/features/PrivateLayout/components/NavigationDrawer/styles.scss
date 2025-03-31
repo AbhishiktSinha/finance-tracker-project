@@ -1,7 +1,7 @@
 @use '@app_styles/default-dimensions' as default-dimensions;
 @use '@app_styles/colors' as colors;
 @use '@app_styles/colors-alt' as colors-alt;
-
+@use '@app_styles/breakpoints' as breakpoints;
 
 $drawer-padding-block: 36px;
 
@@ -12,13 +12,18 @@ $nav-link-item-container-padding-inline: 13px;
 $nav-accordion-content-padding-left: 8px;
 
 .navigation-drawer {
+
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+
     // position: absolute;
     position: fixed;
     left: 0;
     top: default-dimensions.$header-height;
     bottom: 0;
 
-    z-index: 1;
+    z-index: 30;
 
     background-color: colors-alt.$light-bg-blue-secondary;
 
@@ -26,20 +31,47 @@ $nav-accordion-content-padding-left: 8px;
 
     padding-block: $drawer-padding-block;
 
+    user-select: none;
+
+    /* ----- TOP SECTION -- hidden by default -------- */
+    .navbar-top-container {
+        display: none;
+
+        height: default-dimensions.$logo-main-height-default;
+        width: 100%;
+
+        padding-inline: $nav-link-item-container-padding-inline;
+
+        .logo-main-container {
+            height: 100%;
+
+            >img {
+                height: 100%;
+                object-fit: contain;
+            }
+        }
+    }
+
+
+    /* ----------- NAV-LINKS - LIST --------------- */
     .navigation-drawer-list {
 
-        li, 
-        .nav-link-item-container, 
-        .nav-accordion-header-item-container, 
+        padding-inline: $nav-link-item-container-padding-inline;
+
+        /* -------- generic styling for list items --------- */
+        li,
+        & .nav-link-item-container,
+        & .nav-accordion-header-item-container,
         & li {
 
             display: flex;
             align-items: center;
             // justify-content: center;
-            
-            padding-inline: $nav-link-item-container-padding-inline;
-            
-            a, p {
+            // padding-inline: $nav-link-item-container-padding-inline;
+
+
+            a,
+            p {
                 text-transform: capitalize;
 
                 display: flex;
@@ -58,7 +90,7 @@ $nav-accordion-content-padding-left: 8px;
                     height: 24px;
 
                     object-fit: contain;
-                    overflow: hidden; 
+                    overflow: hidden;
 
                     >img {
 
@@ -67,41 +99,63 @@ $nav-accordion-content-padding-left: 8px;
                         object-fit: contain;
                     }
                 }
-                
+
             }
+
             a.selected {
                 background-color: colors-alt.$light-accent-tertiary;
                 color: colors.$text-dark;
             }
-            a:hover:not(.selected), p:hover {
+
+            a:hover:not(.selected),
+            p:hover {
                 background-color: colors-alt.$light-bg-blue-primary;
             }
 
-            .accordion-header {
-                cursor: pointer;
-                border: 1px solid colors.$text-dark-tertiary;
+        }
 
-                & .accordion-action {
-                    display: flex; 
-                    align-items: center;
-                    justify-content: center;  
-                                       
+        /* ---------specific styling for accordions --------- */
+        .accordion-container {
 
-                    width: 16px;
-                    height: 16px;
-                    img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit:cover;
-                    }      
-                    svg {
-                        width: 100%;
-                        height: 100%;
-                        object-fit:fill;
-                    }          
+            // for the psuedo list item inside accordion
+            .nav-accordion-header-item-container {
+
+                .accordion-header {
+                    flex-direction: column;
+                    row-gap: 5px;
+
+                    cursor: pointer;
+                    // border: 1px solid colors.$text-dark-tertiary;
+
+                    .accordion-action {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        color: colors.$text-dark-tertiary !important;
+
+                        width: 16px;
+                        height: 16px;
+
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+
+                        svg {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: fill;
+                        }
+                    }
                 }
             }
-            
+
+            &.isOpen {
+                // border: 0.5px solid colors.$text-dark-tertiary;
+                // border-radius: $nav-link-border-radius;
+            }
         }
     }
 }
@@ -113,21 +167,6 @@ $nav-accordion-content-padding-left: 8px;
         display:none;
     } */
 
-    .nav-accordion-header-item-container.open {
-        
-        
-        .accordion-content {
-            padding: 0;
-        }
-    }
-    .nav-accordion-header-item-container .accordion-header {
-        flex-direction: column;
-        border: 1px solid colors.$text-dark-tertiary;
-
-        row-gap: 5px;
-    }
-    
-    
 }
 
 
@@ -140,7 +179,8 @@ $nav-accordion-content-padding-left: 8px;
 
         & li {
 
-            a, p {
+            a,
+            p {
 
                 width: 100%;
                 justify-content: start;
@@ -148,31 +188,59 @@ $nav-accordion-content-padding-left: 8px;
         }
     }
 
-    .nav-accordion-header-item-container.open {
-        flex-direction: column;
-        align-items: stretch;
-        row-gap: 0;                
-        
-        .accordion-content {
-            
-            padding-left: $nav-accordion-content-padding-left;
+    .accordion-container {
 
-            & li {
-                padding-inline: 0
+        .nav-accordion-header-item-container {
+
+            .accordion-header {
+                flex-direction: row !important;
+
+                position: relative;
+
+                & .accordion-action {
+                    position: absolute;
+                    right: $nav-link-item-container-padding-inline;
+                }
             }
+
+            /* ---- accordion is open for an open drawer ------- */
+            
         }
+
+        &.isOpen {
+    
+                .accordion-content {
+                padding-left: $nav-accordion-content-padding-left;
+            }
+        }            
+    }
+}
+
+
+
+/* -------------------------- BREAKPOINTS -------------------- */
+
+@media (max-width: breakpoints.$large-screen-min-width) {
+
+    .navigation-drawer {
+
+        top: 0;
     }
 
-    & .accordion-header {
-        position: relative;
+    .navigation-drawer.closed {
 
-        & .accordion-action {
-            position: absolute;
-            right: $nav-link-item-container-padding-inline;
-        }
+        width: 0;
+        overflow: hidden;
     }
 
-    /* & .nav-link-title {
-        display: inline;        
-    } */
+    .navigation-drawer.open {
+
+        width: default-dimensions.$navigation-drawer-width-opened-wider;
+
+        .navbar-top-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
 }

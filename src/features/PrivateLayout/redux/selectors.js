@@ -3,37 +3,57 @@
 import getSymbolFromCurrency from "currency-symbol-map";
 import { createSelector } from "reselect";
 import { consoleDebug } from "../../../console_styles";
+// import { reduxSliceKeys } from "../defaults";
 
-/* export const selectDefaultCurrency = ({userDoc})=> {
-    if (Boolean(userDoc.data?.settings?.defaultCurrency)) {
+import { reduxSliceKeys } from "../defaults";
 
-        const { data: { settings: {defaultCurrency}} } = userDoc;
-        return {
-            code: defaultCurrency, 
-            symbol: getSymbolFromCurrency(defaultCurrency)
-        }
-    }
-    return undefined;
-} */
+
+// ATTENTION: keepers of secret
+export const wrapper_selectDataAsList = (sliceKey)=>{
+
+    return createSelector(
+        [(state) => state[sliceKey].data.byId],
+        (data) =>
+            data ? Object.entries(data).map(([id, value]) => ({ id, data: value })) : []
+    );
+}
+
 export const selectDefaultCurrency = createSelector([({userDoc})=>userDoc.data?.settings?.defaultCurrency], (defaultCurrency)=>{
     return Boolean(defaultCurrency) ? {code: defaultCurrency, symbol: getSymbolFromCurrency(defaultCurrency)} : undefined;
 })
 
 /* ------------- primary transaction selecltor ------------ */
-export const selectPrimaryTransactionsList = ({primaryTransactions: state})=> state.data;
+export const selectPrimaryTransactionsData = ( { [reduxSliceKeys.primaryTransactions]:state } ) => state.data.byId;
+export const selectPrimaryTransactionsDataList = wrapper_selectDataAsList(reduxSliceKeys.primaryTransactions)
+export const selectPrimaryTransactionsIdList = ( { [reduxSliceKeys.primaryTransactions]:state } ) => state.data.allIds;
+
+export const wrapper_selectPrimaryTransactionData = (id)=>{
+    return createSelector(
+        [selectPrimaryTransactionsData], 
+        (data)=>data[id]
+    )
+}
+
 
 /* ------------ balance SELECTORS ---------------- */
 
-export const selectBalanceData = ({balance}) => balance.data;
+export const selectBalanceData = ({[reduxSliceKeys.balance]:state}) => state.data.byId;
+export const selectBalanceDataList = wrapper_selectDataAsList(reduxSliceKeys.balance);
+export const selectBalanceIdList = ({[reduxSliceKeys.balance]:state})=>state.data.allIds;
 
 /* ------------ newTransaction SELECTORS --------------- */
 export const selectNewTransactionData = ({newTransaction})=> newTransaction.data;
 
+
 /* -------------------- TAG SELECTORS -------------------- */
-export const selectTags = ({tags}) => tags.data;
+
+export const selectTagsData = ({[reduxSliceKeys.tags]: state}) => state.data.byId;
+export const selectTagsDataList = wrapper_selectDataAsList(reduxSliceKeys.tags);
+export const selectTagIdList = ({[reduxSliceKeys.tags]:state}) => state.data.allIds;
+
 export const wrapper_selectTagsOfType = (type) => {
     
-    return createSelector([selectTags], (tagsList)=>{
+    return createSelector([selectTagsDataList], (tagsList)=>{
 
         return tagsList.filter( tagItem => {
                       
@@ -42,18 +62,15 @@ export const wrapper_selectTagsOfType = (type) => {
         })
     })
 }
-export const selectTag_wrapper = (tagId) => {
+export const wrapper_selectTagData = (tagId) => {
     
-    return createSelector(selectTags, 
-        (tagsList=>{
-            return tagsList.filter(
-                ({id, data})=>{
-                    
-                    return id==tagId
-                }
-            )[0];
-        })
-    )
+   return createSelector(
+     [selectTagsData], 
+     (tagsData)=>{
+        // console.log('fetch tag data for', tagId, tagsData[tagId])
+        return tagsData[tagId];
+     }
+   )
 }
 
 

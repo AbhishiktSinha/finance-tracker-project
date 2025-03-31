@@ -2,10 +2,26 @@ import { useContext, useRef } from "react";
 import userAuthContext from "../../../../context/userAuthContext";
 import { useDispatch } from "react-redux";
 import { deleteTransactionsListThunk } from "../../../../redux/thunk";
+import { consoleDebug } from "../../../../../../console_styles";
+import modalContext from "../../../../../../components_common/ModalWrapper/context";
+import ActionButton from "../../../../../../components_common/ActionButton";
+
+import '../../styles/confirm-modal-styles.scss'
 
 
-export default function DeleteSelectedModal({selectedTransactionsList, onDelete}) {
+/**
+ * 
+ * @param {object} param0 props
+ * @param {Array<{id:string, data:object}>} param0.selectedTransactionsList
+ * @param {Function} param0.onDeleteList
+ * @returns 
+ */
+export default function DeleteSelectedModal({selectedTransactionsList, onDeleteList, callbackModifyUI}) {
 
+    consoleDebug('------- DELETE SELECTED MODAL RENDERED ------------')
+    console.log('props:', selectedTransactionsList, onDeleteList)
+
+    
     const {user: {uid}} = useContext(userAuthContext);
 
     const {closeModal} = useContext(modalContext);    
@@ -29,9 +45,10 @@ export default function DeleteSelectedModal({selectedTransactionsList, onDelete}
 
         try {
 
-            // await dispatch(deleteTransactionThunk(uid, transactionObject, onDelete));
-            await dispatch(deleteTransactionsListThunk(uid, selectedTransactionsList, onDelete));
+            // await dispatch(deleteTransactionThunk(uid, transactionObject, onDeleteList));
+            await dispatch(deleteTransactionsListThunk(uid, selectedTransactionsList, onDeleteList));
 
+            callbackModifyUI && callbackModifyUI()
             closeModal();
         }
         catch(e) {
@@ -42,13 +59,8 @@ export default function DeleteSelectedModal({selectedTransactionsList, onDelete}
     }
 
     return (
-        <div className="delete-modal-content">
-            <h2 className="modal-title">Delete Selected Transactions Transaction?</h2>
-
-            {/* <ul className="modal-description">
-                <li>Transaction Title: <span>{transactionData.title}</span> </li>
-                <li>Transaction Id: <span>{transactionId}</span> </li>
-            </ul> */}            
+        <div className="delete-modal-content transaction-action-confirm-modal">
+            <h2 className="modal-title">Delete Selected Transactions?</h2>
 
             <div className="buttons-container">
                 

@@ -12,44 +12,67 @@ import { consoleInfo } from '../../console_styles';
 
 import './styles.scss'
 import { asyncStatus } from '../../enums';
+import { Button } from 'antd';
+import { MenuRounded } from '@mui/icons-material';
 
-export default function Header({userAuthDetails: {userLoginStatus, user, error}}) {    
+    export default function Header({userAuthDetails: {userLoginStatus, user, error}, drawerActionsRef}) {    
 
-    // to make header icon dynamically respond to change in width
-    const [smallThreshold, setSmallThreshold] = useState(()=>{
-        
-        consoleInfo(`window.innerWidth: ${window.innerWidth}`);
-        return window.innerWidth < 520 ? false : true; 
-    });
 
-    // handle window resize event in effect
-    useEffect(()=>{
-        const resizeHandler = (e)=>{
-            consoleInfo('window resize event');
+        consoleInfo('-------HEADER PROP: drawerActionsRef -------------')
+        console.log(drawerActionsRef)
 
-            if (e.target.innerWidth <= 520) {
-                setSmallThreshold(false);
-            }
-            else if(e.target.innerWidth > 520) {
-                setSmallThreshold(true);
-            }
+        // to make header icon dynamically respond to change in width
+        const [smallThreshold, setSmallThreshold] = useState(()=>{
+            
+            consoleInfo(`window.innerWidth: ${window.innerWidth}`);
+            return window.innerWidth < 520 ? false : true; 
+        });
+
+
+        function openNavDrawer() {
+            console.log(drawerActionsRef)
+            drawerActionsRef.current.openDrawer();
         }
-        window.addEventListener('resize', resizeHandler);
-
-        return ()=>{
-            window.removeEventListener('resize', resizeHandler);
+        function closeDrawer() {
+            drawerActionsRef.current.closeDrawer();
         }
-    }, [])
+
+        // handle window resize event in effect
+        useEffect(()=>{
+            const resizeHandler = (e)=>{
+                consoleInfo('window resize event');
+
+                if (e.target.innerWidth <= 520) {
+                    setSmallThreshold(false);
+                }
+                else if(e.target.innerWidth > 520) {
+                    setSmallThreshold(true);
+                }
+            }
+            window.addEventListener('resize', resizeHandler);
+
+            return ()=>{
+                window.removeEventListener('resize', resizeHandler);
+            }
+        }, [])
 
 
-    return (
-        <div id="header">
-            <div className="logo-main-container">
-                <img className="logo-main" 
-                    src={smallThreshold ? Logo_main : Logo_small} 
-                    alt="financely" 
-                    draggable={false}
-                    />
+        return (
+            <div id="header">
+                <div className="header-left-container">
+                    
+                    <Button 
+                        className='open-nav-drawer-button'
+                        ghost
+                        shape={'circle'}
+                        onClick={openNavDrawer}
+                    ><MenuRounded/></Button>
+
+                <div className="logo-main-container">
+                    <img className="logo-main" src={Logo_main} alt="financely" draggable={false} />
+                    <img src={Logo_small} alt="Financely" className="logo-small" draggable={false}/>
+                </div>
+
             </div>
             {
                 Boolean(userLoginStatus != asyncStatus.ERROR) && (
@@ -85,6 +108,7 @@ export default function Header({userAuthDetails: {userLoginStatus, user, error}}
                 )
 
             }
+            
         </div>
     )
 }

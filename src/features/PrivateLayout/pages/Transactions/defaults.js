@@ -1,7 +1,7 @@
 // import defaults from "../../defaults";
 
 import { filterTypes, timeframe } from "../../../../enums"
-import defaults from "../../defaults"
+import {primaryTransactionsTimeframe} from "../../defaults"
 
 
 /* if there is no default-filtering for a condition, 
@@ -27,6 +27,10 @@ export const filterDefaults = {
         options_label: ['name'],
 
         defaultSelected: new Set([]), 
+
+        isTypeDependent: true,
+
+        showSelectedOnTop: true,
     }, 
 
     currency: {
@@ -37,6 +41,13 @@ export const filterDefaults = {
         options_label: ['code', 'name', 'symbol'],
 
         defaultSelected: new Set([]),
+
+        // isTypeDependent: true,
+
+        showSelectedOnTop: true,
+
+        orderList: true, 
+        orderByField: 'code', // null if the list has to be ordered by the data itself
     }, 
 
     timeframe: {
@@ -44,9 +55,14 @@ export const filterDefaults = {
         category_label: 'Timeframe',
         //defaultSelected: {} this needs the key, not the value of timeframe.YEAR_DURATION
         defaultSelected: new Set(Object.keys(timeframe).filter(
-            (key)=>timeframe[key]==defaults.primaryTransactionsTimeframe))
+            (key)=>timeframe[key]==primaryTransactionsTimeframe))
     }
 }
 
 /* order being a single select value, no option is selected by default */
-export const orderDefaults = { }
+export const orderDefaults = { 
+    criteria: undefined, 
+    orderKey: undefined,
+}
+
+export const queryDefaults = "";

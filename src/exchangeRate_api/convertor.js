@@ -34,9 +34,11 @@ export default class ExchangeRateConvertor {
             this.#priorCheck();
             
             const reducedAmount = initializer.reduce(
-                (accumulator, curr)=>{
+                (accumulator, data)=>{
+
+                    const {currency, amount} = data;
                     
-                    const convertedAmt = this.convertAmount(defaultCurrency, curr.data);
+                    const convertedAmt = this.convertAmount(defaultCurrency, {'currency': currency, 'amount': amount});
 
                     if (! binary_types) {
                         return (accumulator + convertedAmt)
@@ -57,6 +59,7 @@ export default class ExchangeRateConvertor {
             return reducedAmount;
         }
         catch(e) {
+            console.log(e, initializer);
             consoleError(e);
         }
     }

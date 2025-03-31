@@ -7,8 +7,8 @@ import modalContext from "../../../../../../components_common/ModalWrapper/conte
 export default function CustomTimeframeModal({defaultValue, submitValue}) {
 
     const [value, setValue] = useState({
-        start: defaultValue?.start || DayJSUtils.getLoginTimeStamp(), 
-        end: defaultValue?.end || DayJSUtils.getLoginTimeStamp(),
+        start: defaultValue?.start || dayjs().startOf('day').valueOf(), 
+        end: defaultValue?.end || dayjs().endOf('day').valueOf(),
     })
 
     const {closeModal} = useContext(modalContext)
@@ -18,6 +18,27 @@ export default function CustomTimeframeModal({defaultValue, submitValue}) {
     function onClick() {
         submitValue(value.start, value.end);
         closeModal();
+    }
+
+    /**
+     * Start at the startOf DAY for the selected start date
+     */
+    function setStartLimit(dayjsDate) {
+        setValue( value => ({
+            ...value, 
+            start: dayjsDate.startOf('day').valueOf()
+        }))
+    }
+
+    /**
+     * End at the endOf DAY for the selected end date
+     * @param {dayjs} dayjsDate 
+     */
+    function setEndLimit(dayjsDate) {
+        setValue( value => ({
+            ...value, 
+            end: dayjsDate.endOf('day').valueOf()
+        }))
     }
 
     return (
@@ -33,12 +54,7 @@ export default function CustomTimeframeModal({defaultValue, submitValue}) {
                     
                     allowClear={false}
 
-                    onChange={(dayjsDate)=>{
-                        setValue( value => ({
-                            ...value, 
-                            start: dayjsDate.valueOf()
-                        }))
-                    }}
+                    onChange={setStartLimit}
                 />
                 <DatePicker 
                     key={'end'}
@@ -48,12 +64,7 @@ export default function CustomTimeframeModal({defaultValue, submitValue}) {
 
                     allowClear={false}
 
-                    onChange={(dayjsDate)=>{
-                        setValue( value => ({
-                            ...value, 
-                            end: dayjsDate.valueOf()
-                        }))
-                    }}
+                    onChange={setEndLimit}
                 />
 
             </div>

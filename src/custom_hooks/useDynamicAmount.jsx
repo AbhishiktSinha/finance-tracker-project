@@ -54,9 +54,8 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, cardT
     }, [status])
     
     consoleDebug(`Status in useDynamicAmount: ${status}\n
-        Status sent to ${cardTransactionType ? 
-            (cardTransactionType==transactionType.INCOME?'Income':'Expenditure') :
-             'Balance'}: ${amount.current.status}`);
+        Status sent to ${cardTransactionType}) :
+             'Balance': ${amount.current.status}`);
 
     
     /* recompute amount on every defaultCurrencyCode change for success
@@ -68,7 +67,9 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, cardT
         if (amount.current.status == asyncStatus.SUCCESS) {
             
             amount.current.data = new ExchangeRateConvertor().
-                reduceConvertedList(defaultCurrencyCode, initializer)
+            reduceConvertedList(defaultCurrencyCode, initializer)
+
+            consoleDebug(`RECALCULATING INITIALIZER FOR ${cardTransactionType}} ---> amount: ${amount.current.data}`)
         }
     }, [defaultCurrencyCode, status, activeTimeframe])
 
@@ -79,6 +80,8 @@ export default function useDynamicAmount(initializer, defaultCurrencyCode, cardT
     useMemo(() => {
         // handle initial case
         if (Boolean(latestTransaction)) {
+
+            console.log('valid latest transaction found ---- updating initializer');
 
             const {id: transactionId, transactionOperation: operation, 
                 transactionData, modifiedFields

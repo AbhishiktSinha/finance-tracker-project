@@ -1,7 +1,7 @@
 import { filter } from "lodash";
 import { consoleError, consoleInfo } from "../../../../console_styles";
-import { getKey } from "../../utils";
-import { timeframe, transactionType } from "../../../../enums";
+import { getKey, getNestedValue } from "../../utils";
+import { sortOrder, timeframe, transactionType } from "../../../../enums";
 import { DayJSUtils } from "../../../../dayjs";
 
 
@@ -57,44 +57,54 @@ export function searchThroughFilterOptions(data, filterConditions, searchConditi
 
 /**
  * 
- * @param {Array<{id:string, data: object}>} transactionsList 
+ * @param {Array<string>} idList 
+ * @param {{id:string}} data 
  * @param {{type:Set<string>, tagId: Set<string>, currency: Set<string>, timeframe: Set<string>}} appliedFilters 
  * @param {string} query 
+ * @param {{start:number, end:number}} customTimeframe
+ * @returns {Array<string>} List of Ids, filtered according to parameters
  */
-export function filterTransactions(transactionsList, appliedFilters, query, customTimeframe) {
-    const filterCategoryList = Object.keys(appliedFilters)
-    console.log('filterCategoryList:',filterCategoryList);
-    
-    return transactionsList.filter(
-        ({id, data}) => {            
+export function getFilteredList(idList, data, appliedFilters, customTimeframe) {
 
-            const valid = filterCategoryList.reduce(
-                (aggregator, category)=>{
+    const filterCategoryList = Object.keys(appliedFilters);
+
+    return idList.filter(
+        (id) => {            
+            const transactionData = data[id];
+
+            const {title} = transactionData;
+
+            // ---------- check for filters --------
+            let isValid = filterCategoryList.reduce(
+                (accumulator, category)=>{
                     
                     const category_appliedFilters = appliedFilters[category];                       
                     
                     // no active filters for this category
-                    if (appliedFilters[category].size == 0) return aggregator && true;
+                    if (appliedFilters[category].size == 0) return accumulator && true;
                     
                     
                     /* ------------------ TYPE -------------------- */
                     if (category == 'type') {
-                        return aggregator && category_appliedFilters.has(getKey(transactionType, data[category]))
-                        // console.log(category, data[category], aggregator);
+                        return accumulator && 
+                            category_appliedFilters.has(getKey(transactionType, transactionData[category]))
+                        // console.log(category, transactionData[category], accumulator);
                     }
                     /* -------------- TIMEFRAME ----------- */
                     else if (category == 'timeframe') {
                         
                         const appliedTimeframe = category_appliedFilters.keys().next().value;
 
-                        const {timestamp: {occurredAt}} = data;
+                        const {timestamp: {occurredAt}} = transactionData;
 
-                        if (timeframe[appliedTimeframe] && !customTimeframe) {
+                        if (timeframe[appliedTimeframe]) {
 
-                            return aggregator && DayJSUtils.isWithinTimeframe(timeframe[appliedTimeframe], occurredAt);
+                            return accumulator && 
+                                DayJSUtils.isWithinTimeframe(timeframe[appliedTimeframe], occurredAt);
                         }
                         else if (customTimeframe) {
-                            return aggregator && (occurredAt >= customTimeframe.start && occurredAt <= customTimeframe.end)
+                            return accumulator && 
+                                (occurredAt >= customTimeframe.start && occurredAt <= customTimeframe.end)
                         }
                         else {
                             consoleError("What's that timeframe?:"+" "+appliedTimeframe);
@@ -102,22 +112,66 @@ export function filterTransactions(transactionsList, appliedFilters, query, cust
                     }
                     /* ------------ EVERYTHING ELSE ---------- */
                     else {
-                        return aggregator && category_appliedFilters.has(data[category]);
+                        return accumulator 
+                            && category_appliedFilters.has(transactionData[category]);
                     }                    
-                }, 
-                true
-            )
+                }, true )
 
-            console.log(data, valid);
+            // -------- check for query --------
+            // isValid = isValid && (Boolean(query) ? title.toUpperCase().includes(query.toUpperCase()) : true);
 
-            return valid;
-        }
-    ).filter(
-        ({id, data: {title}})=>{
-            if (query == '') return true;
-            
-            return title.toUpperCase().includes(query.toUpperCase());
+            // console.log(transactionData, isValid);
+
+            return isValid;
         }
     )
-    
+}
+
+
+/**
+ * 
+ * @param {Array<string>} allIds 
+ * @param {{id:data}} byId 
+ * @param {string} query 
+ * @returns {Array<string>} List of Ids, which satisfy search query
+ */
+export function searchByQuery(allIds = [], byId = {}, query = "") {
+
+    return allIds.filter(id => {
+        return byId[id].title.toUpperCase().includes(query.toUpperCase())
+    })
+}
+
+
+export function sortTransactionIdList(allIds = [], byId = {}, criteria = '', orderValue = '') {
+
+    if (!criteria || !orderValue) return allIds;
+
+    return allIds.sort( (id1, id2)=> {
+
+        const value1 = getNestedValue(byId[id1], criteria);
+        const value2 = getNestedValue(byId[id2], criteria);
+
+        // console.log(value1, value2);
+
+        if (orderValue == sortOrder.ASC) {
+
+            if (typeof value1 == 'string') {
+                return value1.localeCompare(value2)
+            }
+            else if (typeof value1 == 'number') {
+                return (value1 - value2);
+            }
+        }
+        else if (orderValue == sortOrder.DESC) {
+
+            if (typeof value1 == 'string') {
+                return value2.localeCompare(value1)
+            }
+            else if (typeof value1 == 'number') {
+                return value2 - value1;
+            }
+        }
+
+    } )
 }

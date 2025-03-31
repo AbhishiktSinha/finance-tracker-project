@@ -18,10 +18,13 @@ import { consoleDebug, consoleInfo } from "../../console_styles";
 
 import './styles.scss'
 import ROUTES from "../../routes.config.js";
+import { useRef } from "react";
 
 export default function PrivateContextProviderLayout() {
 
     const { status: userLoginStatus, data: user, error } = useIsLoggedIn();
+
+    const navDrawerRef = useRef(null);
 
     consoleInfo('USER LOGIN STATUS ------- ⤵');
     console.log(userLoginStatus, user, error);  
@@ -42,6 +45,7 @@ export default function PrivateContextProviderLayout() {
 
                         <Header
                             userAuthDetails={{userLoginStatus, user, error}}
+                            drawerActionsRef={navDrawerRef}
                         />
 
                         <div className="main">
@@ -56,7 +60,7 @@ export default function PrivateContextProviderLayout() {
                                             <OnboardingAction>
                                                 <ExchangeRateStatusContext>
                                                     
-                                                    <NavigationDrawer />
+                                                    <NavigationDrawer ref={navDrawerRef}/>
 
                                                     <Outlet />
                                                 </ExchangeRateStatusContext>

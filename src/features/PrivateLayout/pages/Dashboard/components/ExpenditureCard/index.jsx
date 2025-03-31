@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { selectNewTransactionData_wrapper, selectTransactionsInitializer_wrapper } from "../../redux/selectors";
+import { wrapper_selectTransactionsInitializer } from "../../redux/selectors";
 import { selectDefaultCurrency } from "../../../../redux/selectors";
 
 import { transactionType } from "../../../../../../enums";
@@ -17,10 +17,14 @@ export default function ExpenditureCard() {
     consoleDebug(`--------- EXPENDITURE CARD RENDERED ------`);
     const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
-    const initializer = useSelector(
-        selectTransactionsInitializer_wrapper(transactionType.EXPENDITURE, timeframe)
-    )
+    // const initializer = useSelector(
+    //     selectTransactionsInitializer_wrapper(transactionType.EXPENDITURE, timeframe)
+    // )
 
+    const initializer = useSelector(wrapper_selectTransactionsInitializer(
+        transactionType.EXPENDITURE, 
+        timeframe))
+        
     const defaultCurrency = useSelector(selectDefaultCurrency);
 
 

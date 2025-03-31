@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { asyncStatus } from "../enums";
-import { fetchPreviousTimeframeTransactions } from "../features/PrivateLayout/utils";
+import { fetchPreviousTimeframeTransactionsData } from "../features/PrivateLayout/utils";
 import userAuthContext from "../features/PrivateLayout/context/userAuthContext";
 import ExchangeRateConvertor from "../exchangeRate_api/convertor";
 import latestTransactionContext from "../features/PrivateLayout/pages/Dashboard/context/LatestTransactionContext";
@@ -54,16 +54,16 @@ export default function useSimpleInsights (type, activeTimeframe, defaultCurrenc
                 
                 setStatus(asyncStatus.LOADING);
 
-                const { success, data: transactionList, error } = await
-                    fetchPreviousTimeframeTransactions(uid, activeTimeframe, type);
+                const { success, data: transactionDataList, error } = await
+                    fetchPreviousTimeframeTransactionsData(uid, activeTimeframe, type);
 
                 if (success) {
 
                     consoleInfo('-------- FETCHED '+ type +' TRANSACTIONS FOR PREV '+ activeTimeframe +' -------------');
-                    console.log(transactionList)
+                    console.log(transactionDataList)
 
                     const amount = new ExchangeRateConvertor().
-                    reduceConvertedList(defaultCurrencyCode, transactionList, false);
+                    reduceConvertedList(defaultCurrencyCode, transactionDataList, false);
 
                     setStatus(asyncStatus.SUCCESS);
                     setData({

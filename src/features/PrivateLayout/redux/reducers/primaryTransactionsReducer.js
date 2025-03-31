@@ -13,12 +13,16 @@ const {
     ADD_PRIMARY_TRANSACTION: ADD_TRANSACTION, 
     UPDATE_PRIMARY_TRANSACTION: UPDATE_TRANSACTION,
     REMOVE_PRIMARY_TRANSACTION: REMOVE_TRANSACTION,
+    REMOVE_PRIMARY_TRANSACTIONS_LIST: REMOVE_TRANSACTIONS_LIST,
 } = UDPATE_PRIMARY_TRANSACTIONS
 
 
 const initialState = {
     status: asyncStatus.INITIAL, 
-    data: undefined, // data will be an array of objects
+    data: {
+        byId: {}, 
+        allIds: [], 
+    },
     error: ''
 };
 
@@ -35,10 +39,13 @@ export default function primaryTransactionsReducer(state = initialState, action)
             }
         }
         case FETCH_SUCCESS: {
-            // payload must be an array of objects with {id, data} fields
+            // payload = {byId, allIds}
             return { 
                 ...state, 
-                data: payload, 
+                data: {
+                    byId: payload.byId, 
+                    allIds: payload.allIds
+                }, 
                 status: asyncStatus.SUCCESS,
             }
         }
@@ -50,13 +57,23 @@ export default function primaryTransactionsReducer(state = initialState, action)
         }
 
         
+        /*
+            payload: {id, data}
+        */
         case ADD_TRANSACTION: {
+            const {id : transactionId, data: transactionData} = payload
             return {
                 ...state, 
-                data: [
-                    ...state.data, 
-                    payload
-                ]
+                data: { 
+                    byId: {                        
+                        ...state.data.byId, 
+                        [transactionId]: transactionData
+                    }, 
+                    allIds: [
+                        ...state.data.allIds, 
+                        transactionId
+                    ]
+                 }
             }
         }
 
@@ -68,22 +85,20 @@ export default function primaryTransactionsReducer(state = initialState, action)
         case UPDATE_TRANSACTION: {
             const { id, modifiedData } = payload;
 
+            const transactionData  = state.data.byId[id];
+
             return {
                 ...state, 
 
-                data: state.data.map(transaction => {
+                data: {                    
 
-                    if (id == transaction.id) {
-
-                        return {
-                            id: transaction.id,  
-                            data: _.merge({}, transaction.data, modifiedData)
-                        }
+                    ...state.data, 
+                    
+                    byId: {
+                        ...state.data.byId,                         
+                        [id]: _.merge({}, transactionData, modifiedData)
                     }
-                    else {
-                        return transaction
-                    }
-                })
+                }
             }
         }
 
@@ -93,13 +108,42 @@ export default function primaryTransactionsReducer(state = initialState, action)
 
             const { id: transactionId } = payload;
 
-            // filter it out
-            return ({
-                ...state,
-                data: state.data.filter(
-                    ({id})=> (id != transactionId)
+            const new_byId = {...state.data.byId};
+            delete new_byId[transactionId]
+
+
+            return {
+                ...state, 
+                data: {
+                    byId: new_byId,
+                    allIds: state.data.allIds.filter( id => id != transactionId )
+                }
+            }
+        }
+
+
+        /* 
+            payload: targetTransactionsSet
+        */
+        case REMOVE_TRANSACTIONS_LIST: {
+
+            const targetTransactionIdSet = payload;
+
+            const newById = Object.fromEntries(
+                Object.entries(state.data.byId).filter(
+                    ([id,data])=> !targetTransactionIdSet.has(id)
                 )
-            })
+            )
+
+            return {
+                ...state, 
+
+                data: {
+                    byId: newById, 
+                    allIds: state.data.allIds.filter(id => !targetTransactionIdSet.has(id))
+                }
+            }
+            
         }
 
         default: {

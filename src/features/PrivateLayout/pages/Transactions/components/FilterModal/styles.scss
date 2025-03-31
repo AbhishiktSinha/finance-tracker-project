@@ -1,4 +1,5 @@
 @use '@app_styles/colors-alt' as colors-alt;
+@use "@app_styles/colors" as colors;
 @use '@app_styles/fonts' as fonts;
 
 
@@ -13,7 +14,14 @@
     user-select: none;
     
     .modal-header {
-        font-size: fonts.$text-large-size;        
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .modal-title {
+            font-size: fonts.$text-large-size;        
+        }
+        
     }
 
     .filter-category-tabs {
@@ -23,8 +31,51 @@
 
         background-color: colors-alt.$light-bg-main;
         
+        // active color
+        .ant-tabs-tab-active {
+            
+            & .label-badge {                
+                color: colors-alt.$text-accent-blue;                
+            }
+        }
+        
+        & .label-badge {
+            font-size: fonts.$text-default-size;
+        }
+
+        // badge color
+        /* & .ant-badge {
+            
+            & .ant-badge-dot, & .ant-badge-count {
+                background-color: colors-alt.$light-accent-primary;
+                color: colors.$white;
+
+                & span {
+                    color: inherit;
+                }
+            }            
+        } */
+
         .ant-tabs-tab {
             padding-inline-start: 0;
+        }
+
+        & .filter-category-label {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;     
+            
+            column-gap: 14px;
+            width: 100%;
+
+            color: inherit;
+
+            .span {
+                color: inherit;                
+            }
+            .selected-options-count {
+                font-size: fonts.$text-small-size !important;
+            }
         }
 
         .filter-category-section {

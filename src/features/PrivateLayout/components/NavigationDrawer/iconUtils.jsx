@@ -2,6 +2,10 @@ import IncomeOutlined from '@assets/income-mui-outlined.png'
 import IncomeRounded from '@assets/income-mui-rounded.png'
 import ExpenditureOutlined from '@assets/expenditure-mui-outlined.png'
 import ExpenditureRounded from '@assets/expenditure-mui-rounded.png'
+import CashOutDefault from '@assets/cash-out-default.png';
+import CashOutActive from '@assets/cash-out-active.png';
+import CashInDefault from '@assets/cash-in-default.png'
+import CashInActive from '@assets/cash-in-active.png'
 import { consoleError } from '../../../../console_styles'
 import { AccountBalanceWalletOutlined, AccountBalanceWalletRounded, BarChartOutlined, BarChartRounded, DashboardOutlined, DashboardRounded, ListAltOutlined, ListAltRounded } from '@mui/icons-material'
 /**
@@ -38,15 +42,15 @@ export function getRouteIcon(route, iconType) {
         }
         case 'income' : {
             return selectIcon(
-                <img src={IncomeOutlined} style={{height:'24px', width:'24px'}}/>,
-                <img src={IncomeRounded} style={{height:'24px', width:'24px'}}/>
+                <img src={CashInDefault} style={{height:'24px', width:'24px'}}/>,
+                <img src={CashInActive} style={{height:'24px', width:'24px'}}/>
             )
             break;
         }
         case 'expenditure': {
             return selectIcon(
-                <img src={ExpenditureOutlined} style={{height:'24px', width:'24px'}}/>,
-                <img src={ExpenditureRounded} style={{height:'24px', width:'24px'}} />
+                <img src={CashOutDefault} style={{height:'24px', width:'24px'}}/>,
+                <img src={CashOutActive} style={{height:'24px', width:'24px'}} />
             )
             break;
         }

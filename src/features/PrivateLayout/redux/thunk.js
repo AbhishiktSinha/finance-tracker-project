@@ -17,13 +17,13 @@ import InitializerError from '../../../custom_errors/InitializerError'
 import PrimaryTransactionsError from '../../../custom_errors/PrimaryTransactionsError'
 import endpoints from '../../../network/endpoints';
 import request from '../../../network/request';
-import { rules } from 'eslint-plugin-react';
-import { balanceOperations, dayJsUnits, timeframe, transactionType } from '../../../enums';
+import { balanceOperations, dayJsUnits, transactionType } from '../../../enums';
 import { batch } from 'react-redux';
 import { DayJSUtils } from '../../../dayjs';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { flushSync } from 'react-dom';
-import defaults from '../defaults';
+import { primaryTransactionsTimeframe } from '../defaults'
+import { isPrimaryTransaction } from '../utils';
 // import { selectPrimaryTransactionsList, selectTransactionsInitializer_wrapper } from '../pages/Dashboard/redux/selectors';
 
 export const fetchUserDocThunk = (uid) => {
@@ -90,10 +90,7 @@ export const updateOnboardingDataThunk = function (uid, data) {
                 type: UPDATE_BALANCE.UPDATE_BALANCE_DATA,
                 payload: {
                     id: currency, 
-                    data: {
-                        currency: currency, 
-                        amount: Number(amount),
-                    }
+                    amount: Number(amount)
                 }
 
             })
@@ -294,10 +291,19 @@ export const stateInitializerThunk = (uid)=> {
         }
     }
     async function fetchTags() {
+        /**
+         * 
+         * @returns {Promise<object>}
+         */
         async function fetchGlobalTags() {
             return await new FirestoreCRUD().
                 getDocsData('tags')
         }
+
+        /**
+         * 
+         * @returns {Promise<object>}
+         */
         async function fetchCustomTags() {
             return await new FirestoreCRUD().
                 getDocsData(`users/${uid}/customTags`)
@@ -309,9 +315,10 @@ export const stateInitializerThunk = (uid)=> {
                 fetchCustomTags()
             ])
 
-            return [...globalTags, ...customTags];
+            return {...globalTags, ...customTags};
         }
         catch(e) {
+            console.log(e);
             throw new TagError('Failed to retrieve "tags"')
         }
     }
@@ -380,13 +387,38 @@ export const stateInitializerThunk = (uid)=> {
                 fetchPrimaryTransactions()
             ])
 
-            /* ------- success ---------------- */
+            /* ------------------------ success ---------------- */
             consoleSucess(`FETCHED: USERDOC, TAG, PRIMARY_TRANSACTIONS & BALANCE`);
 
+            // ----------- FETCH-USERDOC-SUCCESS --------------------
             dispatch( { type: FETCH_USERDOC_DATA_SUCCESS, payload: userDocData } );
-            dispatch( { type: FETCH_BALANCE_DATA_SUCCESS, payload: balanceData });
-            dispatch( { type: FETCH_TAG_DATA_SUCCESS, payload: tagData } );
-            dispatch( {type: FETCH_PRIMARY_TRANSACTIONS_SUCCESS, payload: primaryTransactionsData});
+            
+            // ------------- FETCH-BALANCE-SUCCESS -----------------
+            dispatch( { 
+                type: FETCH_BALANCE_DATA_SUCCESS, 
+                payload: {
+                    byId: balanceData, 
+                    allIds: Object.keys(balanceData)
+                } 
+            });
+
+            // -------------- FETCH-TAG-DATA-SUCESS ------------------
+            dispatch( { 
+                type: FETCH_TAG_DATA_SUCCESS, 
+                payload: {
+                    byId: tagData, 
+                    allIds: Object.keys(tagData)
+                }
+            } );
+
+            // ------------- FETCH-PRIMARY-TRANSACTIONS-SUCCESS -------------
+            dispatch( {
+                type: FETCH_PRIMARY_TRANSACTIONS_SUCCESS, 
+                payload: {
+                    byId: primaryTransactionsData, 
+                    allIds: Object.keys(primaryTransactionsData)
+                }
+            });
         }
         /* ----------- error ------------------ */
         catch(e) {
@@ -667,13 +699,6 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
             return new FirestoreCRUD().getRandomDocID(`users/${uid}/transactions`);
         }
         
-        //#region DEPRECATED
-        /* const payloadObj = {
-            transactionPayload: null, 
-            balancePayload: null, 
-        } */
-        //#endregion
-
 
         const actionObject = {
             transactionActionObject: null, 
@@ -700,7 +725,7 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
 
                         
                         // if the created transaction qualifies as a primary_transaction
-                        if (DayJSUtils.isWithinTimeframe( defaults.primaryTransactionsTimeframe, 
+                        if (DayJSUtils.isWithinTimeframe( primaryTransactionsTimeframe, 
                             transactionData.timestamp.occurredAt, 0 )) {
 
                                 
@@ -752,7 +777,8 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
                             } */
                            //#endregion
 
-                            actionObject.balanceActionObject = {
+                            // #region DEPRECATED
+                            /* actionObject.balanceActionObject = {
                                 type: UPDATE_BALANCE_DATA_2, 
                                 payload: {
                                     id: transactionData.currency, 
@@ -763,6 +789,15 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                     ), 
 
                                     amount: transactionData.amount
+                                }
+                            } */
+                            // #endregion
+
+                            actionObject.balanceActionObject = {
+                                type: UPDATE_BALANCE_DATA, 
+                                payload: {
+                                    id: transactionData.currency, 
+                                    amount: newAmount
                                 }
                             }
 
@@ -789,13 +824,23 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                 throw new Error(`Balance Does not exist for ${transactionData.currency}, Expenditure not possible`)
                             }
 
-                            actionObject.balanceActionObject = {
+                            // #region DEPRECATED
+                            /* actionObject.balanceActionObject = {
                                 type: UPDATE_BALANCE_DATA_2,
                                 payload: {
                                     id: transactionData.currency,
 
                                     balanceOperation: balanceOperations.CREATE_AMOUNT,
 
+                                    amount: transactionData.amount
+                                }
+                            } */
+                            // #endregion
+
+                            actionObject.balanceActionObject = {
+                                type: UPDATE_BALANCE_DATA, 
+                                payload: {
+                                    id: transactionData.currency, 
                                     amount: transactionData.amount
                                 }
                             }
@@ -850,8 +895,8 @@ export const createTransactionThunk = (uid, formFields, modifiedFields, extraWor
 export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWork)=>{
 
     // action types extraction
-    const {INITIALIZE_BALANCE, UPDATE_BALANCE_DATA_2} = UPDATE_BALANCE; 
-    const {UPDATE_PRIMARY_TRANSACTION, REMOVE_PRIMARY_TRANSACTION} = UDPATE_PRIMARY_TRANSACTIONS;
+    const {INITIALIZE_BALANCE, UPDATE_BALANCE_DATA_2, UPDATE_BALANCE_DATA} = UPDATE_BALANCE; 
+    const {UPDATE_PRIMARY_TRANSACTION, REMOVE_PRIMARY_TRANSACTION, ADD_PRIMARY_TRANSACTION} = UDPATE_PRIMARY_TRANSACTIONS;
 
     const now = dayjs().valueOf();
     
@@ -881,6 +926,7 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
         const getTransactionData = ()=>{
             const transactionData = { ...formFields };
             delete transactionData['occurredAt'];
+            delete transactionData['id'];
 
             transactionData.timestamp = {
                 createdAt: now, 
@@ -942,23 +988,29 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
 
                         /* ----------- transaction already exists ------------ */
 
-                        // if transaction is modified -> out of the current year-duration 
-                        // transaction is no longer a valid primary transaction
-                        if ( !DayJSUtils.isWithinTimeframe( defaults.primaryTransactionsTimeframe, 
-                            transactionData.timestamp.occurredAt, 0 )) {
+                        const {timestamp: {occurredAt}} = transactionData;
+                        
+                        const prev_occurredAt = modifiedData.timestamp.occurredAt || occurredAt;                         
 
-                                consoleDebug(`${transactionData.title} -- no longer Primary Transaction`);
-                                
-                                actionObject.transactionActionObject = {
+                        /* ----------- cases to accommodate primary and custom transactions -------------- */
 
-                                    type: REMOVE_PRIMARY_TRANSACTION, 
-                                    payload: {
-                                        id: transactionId
-                                    }
+                        // CASE 1: used to be PT ---> is NOT anymore
+                        if ( isPrimaryTransaction(prev_occurredAt) && !isPrimaryTransaction(occurredAt)) {
+
+                            consoleDebug(`${transactionData.title} -- no longer Primary Transaction`);
+                            
+                            actionObject.transactionActionObject = {
+
+                                type: REMOVE_PRIMARY_TRANSACTION, 
+                                payload: {
+                                    id: transactionId
                                 }
-
+                            }
                         }
-                        else {
+                        // CASE 2: PT - modified in situ
+                        else if ( isPrimaryTransaction(prev_occurredAt) && isPrimaryTransaction(occurredAt)) {
+                            
+                            consoleDebug(`${transactionData.title} -- PRIMARY T. in situ modification`);
 
                             actionObject.transactionActionObject = {
                                 type: UPDATE_PRIMARY_TRANSACTION, 
@@ -968,6 +1020,20 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                 }
                             }
                         }
+                        // CASE 3: was NOT a PT ---- IS now
+                        else if ( !isPrimaryTransaction(prev_occurredAt) && isPrimaryTransaction(occurredAt)) {
+
+                            consoleDebug(`${transactionData.title} -- Custom T. ---> Primary T.`);
+
+                            actionObject.transactionActionObject = {
+                                type: ADD_PRIMARY_TRANSACTION, 
+                                payload: {
+                                    id: transactionId,
+                                    data: transactionData
+                                }
+                            }
+                        }
+
 
                         return {
                             commit: true, 
@@ -1022,7 +1088,7 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                 pendingUpdates[targetDocPath] = operationManifest;
 
                                 // [APPLICATION STATE] ----- remove contribution of transaction_prevAmount ---
-                                actionObject.balanceActionObjectList.push({
+                                /* actionObject.balanceActionObjectList.push({
                                     type: UPDATE_BALANCE_DATA_2, 
                                     payload: {
                                         balanceOperation: transaction_prevType == transactionType.INCOME ?
@@ -1030,6 +1096,14 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                         
                                         id: previous_currency, 
                                         amount: transaction_prevAmount,
+                                    }
+                                }) */
+
+                                actionObject.balanceActionObjectList.push({
+                                    type: UPDATE_BALANCE_DATA, 
+                                    payload: {
+                                        id: previous_currency, 
+                                        amount: balance_newAmount
                                     }
                                 })
 
@@ -1080,7 +1154,7 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                     pendingUpdates[targetDocPath] = operationManifest;
 
                                     // [APP STATE] ---- include contribution of the transaction_newAmount
-                                    actionObject.balanceActionObjectList.push({
+                                    /* actionObject.balanceActionObjectList.push({
                                         type: UPDATE_BALANCE_DATA_2, 
                                         
                                         payload: {
@@ -1089,6 +1163,14 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                                             
                                             id: new_currency, 
                                             amount: transaction_newAmount
+                                        }
+                                    }) */
+
+                                    actionObject.balanceActionObjectList.push({
+                                        type: UPDATE_BALANCE_DATA, 
+                                        payload: {
+                                            id: new_currency, 
+                                            amount: balance_newAmount
                                         }
                                     })
 
@@ -1156,6 +1238,7 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
                 extraWork && extraWork({
                     id: transactionId, 
                     data: transactionData, 
+                    modifiedData: modifiedData,
                     modifiedFields: modifiedFields
                 })
             })
@@ -1169,15 +1252,18 @@ export const modifyTransactionThunk = (uid, formFields, modifiedFields, extraWor
 }
 
 
-export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
+export const deleteTransactionThunk = (uid, transactionId, transactionData, extraWork)=>{
 
     const { REMOVE_PRIMARY_TRANSACTION } = UDPATE_PRIMARY_TRANSACTIONS;
-    const { UPDATE_BALANCE_DATA_2 } = UPDATE_BALANCE;
+    const { UPDATE_BALANCE_DATA_2, UPDATE_BALANCE_DATA } = UPDATE_BALANCE;
 
     return async function thunkFunction(dispatch, getState) {
 
-        const { id: transactionId, data: transactionData} = transactionObj;   
-        
+        // const { id: transactionId, data: transactionData} = transactionObj;   
+
+        /* const selectTransactionData = wrapper_selectPrimaryTransactionData(transactionId)
+        const transactionData = selectTransactionData(getState()); */
+
         const actionObject = {
             transactionActionObject: null, 
             balanceActionObject: null
@@ -1195,7 +1281,7 @@ export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
                         const [transactionDocSnap] = docSnapDependencies;
 
                         // if transaction was part of primary_transactions --- REMOVE
-                        if (DayJSUtils.isWithinTimeframe(defaults.primaryTransactionsTimeframe, 
+                        if (DayJSUtils.isWithinTimeframe(primaryTransactionsTimeframe, 
                             transactionData.timestamp.occurredAt, 0) ) {
 
                                 actionObject.transactionActionObject = {
@@ -1232,7 +1318,8 @@ export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
                         // #endregion
 
                         
-                        actionObject.balanceActionObject = {
+                        // ------------ APPLICATION STATE ------------
+                        /* actionObject.balanceActionObject = {
                             type: UPDATE_BALANCE_DATA_2, 
                             payload: {
 
@@ -1242,8 +1329,16 @@ export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
                                 id: transactionData.currency, 
                                 amount: transactionData.amount
                             }
-                        }
+                        } */
 
+                        actionObject.balanceActionObject = {
+                            type: UPDATE_BALANCE_DATA, 
+                            payload: {
+                                id: transactionData.currency, 
+                                amount: newBalanceAmount
+                            }
+                        }
+                        
                         return {
                             commit: true, 
                             operation: 'update', 
@@ -1290,14 +1385,19 @@ export const deleteTransactionThunk = (uid, transactionObj, extraWork)=>{
  */
 export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> {
 
-    const { UPDATE_BALANCE_DATA_2 } = UPDATE_BALANCE;
-    const { REMOVE_PRIMARY_TRANSACTION } = UDPATE_PRIMARY_TRANSACTIONS;
+    const { UPDATE_BALANCE_DATA_2, UPDATE_BALANCE_DATA } = UPDATE_BALANCE;
+    const { REMOVE_PRIMARY_TRANSACTION, 
+        REMOVE_PRIMARY_TRANSACTIONS_LIST } = UDPATE_PRIMARY_TRANSACTIONS;
 
     return async function thunkFunction(dispatch, getState) {
 
-        const actionObject = {
-            transactionActionObjectList: [], 
-            balanceActionObjectList: [], 
+        const compoundActionObject = {
+            
+            balanceCompoundActionObject: {}, 
+            transactionsCompoundActionObject: {
+                targetTransactionsSet: new Set(), 
+                type: REMOVE_PRIMARY_TRANSACTIONS_LIST
+            }
         }
 
         try {
@@ -1323,12 +1423,11 @@ export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> 
 
                             // prepare for application state change
                             if (DayJSUtils.isWithinTimeframe(
-                                defaults.primaryTransactionsTimeframe, occurredAt, 0)) {
+                                primaryTransactionsTimeframe, occurredAt, 0)) {
 
-                                    actionObject.transactionActionObjectList.push({
-                                        type: REMOVE_PRIMARY_TRANSACTION, 
-                                        payload: { id: transactionId }
-                                    })
+                                    compoundActionObject.
+                                        transactionsCompoundActionObject.
+                                            targetTransactionsSet.add(transactionId)
                             }
 
                             /* writeManifest -------- delete document at this path */
@@ -1373,17 +1472,8 @@ export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> 
 
                             
                             // ----------- actionObject ------------
-                            actionObject.balanceActionObjectList.push({
-                                type: UPDATE_BALANCE_DATA_2, 
-                                payload: {
-                                    id: balanceDocId, 
-                                    
-                                    balanceOperation: transactionIsIncome ? balanceOperations.SUBTRACT_AMOUNT :
-                                        balanceOperations.ADD_AMOUNT, 
-                                    
-                                    amount: transactionAmount
-                                }
-                            })
+                            compoundActionObject.
+                                balanceCompoundActionObject[balanceDocId] = newBalanceAmount
 
                             const operationManifest = {
                                 commit: true, 
@@ -1407,13 +1497,28 @@ export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> 
             
             // ------- application state change ----------
             flushSync(()=>{
-                actionObject.transactionActionObjectList.
-                    forEach(transactionAction => dispatch(transactionAction))
+                
+                /* ----------- PRIMARY TRANSACTIONS ----------- */
+                dispatch({
+                    type: REMOVE_PRIMARY_TRANSACTIONS_LIST, 
+                    payload: compoundActionObject.
+                        transactionsCompoundActionObject.
+                            targetTransactionsSet
+                })
 
-                actionObject.balanceActionObjectList.
-                    forEach(balanceAction => dispatch(balanceAction));
+                /* -------------- BALANCE ---------------- */
+                Object.entries(compoundActionObject.balanceCompoundActionObject).
+                    map(([id, amount])=> {
+                        dispatch({
+                            type: UPDATE_BALANCE_DATA, 
+                            payload: {
+                                id: id, 
+                                amount: amount
+                            }
+                        })
+                    })
 
-                extraWork(transactionsList);
+                extraWork && extraWork(compoundActionObject.transactionsCompoundActionObject.targetTransactionsSet);
             })
         }
         catch(e){ 
@@ -1422,3 +1527,4 @@ export const deleteTransactionsListThunk = (uid, transactionsList, extraWork)=> 
         }
     }
 }
+

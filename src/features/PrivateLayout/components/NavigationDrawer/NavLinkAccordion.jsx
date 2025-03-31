@@ -13,24 +13,26 @@ import NavLinkItem from "./NavLinkItem";
 
 export default function NavLinkAccordion({route_key, title, drawerOpen, children}) {
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [accordionIsOpen, setAccordionIsOpen] = useState(false);
 
 
     function toggleAccordion(e) {
         e.preventDefault();
         e.stopPropagation();
 
-        setIsOpen( value => !value );
+        setAccordionIsOpen( value => !value );
     }
 
     return (
-        <>
-            <li key={'nav-link-accordion-'+route_key} className={"nav-link-item-contianer nav-accordion-header-item-container" + (isOpen ? ' open' : ' closed') }>
+        <div className={"accordion-container" + (accordionIsOpen ? ' isOpen' : ' isClosed')}>
+            <li key={'nav-link-accordion-'+route_key} 
+                className={"nav-link-item-contianer nav-accordion-header-item-container" + (accordionIsOpen ? ' open' : ' closed') }>
                 
                 <p className="accordion-header" onClick={toggleAccordion}>
 
                     {/* ----- icon ----- */}
-                    {getRouteIcon(route_key, drawerOpen ? 'active' : 'default')}
+                    { getRouteIcon(route_key, 'default') }
+                    {/* {getRouteIcon(route_key, drawerOpen ? 'active' : 'default')} */}
 
                     {drawerOpen ?
                         // drawer is open
@@ -43,29 +45,31 @@ export default function NavLinkAccordion({route_key, title, drawerOpen, children
 
                                 {/* --- accordion-arrow --- */}
                                 <span className="accordion-action">
-                                    {isOpen ? <ExpandLess /> : <ExpandMore />}
+                                    {accordionIsOpen ? <ExpandLess /> : <ExpandMore />}
                                 </span>
                             </>
                         ) :
                         // drawer is closed
                         (
+                            // ----------- accordion-arrow ----------
                             <span className="accordion-action">
-                                {isOpen ? <ExpandLess /> : <ExpandMore />}
+                                {accordionIsOpen ? <ExpandLess /> : <ExpandMore />}
                             </span>
                         )
                     }
                 </p>
 
-                {
-                    isOpen && drawerOpen && (
-                        <div className="accordion-content">
-                            {
-                                children
-                            }
-                        </div>
-                    )
-                }
             </li>
-        </>
+            
+            {
+                accordionIsOpen && (
+                    <div className="accordion-content">
+                        {
+                            children
+                        }
+                    </div>
+                )
+            }
+        </div>
     )
 }

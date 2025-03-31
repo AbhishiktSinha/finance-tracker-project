@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { selectBalanceData } from "../../../features/PrivateLayout/redux/selectors";
+import { selectBalanceData, selectBalanceDataList } from "../../../features/PrivateLayout/redux/selectors";
 import { Form, Select } from "antd";
 import { transactionType } from "../../../enums";
 import { getAllCurrencyCodeDropdownOptions } from "../../../features/PrivateLayout/utils";
@@ -7,7 +7,8 @@ import { useEffect, useMemo } from "react";
 
 export default function SelectCurrency({ defaultType, form }) {
 
-    const balanceList = useSelector(selectBalanceData);
+    // const balanceList = useSelector(selectBalanceData);
+    const balanceList = useSelector(selectBalanceDataList)
 
     const selectedType = Form.useWatch('type');
 

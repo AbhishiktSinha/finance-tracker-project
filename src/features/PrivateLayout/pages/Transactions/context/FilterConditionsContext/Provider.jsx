@@ -1,30 +1,32 @@
+import { useCallback, useMemo, useState } from "react";
+
 import { useSelector } from "react-redux";
 
-import { selectTags } from "../../../../redux/selectors";
-
-import { filterDefaults, orderDefaults } from "../../defaults";
-import { useMemo, useState } from "react";
-import { timeframe, transactionType } from "../../../../../../enums";
-import getAllFiatCurrencies, { convertListToObject } from "../../../../utils";
 import FilterConditionsContext from ".";
+
+import { selectTagsData } from "../../../../redux/selectors";
+
+import { filterDefaults, orderDefaults, queryDefaults } from "../../defaults";
+import { sortOrder, timeframe, transactionType } from "../../../../../../enums";
+import getAllFiatCurrencies, { convertListToObject, debounce } from "../../../../utils";
 import { consoleDebug } from "../../../../../../console_styles";
 
 
 export default function FilterConditionsContextProvider({children}) {
 
-    const tagsList = useSelector(selectTags);
-
-    consoleDebug('tagsList in FILTER_CONDITIONS_CONTEXT');
-    console.log(tagsList);
-
-    const [appliedFilters, setAppliedFilters] = useState(()=>{
+    const getDefaultFilters = useCallback(() => {
         const initialFilters = {};
         for (const category in filterDefaults) {
             initialFilters[category] = filterDefaults[category].defaultSelected;
         }
 
         return initialFilters;
-    })
+    }, [])
+
+    // const tagsList = useSelector(selectTags);
+    const tagsData = useSelector(selectTagsData)    
+
+    const [appliedFilters, setAppliedFilters] = useState(getDefaultFilters)
 
     consoleDebug('------------- APPLIED FILTERS CONTEXT ------------------⤵')
     console.log(appliedFilters)
@@ -41,7 +43,7 @@ export default function FilterConditionsContextProvider({children}) {
                 EXPENDITURE: transactionType.EXPENDITURE
             }, 
 
-            tagId: convertListToObject(tagsList, 'id'), 
+            tagId: tagsData,
 
             currency: getAllFiatCurrencies(), 
 
@@ -51,29 +53,10 @@ export default function FilterConditionsContextProvider({children}) {
             }
         }
 
-    }, [tagsList])
+    }, [tagsData])    
 
     
-    const orderOptions = useMemo(()=>{
-        return {
-            title: {
-                'A-Z': 'asc', 
-                'Z-A': 'desc',
-            }, 
-    
-            amount: {
-                'LOW TO HIGH': 'asc', 
-                'HIGH TO LOW': 'desc',
-            }, 
-    
-            'timeframe.occurredAt': {
-                'OLD TO NEW': 'asc', 
-                'NEW TO OLD': 'desc',
-            }
-        }
-    }, [])
-
-    
+    /* ------------------ CUSTOM IMPLEMENTATIONS STATE-SETTERS --------------- */
     /**
      * Provided filters in the correct format, 
      * this function updates filters to new conditions
@@ -85,12 +68,9 @@ export default function FilterConditionsContextProvider({children}) {
         setAppliedFilters(newFilters)
     }
 
-    /**
-     * 
-     * @param {{orderParameter:string}} newOrder an object with a single -> order parameter key:value pair, picked from the order options
-     */
-    function applyOrder(newOrder) {
 
+    function clearFilters() {
+        setAppliedFilters(getDefaultFilters());
     }
 
     /* --------------------- JSX -------------- */
@@ -98,9 +78,8 @@ export default function FilterConditionsContextProvider({children}) {
     return (
         <FilterConditionsContext.Provider 
             value={{
-                appliedFilters, 
-                filterOptions, orderOptions,
-                applyFilters, applyOrder, 
+                appliedFilters, filterOptions,
+                applyFilters, clearFilters
             }}
         >
             {children}

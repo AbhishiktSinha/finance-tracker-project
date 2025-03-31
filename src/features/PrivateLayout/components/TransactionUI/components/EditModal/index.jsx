@@ -6,19 +6,19 @@ import userAuthContext from "../../../../context/userAuthContext";
 import { transactionType } from "../../../../../../enums";
 import { selectBalanceData } from "../../../../redux/selectors";
 
-export default function EditModal({transactionObject, onEdit}) {
+export default function EditModal({id, data, onEdit}) {
 
     const {user: {uid}} = useContext(userAuthContext)
 
     const defaults = useMemo(()=>{
         const defaults = {};
 
-        defaults.id = transactionObject.id;
-        defaults.occurredAt = transactionObject.data.timestamp.occurredAt;
+        defaults.id = id;
+        defaults.occurredAt = data.timestamp.occurredAt;
 
-        for (let field in transactionObject.data) {
+        for (let field in data) {
             if (typeof field != "object") {
-                defaults[field] = transactionObject.data[field];
+                defaults[field] = data[field];
             }
         }
         return defaults;
@@ -32,9 +32,7 @@ export default function EditModal({transactionObject, onEdit}) {
 
         if (formFields.type == transactionType.EXPENDITURE) {
 
-            const selectedCurrencyBalanceAmount = balanceData.find(
-                ({id, data: {currency, amount}})=> currency == formFields.currency
-            ).data.amount;
+            const selectedCurrencyBalanceAmount = balanceData[formFields.currency]
     
             if (selectedCurrencyBalanceAmount < formFields.amount) {
                 throw 'Insufficient balance in selected currency';
@@ -52,7 +50,7 @@ export default function EditModal({transactionObject, onEdit}) {
         <TransactionMangementForm 
             defaults={defaults}
             modification={true}
-            transactionType={transactionObject.data.type}
+            transactionType={data.type}
             onFinishCheck={onFinishCheck}
             onFinishAction={onFinishAction}
         />

@@ -7,6 +7,8 @@ import { changeType, transactionType } from '../../enums';
 import { DayJSUtils } from '../../dayjs';
 import { FirestoreCRUD } from '../../firebase/firestore';
 import getSymbolFromCurrency from 'currency-symbol-map';
+import { primaryTransactionsTimeframe } from './defaults';
+import { unparse } from 'papaparse';
 
 
 export const getAllCurrencyCodeDropdownOptions = () => {
@@ -81,7 +83,7 @@ export function range(start, endExclusive, step = 1) {
 
 
 
-export async function fetchPreviousTimeframeTransactions(uid, activeTimeframe, type) {
+export async function fetchPreviousTimeframeTransactionsData(uid, activeTimeframe, type) {
 
     try {
 
@@ -100,7 +102,7 @@ export async function fetchPreviousTimeframeTransactions(uid, activeTimeframe, t
 
 
         /* ----------------- NETWORK CALL -------------------- */
-        const transactionListOfType = await new FirestoreCRUD().
+        const transactionsObject = await new FirestoreCRUD().
             getDocsData(
                 `users/${uid}/transactions`,
                 [
@@ -126,10 +128,11 @@ export async function fetchPreviousTimeframeTransactions(uid, activeTimeframe, t
                 ]
             )
 
+        const transactionDataList = Object.values(transactionsObject);
 
         return {
             success: true,
-            data: transactionListOfType,
+            data: transactionDataList,
             error: '',
         }
     }
@@ -237,11 +240,120 @@ export function debounce( callback, delay ) {
     }
 }
 
+/**
+ * 
+ * @param {Function} callback 
+ * @param {number} delay 
+ * @param {boolean} leading 
+ * @returns 
+ */
+export function throttle(callback, delay, leading=false) {
+
+    let timeoutId = null;
+
+    return function throttledCallback(...args) {
+
+        if (timeoutId) return;
+
+        if (leading) {
+
+            callback(...args);
+            timeoutId = setTimeout(()=>{
+                timeoutId = null
+            }, delay)
+        }
+        else {
+            setTimeout(()=>{
+                callback(...args);
+                timeoutId = null;
+            }, delay);
+        }
+    }
+}
 
 
+
+/**
+ * 
+ * @param {object} object the object to search for the target value, must have unique values
+ * @param {*} targetValue
+ * @returns {string} key
+ */
 export function getKey(object, targetValue) {
 
     return Object.entries(object).find(
         ([key, value])=>value==targetValue
     )[0];
+}
+
+
+
+/**## isPrimaryTransaction
+ * This function determines whether a transaction qualifies as a 
+ * `primaryTransaction` based on the `timestamp.occurredAt` for that transaction.  
+ * 
+ * **Note**: This function has no access to the state, it just validates whether the transaction lies within the  
+ * stipulated timeframe to a be a `primaryTransaction`.
+ * 
+ * @param {number} occurredAt The timestamp.occurredAt for the transaction
+ * @returns {boolean} 
+ */
+export function isPrimaryTransaction(occurredAt) {
+
+    return DayJSUtils.isWithinTimeframe(primaryTransactionsTimeframe, occurredAt, 0)
+}
+
+
+
+export function getNestedValue(obj={}, path='') {
+
+    return path.split('.').reduce(
+        (acc, key)=>acc?.[key], 
+        obj)
+}
+
+
+
+/**
+ * 
+ * @param {Array<{id: string, data: object}>} transactionsList list of transactions to be downloaded
+ * @param {string} filename optional -> name of the csv file that will be downloaded
+ * @returns {Function} download() use this function to download the .csv
+ */
+export function downloadAsCsv(transactionsList, filename) {
+
+    const structured_list = transactionsList.map(({id, data: {timestamp, ...restData}}) => {
+
+        return {
+            'id': id,
+            ...restData, 
+            occurredAt: timestamp.occurredAt, 
+            createdAt: timestamp.createdAt, 
+            modifiedAt: timestamp.modifiedAt,
+        }
+    })
+
+    const csv = unparse(structured_list);
+
+    console.log(csv);
+    
+    return function download() {
+        
+        const blob = new Blob([csv], {type: 'text/csv'}); 
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+
+        link.download = filename ? 
+            `${filename.replace(/\.csv$/, '')}.csv` : 
+            'transaction-exports.csv';
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+    }
 }

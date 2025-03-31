@@ -1,0 +1,39 @@
+@use '@app_styles/fonts' as fonts;
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+
+.common-badge {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+
+    width: 20px;
+    min-width: 20px;
+
+    aspect-ratio: 1 !important;
+
+    border-radius: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: colors-alt.$light-accent-primary;
+
+    border: 1px solid colors.$white;
+
+    >span {
+        font-size: fonts.$text-small-size;
+        color: colors.$white
+    }
+}
+
+.common
+
+.common-badge[type="dot"] {
+
+    width: 8px !important;
+    min-width: 8px !important;
+
+    >span {display: hidden;}
+}

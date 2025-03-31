@@ -15,10 +15,9 @@ export default function AddExpenditureTransaction({onFinishAction}) {
 
         const transactionAmt = Number(formValues.amount);
 
-        const selectedCurrencyBalanceObj = balanceData.find( 
-            (balanceObject)=>balanceObject.data.currency == formValues.currency);
+        const selectedCurrencyBalanceObj = balanceData[formValues.currency]
 
-        const availableAmt = selectedCurrencyBalanceObj.data.amount;
+        const availableAmt = selectedCurrencyBalanceObj.amount;
 
         consoleDebug('Selected Expense Balance:');
         console.log(selectedCurrencyBalanceObj);

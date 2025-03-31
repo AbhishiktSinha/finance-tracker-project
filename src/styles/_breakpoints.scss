@@ -2,7 +2,8 @@
 
 $small-screen-width: 350px;
 $mobile-width: 400px;
-$tablet-width: 800px;
+$intermediate-small-screen-width: 624px;
+$tablet-width: 824px;
 $intermediate-large-screen-width: 900px;
 $large-screen-width: 1024px;
 $desktop-width: 1440px;
@@ -10,5 +11,5 @@ $desktop-width: 1440px;
 /* ------------------------ MIN-WIDTH BREAKPOINTS ----------------- */
 $mobile-min-width: 0px;
 $tablet-min-width: 420px;
-$large-screen-min-width: 824px;
+$large-screen-min-width: 850px;
 $desktop-min-width: 1024px;

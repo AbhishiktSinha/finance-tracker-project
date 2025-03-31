@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 
-import { selectBalanceData, selectDefaultCurrency } from '../../../../redux/selectors';
-import { selectNewTransactionData_wrapper } from '../../redux/selectors';
+import { selectBalanceDataList, selectDefaultCurrency } from '../../../../redux/selectors';
+// import { selectNewTransactionData_wrapper } from '../../redux/selectors';
 
 import useDynamicAmount from '../../../../../../custom_hooks/useDynamicAmount';
 import { consoleDebug, consoleInfo } from '../../../../../../console_styles';
@@ -13,6 +13,8 @@ import { useContext, useMemo } from 'react';
 import activeTimeframeContext from '../../context/ActiveTimeframeContext';
 import './styles.scss'
 import latestTransactionContext from '../../context/LatestTransactionContext';
+import { reduxSliceKeys } from '../../../../defaults';
+import { selectBalanceInitializer } from '../../redux/selectors';
 
 /**
  * # TODO: 
@@ -35,7 +37,8 @@ export default function BalanceCard() {
     // const timeframe = useSelector(selectActiveTimeframe)
     const {activeTimeframe: timeframe} = useContext(activeTimeframeContext)
 
-    const initializer = useSelector(selectBalanceData);
+    // const initializer = useSelector(selectBalanceData);
+    const initializer = useSelector(selectBalanceInitializer);
     const defaultCurrency = useSelector(selectDefaultCurrency); 
 
     consoleInfo(`BALANCE CARD DEPENDENCIES:\n

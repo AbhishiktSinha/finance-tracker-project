@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Form, Select, Flex, Input, Divider, DatePicker, Button } from 'antd'
 import dayjs from 'dayjs'
 
-import { selectBalanceData } from '../../features/PrivateLayout/redux/selectors'
+import { selectBalanceDataList } from '../../features/PrivateLayout/redux/selectors'
 import { selectDefaultCurrency } from '../../features/PrivateLayout/redux/selectors'
 
 
@@ -57,7 +57,8 @@ export default function TransactionMangementForm({
 
   // ----------------------------- selectors -------------
   const currency = useSelector(selectDefaultCurrency);
-  const balanceList = useSelector(selectBalanceData);
+  // const balanceList = useSelector(selectBalanceData);
+  const balanceList = useSelector(selectBalanceDataList)
 
   // ------------------------------ context --------------
   const { user: { uid } } = useContext(userAuthContext)

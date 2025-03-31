@@ -20,11 +20,14 @@ const ROUTES= {
             expenditure: '/analytics/expenditure'
         }, 
         
-        /* EMPTY LAYOUT ---> doesn't need a specific route */
+        /* CATEGORY NESTING LAYOUT ---> with a dummy route that redirects to index */
         settings: {            
             /* __index__: '/settings/general',  */
 
-            emptyCategoryLayout: true, 
+            emptyCategoryLayout: false,
+
+            __route__: '/settings', 
+            __index__: '/settings/general',
 
             general: '/settings/general', 
             account: '/settings/account',

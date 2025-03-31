@@ -8,7 +8,7 @@ import { asyncStatus, timeframe as timeframeEnum, transactionType } from "../enu
 import { FirestoreCRUD } from "../firebase/firestore";
 import { DayJSUtils } from "../dayjs";
 import { useSelector } from "react-redux";
-import { fetchPreviousTimeframeTransactions } from "../features/PrivateLayout/utils";
+import { fetchPreviousTimeframeTransactionsData } from "../features/PrivateLayout/utils";
 import userAuthContext from "../features/PrivateLayout/context/userAuthContext";
 
 
@@ -158,7 +158,7 @@ export default function useInsightState(activeTimeframe, defaultCurrencyCode, ne
             const {
                 success, 
                 data: transactionList, 
-                error} = await fetchPreviousTimeframeTransactions(uid,activeTimeframe,type);
+                error} = await fetchPreviousTimeframeTransactionsData(uid,activeTimeframe,type);
 
             if (success) {
 

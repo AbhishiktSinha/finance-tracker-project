@@ -1,0 +1,121 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/fonts' as fonts;
+
+
+$select-transaction-cell-width: 36px;
+
+
+%table-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    padding: 12px 8px;
+}
+
+%table-cell {
+    padding-inline-end: 12px;
+    text-align: start;
+
+    font-size: fonts.$text-small-size;
+}
+
+%item-actions-span {
+    
+    >span {
+
+        height: fonts.$text-small-size + 3px;
+        // height: inherit;
+        // aspect-ratio: 1;
+
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        >img,
+        >svg {
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+        }
+    }
+}
+
+%select-transaction-cell {
+    @extend %table-cell;
+    @extend %item-actions-span;
+
+    flex-basis: $select-transaction-cell-width;
+    min-width: $select-transaction-cell-width;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+%amount-cell {
+    @extend %table-cell;
+
+    flex-basis: 15%;
+    min-width: 150px;
+    text-wrap: nowrap;
+}
+
+%tag-cell {
+    @extend %table-cell;
+
+    flex-basis: 12%;
+    min-width: 150px;
+
+    /* >span {
+        justify-content: start;
+        padding: 4px 6px;
+        white-space-collapse: collapse;
+
+    } */
+}
+
+%date-cell {
+    @extend %table-cell;
+    flex-basis: 10%;
+    min-width: 100px;
+    text-wrap: nowrap;
+}
+
+%transaction-item-actions-cell {
+    @extend %table-cell;
+    @extend %item-actions-span;
+    flex-basis: 10%;
+    min-width: 100px;
+    display: none;
+    position: relative;    
+}
+
+%title-cell {
+    @extend %table-cell;
+    // flex-basis: calc(100% - 12% - 15% - 10% - 25px);
+    flex-grow: 1;
+    min-width: 200px;
+    display: block;
+    overflow-x: hidden;
+    text-wrap: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+%action-psuedo-element {
+    content: "";
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+%action-psuedo-element-hover {
+    background-color: colors-alt.$light-shadow-mild;
+}

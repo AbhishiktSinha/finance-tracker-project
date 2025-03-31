@@ -1,33 +1,63 @@
-import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import TempFilterContext from "../FilterModal/context/TempFilterContext";
-import FilterConditionsContext from "../../context/FilterConditionsContext";
-
-import { debounce } from "../../../../utils";
-import { filterDefaults } from "../../defaults";
-import { searchThroughFilterOptions } from "../../utils";
 import { Button, Checkbox, Input } from "antd";
 import { SearchOutlined } from "@mui/icons-material";
-import { filterTypes, timeframeDisplay } from "../../../../../../enums";
-import { consoleDebug, consoleInfo } from "../../../../../../console_styles";
-import FilterOption from "../FilterOption";
-import CustomTimeframeButton from "../CustomTimeframeButton";
-import { DayJSUtils } from "../../../../../../dayjs";
 import { Divider } from "@mui/material";
 
+import FilterOption from "../FilterOption";
+import CustomTimeframeButton from "../CustomTimeframeButton";
 
-function FilterCategorySection({ category, categoryAppliedFilters, setFilters, categoryOptions, customTimeframe, setCustomTimeframe }) {
+import { searchThroughFilterOptions } from "../../utils";
+import { filterDefaults } from "../../defaults";
+import { filterTypes, timeframeDisplay, transactionType } from "../../../../../../enums";
+import { DayJSUtils } from "../../../../../../dayjs";
+import { debounce, getKey } from "../../../../utils";
+import { consoleDebug, consoleError, consoleInfo } from "../../../../../../console_styles";
+import { useSelector } from "react-redux";
+import { selectBalanceData } from "../../../../redux/selectors";
 
-    // #region DEBUG-LOG
-    consoleInfo(`FILTER OPTIONS FOR ${category} ------ ⤵`);
-    console.log(categoryOptions);
-    consoleInfo(`APPLIED FILTERS FOR ${category} ---------- ⤵`);
-    console.log(categoryAppliedFilters)
-    // #endregion
 
-    const allOptionsEntries = Object.entries(categoryOptions);
+function FilterCategorySection({ category, categoryAppliedFilters, setFilters, categoryOptions, customTimeframe, setCustomTimeframe, appliedTypeFilters }) {        
 
-    const [displayedOptionsEntries, setDisplayedOptionsEntries] = useState(allOptionsEntries)
+    const availableOptionsEntries = useMemo(()=>{
+
+        let allOptionsEntries = Object.entries(categoryOptions);
+
+        // if this category depends on type
+        if (filterDefaults[category].isTypeDependent) {
+
+            // if there are active type filters 
+            if (appliedTypeFilters.size > 0) {
+
+                if (category == 'tagId') {
+
+                    allOptionsEntries = allOptionsEntries.filter( ([id, data]) =>
+                            appliedTypeFilters.
+                                has(getKey(transactionType, data.category)
+                            )
+                        )
+                }                
+            }
+        }
+
+        if (filterDefaults[category].showSelectedOnTop) {
+
+            allOptionsEntries = allOptionsEntries.sort((option_1, option_2)=>{
+
+                const option_1_key = option_1[0];
+                const option_2_key = option_2[0];
+
+                if (categoryAppliedFilters.has(option_1_key)) return -1;
+                else if (categoryAppliedFilters.has(option_2_key)) return 1;
+                else return 0;
+            })
+        }
+
+        return allOptionsEntries
+
+    }, [categoryOptions, appliedTypeFilters]);
+
+    const [displayedOptionsEntries, setDisplayedOptionsEntries] = useState(availableOptionsEntries)
 
     const searchThroughOptions = debounce((query) => {
 
@@ -38,14 +68,22 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
         }
 
         if (query == '') {
-            setDisplayedOptionsEntries(allOptionsEntries);
+            setDisplayedOptionsEntries(availableOptionsEntries);
         }
         else {
-            setDisplayedOptionsEntries(searchThroughFilterOptions(allOptionsEntries, null, searchConditions));
+            setDisplayedOptionsEntries(searchThroughFilterOptions(availableOptionsEntries, null, searchConditions));
         }
 
-    }, 300);
+    }, 240);
 
+    // #region DEBUG-LOG
+    consoleInfo(`ALL FILTER OPTIONS FOR ${category} ------ ⤵`);
+    console.log(categoryOptions);
+    consoleInfo(`AVAILABLE FILTER OPTIONS FOR ${category} ------ ⤵`);
+    console.log(availableOptionsEntries);
+    consoleInfo(`APPLIED FILTERS FOR ${category} ---------- ⤵`);
+    console.log(categoryAppliedFilters)
+    // #endregion
 
     /**
      * 
@@ -95,7 +133,7 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
 
             /* const selectedOptionsAll = new Set(categorySelectedOptions);
             
-            allOptionsEntries.forEach(([optionKey, value])=>{
+            availableOptionsEntries.forEach(([optionKey, value])=>{
                 
                 selectedOptionsAll.add(optionKey)
             }) */
@@ -112,7 +150,7 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
 
         const label_list_by_option = {};
         
-        allOptionsEntries.forEach(([option_key,option_value])=>{
+        availableOptionsEntries.forEach(([option_key,option_value])=>{
             
             if (filterDefaults[category].options_label) {
                 label_list_by_option[option_key] = filterDefaults[category].options_label.map(
@@ -122,8 +160,8 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
                 if (option_value == categoryOptions.CUSTOM) {
 
                     if (Boolean(customTimeframe)) {
-                        label_list_by_option[option_key] = [`${DayJSUtils.format(customTimeframe.start, 'YYYY/MM/DD')} - 
-                                        ${DayJSUtils.format(customTimeframe.end, 'YYYY/MM/DD')}`]
+                        label_list_by_option[option_key] = [`${DayJSUtils.format(customTimeframe.start, 'DD/MM/YYYY')} - 
+                                        ${DayJSUtils.format(customTimeframe.end, 'DD/MM/YYYY')}`]
                         
                         return;
                     }
@@ -146,7 +184,7 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
     return (
         <div className="filter-category-section">
             {
-                (allOptionsEntries.length > 9) && (
+                (availableOptionsEntries.length > 9) && (
                     <div className="search-select-all-action-container filter-options-action-container">
 
                         <Input
@@ -164,7 +202,7 @@ function FilterCategorySection({ category, categoryAppliedFilters, setFilters, c
 
                                     <Checkbox
                                         className="select-all-checkbox"
-                                        defaultChecked={categoryAppliedFilters.size == allOptionsEntries.length}
+                                        defaultChecked={categoryAppliedFilters.size == availableOptionsEntries.length}
                                         onChange={(e) => { toggleSelectAll(e.target.checked) }}
                                     >Select All</Checkbox>
                                 </div>

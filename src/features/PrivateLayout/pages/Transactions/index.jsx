@@ -1,28 +1,23 @@
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { Skeleton } from "@mui/material";
-
 import FilterConditionsContextProvider from "./context/FilterConditionsContext/Provider";
 import TransationsInitializerContextProvider from "./context/TransactionsInitializerContext/Provider";
 import statusContext from "../../components/StateInitializer/context";
 import onboardingStatusContext from "../../components/OnboardingAction/context";
 
-import FilterModal from "./components/FilterModal";
-import TransactionsTable from './components/TransactionsTable/index.jsx';
-// import FilterDisplaySection from './components/FilterDisplaySection/index.jsx'
+import TransactionsListContainer from './components/TransactionsListContainer/index.jsx';
 
-import ModalWrapper from "../../../../components_common/ModalWrapper";
+import { Button, Input } from "antd";
+import { UploadFileOutlined } from "@mui/icons-material";
+import { Skeleton } from "@mui/material";
 
-import { checkDisplayUI, debounce } from "../../utils";
+import { checkDisplayUI } from "../../utils";
 
 
 import './styles.scss'
-import { Button, Input } from "antd";
-import { FilterAltOutlined, FilterAltRounded, FilterListRounded, UploadFileOutlined } from "@mui/icons-material";
-import { SearchOutlined } from "@ant-design/icons";
-import FilterConditionsContext from "./context/FilterConditionsContext";
-import TransactionsInitializerContext from "./context/TransactionsInitializerContext";
-import { filterTransactions } from "./utils";
+import SearchQueryContextProvider from "./context/SearchQueryContext/Provider.jsx";
+import SortOrderContextProvider from "./context/SortOrderContext/Provider.jsx";
+import MastHead from "./components/MastHead/index.jsx";
 
 export default function Transactions() {
     
@@ -31,9 +26,11 @@ export default function Transactions() {
     const { status: initialStateStatus } = useContext(statusContext);
     const { isOnboardingDone } = useContext(onboardingStatusContext)
 
-    const [query, setQuery] = useState('');
+    // #region DEPRECATED handling search query from context now
+    /* const [query, setQuery] = useState('');
 
-    const onInputChange = debounce((e)=>{setQuery(e.target.value)}, 240);
+    const onInputChange = debounce((e)=>{setQuery(e.target.value)}, 240); */
+    // #endregion
 
     
     const showUI = checkDisplayUI([initialStateStatus], isOnboardingDone);
@@ -48,71 +45,40 @@ export default function Transactions() {
     }
 
 
-
     return (
         <FilterConditionsContextProvider>
 
             <TransationsInitializerContextProvider >
 
-                <div className="route-page" id="transactions-page">
-                    <div className="page-contents-wrapper">
+                <SortOrderContextProvider>
 
-                        <div className="page-title-bar">
-                            <h1 className="page-title">Transactions</h1>
+                    <SearchQueryContextProvider>
 
-                            <Button shape="round" type="primary-inverted">
-                                <UploadFileOutlined />
-                                Export
-                            </Button>
+                        <div className="route-page" id="transactions-page">
+                            <div className="page-contents-wrapper">
+
+                                {/* <div className="page-title-bar">
+                                    <h1 className="page-title">Transactions</h1>
+
+                                    <Button shape="round" type="primary-inverted">
+                                        <UploadFileOutlined />
+                                        Export
+                                    </Button>
+                                </div> */}
+
+                                <MastHead />
+                                
+                                <TransactionsListContainer />
+
+                            </div>
                         </div>
 
-                        <div className="transactions-list-container">
+                    </SearchQueryContextProvider>
 
-                            <header className="transactions-list-header">
-                                <div className="search-transactions-container">
-                                    <Input 
-                                        className="search-transactions-input" 
-                                        variant="filled" 
-                                        prefix={<SearchOutlined />} 
-                                        placeholder="Search"
-                                        onChange={onInputChange}
-                                    />
-                                </div>
+                </SortOrderContextProvider>
 
-                                <Button 
-                                    className="transactions-filter-button transactions-action-button"
-                                    shape="round"
-                                    type="outlined"
-                                    ghost
-                                    onClick={openFilterModal}
-                                >
-                                    <FilterAltRounded />
-                                    Filter
-                                </Button>
 
-                                <Button 
-                                    className="transactions-order-button transactions-action-button"
-                                    shape="round"
-                                    type='outlined'
-                                    ghost
-                                >
-                                    <FilterListRounded />
-                                    Sort
-                                </Button>
-
-                            </header>
-
-                            <TransactionsTable query={query} />
-                            
-                        </div>                        
-
-                        <ModalWrapper ref={filterModalRef} className='transactions-filter-modal-container'>
-                            <FilterModal />
-                        </ModalWrapper>
-                    </div>
-                </div>
             </TransationsInitializerContextProvider>
-
 
         </FilterConditionsContextProvider>
     )

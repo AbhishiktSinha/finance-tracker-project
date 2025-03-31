@@ -15,7 +15,10 @@ const {
 
 const initialState = {
     status: asyncStatus.INITIAL, //initial | loading | success | error
-    data: undefined,
+    data: {
+        byId: {}, 
+        allIds: [], 
+    },
     error: '',
 }
 
@@ -34,7 +37,10 @@ export default function tagReducer(state=initialState, action) {
             return {
                 ...state, 
                 status: asyncStatus.SUCCESS,
-                data: payload,
+                data: {
+                    byId: payload.byId, 
+                    allIds: payload.allIds
+                }
             }
         }
         case FETCH_DATA_ERROR: {
@@ -47,12 +53,18 @@ export default function tagReducer(state=initialState, action) {
 
         case CREATE_TAG: {
             // insert new tag object in the tag list (data)
+            const {id, data: payloadData} = payload;
             return {
                 ...state, 
-                data: [
-                    ...state.data, 
-                    payload
-                ]
+                data: {
+                    
+                    byId: {
+                        ...state.data.byId, 
+                        [id]: payloadData
+                    }, 
+
+                    allIds: [...state.data.allIds, id]
+                }
             }
         }
         default : {

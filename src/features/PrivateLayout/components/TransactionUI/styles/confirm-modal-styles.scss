@@ -1,0 +1,34 @@
+.transaction-action-confirm-modal {
+
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 12px;
+
+    .modal-description {
+
+        & li {
+            font-weight: 600;
+            span {
+                font-weight: initial;
+            }
+        }
+    }
+
+    .buttons-container {
+
+        margin-top: 8px !important;
+
+        display: flex;
+        // padding-inline: 8px;
+
+        justify-content: space-between;
+
+        gap: 12px;
+
+        > button {
+            flex-grow: 1;
+        }
+    }
+
+}

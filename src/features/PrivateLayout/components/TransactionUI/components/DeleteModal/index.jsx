@@ -9,9 +9,7 @@ import userAuthContext from "../../../../context/userAuthContext";
 import './styles.scss'
 
 
-export default function DeleteModal({transactionObject, onDelete}) {
-
-    const {id: transactionId, data: transactionData} = transactionObject;
+export default function DeleteModal({id: transactionId, data: transactionData, onDelete, callbackModifyUI}) {    
 
     const {closeModal} = useContext(modalContext);
     const {user: {uid}} = useContext(userAuthContext)
@@ -23,26 +21,23 @@ export default function DeleteModal({transactionObject, onDelete}) {
     
     async function handleClick() {
 
-        /*  TODO:
-            - Set actionButton to loading
-            - call thunk with extraWork
-            - close modal or set actionButton active
-        */
-
        deleteButtonRef.current.setButtonLoading();
        abortButtonRef.current.setButtonDisabled();
        
+        // #region TESTING
        /* FIXME: :hover:disabled styling */
        /* setTimeout(()=>{
            
            deleteButtonRef.current.setButtonActive();
            abortButtonRef.current.setButtonActive();
         }, 20000) */
+        // #endregion
 
         try {
 
-            await dispatch(deleteTransactionThunk(uid, transactionObject, onDelete));
+            await dispatch(deleteTransactionThunk(uid, transactionId, transactionData, onDelete));
 
+            callbackModifyUI && callbackModifyUI()
             closeModal();
         }
         catch(e) {

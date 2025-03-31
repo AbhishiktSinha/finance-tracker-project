@@ -1,17 +1,19 @@
 import { useContext } from 'react';
 import { useSelector } from 'react-redux'
 
-import { selectRecentTransactionsList_wrapper } from '../../redux/selectors'
+import { wrapper_selectRecentTransactionsIdList } from '../../redux/selectors'
 
 import activeTimeframeContext from '../../context/ActiveTimeframeContext';
 import latestTransactionContext from '../../context/LatestTransactionContext';
 
-import TransactionCardHorz from '../../../../components/TransactionCardHorz';
 import EmptyBoxImage from '../../../../../../components_common/EmptyBoxImage';
 
 import { transactionOperations } from '../../../../../../enums';
 import './styles.scss'
 import TransactionCard from '../../../../components/TransactionUI/TransactionCard';
+import { reduxSliceKeys } from '../../../../defaults';
+import { DayJSUtils } from '../../../../../../dayjs';
+import defaults from '../../defaults';
 
 export default function DashboardRecentTransactions() {
     
@@ -19,8 +21,11 @@ export default function DashboardRecentTransactions() {
     const {activeTimeframe} = useContext(activeTimeframeContext)
     const {setLatestTransaction} = useContext(latestTransactionContext)
     
-    const recentTransactionsList = useSelector(
-        selectRecentTransactionsList_wrapper(activeTimeframe));
+    // const recentTransactionsIdList = useSelector(
+    //     selectRecentTransactionsList_wrapper(activeTimeframe));
+
+    const recentTransactionsIdList = useSelector(
+        wrapper_selectRecentTransactionsIdList(activeTimeframe, defaults.maxRecentTransactions))
 
     const onEdit = ({ id, data, modifiedFields }) => {
         setLatestTransaction({
@@ -44,12 +49,12 @@ export default function DashboardRecentTransactions() {
         <div className="dashboard-recent-transactions-container">
             <h2 className="section-title">Your Recent Transactions</h2>
             {
-                recentTransactionsList.length > 0 ? recentTransactionsList.map(
-                    (transactionObj)=>{
+                recentTransactionsIdList.length > 0 ? recentTransactionsIdList.map(
+                    (id)=>{
                         return (
                             <TransactionCard 
-                            key={transactionObj.id}
-                            transactionObj={transactionObj}
+                            key={id}
+                            id={id}                            
                             onEdit={onEdit}
                             onDelete={onDelete}
                             />

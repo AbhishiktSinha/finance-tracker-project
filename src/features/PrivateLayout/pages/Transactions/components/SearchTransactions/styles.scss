@@ -1,0 +1,62 @@
+@use '@app_styles/colors' as colors;
+@use '@app_styles/colors-alt' as colors-alt;
+@use '@app_styles/breakpoints' as breakpoints;
+
+/* -------- desktop first approach ------- */
+.search-bar-container {
+    // hide search-bar buttons
+    .close-search-button, .open-search-button {
+        display:none;
+        background-color: colors-alt.$light-bg-grey-dark;
+    }
+    
+    // basic styling
+    .search-transactions-input {
+
+        display: flex;
+        align-items: center;
+
+        .ant-input-prefix {
+            color: colors.$text-dark-secondary
+        }
+
+        border-radius: 24px;
+        background-color: colors-alt.$light-bg-grey-dark;
+    }
+}
+
+
+/* ----------- small screen styling --------------- */
+@media (max-width: breakpoints.$intermediate-large-screen-width) {
+
+    // when search is closed --> default
+    .search-bar-container {
+        // test
+        // background-color: red;
+
+        // show open button
+        .open-search-button {display: flex;}
+
+        // hide search-input
+        .search-transactions-input {display: none;}
+    }
+
+    // when search is open
+    .search-bar-container.open {
+
+        display: flex;
+        align-items: center;
+        column-gap: 4px;
+
+        // span page-width
+        width: 100%;
+
+        // hide search-open button
+        .open-search-button {display: none;}
+
+        // show search-input, show close-search button
+        .close-search-button, .search-transactions-input {
+            display: flex;
+        }
+    }
+}

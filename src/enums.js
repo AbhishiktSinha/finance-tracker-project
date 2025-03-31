@@ -72,3 +72,9 @@ export const timeframeDisplay = Object.freeze({
 
     CUSTOM: 'custom range'
 })
+
+
+export const sortOrder = Object.freeze({
+    ASC: 'asc', 
+    DESC: 'desc'
+})

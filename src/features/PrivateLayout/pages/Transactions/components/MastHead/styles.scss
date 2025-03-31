@@ -1,0 +1,57 @@
+@use '@app_styles/fonts' as fonts;
+@use '@app_styles/breakpoints' as breakpoints;
+
+#transactions_page_masthead {
+
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;    
+
+    .page-title {
+        font-size: fonts.$title-large-size;
+    }
+
+    .masthead-actions-container {
+        display: flex;
+        align-items: center;
+        column-gap: 8px;
+    }
+        
+}
+
+
+/* ------------ breakpoints ------------- */
+
+@media (max-width: breakpoints.$intermediate-large-screen-width) {
+
+    #transactions_page_masthead.search-open {
+
+        // hide page-title
+        .page-title {display: none}
+
+        // full-width actions
+        .masthead-actions-container {
+            flex-grow: 1;
+
+            .list-action-button { display: none; }
+        }
+    }
+}
+
+@media (max-width: breakpoints.$intermediate-small-screen-width) {
+
+    .masthead-actions-container {
+
+        .list-action-button {
+            padding: 0 !important;
+            min-width: 32px;
+            border: none;
+
+            &:hover {border: none}
+
+            // hide button label, show only icon
+            .label {display: none}
+        }
+    }
+}
