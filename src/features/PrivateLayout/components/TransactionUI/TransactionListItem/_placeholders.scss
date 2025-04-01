@@ -2,6 +2,8 @@
 @use '@app_styles/colors-alt' as colors-alt;
 @use '@app_styles/fonts' as fonts;
 
+@use "@app_styles/animations" as animations;
+
 
 $select-transaction-cell-width: 36px;
 
@@ -114,8 +116,10 @@ $select-transaction-cell-width: 36px;
     width: 35px;
     height: 35px;
     border-radius: 50%;
+
+    @include animations.fade-in-transition();
 }
 
-%action-psuedo-element-hover {
+%action-psuedo-element-hover {    
     background-color: colors-alt.$light-shadow-mild;
 }

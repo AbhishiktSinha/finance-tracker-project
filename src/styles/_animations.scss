@@ -1,0 +1,28 @@
+
+$duration-default: 0.7s;
+$duration-short: 0.2s;
+$duration-long: 1.2s;
+
+
+/* ------------ transistion mixins -------- */
+@mixin fade-in-transition($duration: $duration-short) {
+    transition: background-color $duration;
+}
+
+/* --------- animation frames ----- */
+@keyframes fade-in-animation {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* ------------ animation mixins -------- */
+
+@mixin fade-in($duration: $duration-default, $timing-function: ease) {
+
+    animation: fade-in-animation $duration $timing-function 0s 1;
+}

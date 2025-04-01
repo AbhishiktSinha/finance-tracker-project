@@ -2,6 +2,7 @@
 @use '@app_styles/colors' as colors;
 @use '@app_styles/colors-alt' as colors-alt;
 @use '@app_styles/breakpoints' as breakpoints;
+@use '@app_styles/animations' as animations;
 
 $drawer-padding-block: 36px;
 
@@ -158,6 +159,7 @@ $nav-accordion-content-padding-left: 8px;
             }
         }
     }
+
 }
 
 .navigation-drawer.closed {
@@ -228,19 +230,41 @@ $nav-accordion-content-padding-left: 8px;
     }
 
     .navigation-drawer.closed {
-
-        width: 0;
+        
+        width: default-dimensions.$navigation-drawer-width-opened-wider;
         overflow: hidden;
+
+        transform: translateX(-100%);
     }
 
     .navigation-drawer.open {
 
+        transform: translateX(0);
+
         width: default-dimensions.$navigation-drawer-width-opened-wider;
+        z-index: 200;
 
         .navbar-top-container {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
+    }
+
+    /* -------- BACKDROP (only rendered on open small screen) -----------*/
+    
+    .backdrop {
+        position: fixed;
+        z-index: 190;
+
+        top: 0; 
+        bottom: 0;
+        right: 0;
+        left: 0;
+
+        background-color: colors-alt.$light-shadow;
+
+        @include animations.fade-in();
+        
     }
 }

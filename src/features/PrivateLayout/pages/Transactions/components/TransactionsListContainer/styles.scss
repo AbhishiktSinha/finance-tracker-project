@@ -3,6 +3,7 @@
 @use '@app_styles/fonts' as fonts;
 @use '@app_styles/default-dimensions' as default-dimensions;
 @use '@app_styles/breakpoints' as breakpoints;
+@use '@app_styles/animations' as animations;
 
 @import '../../../../components/TransactionUI/TransactionListItem/placeholders';
 
@@ -148,6 +149,7 @@ $scrollbar-track-width: 12px;
                             }
                         }
                         .transaction-selection-action:hover {
+                            @include animations.fade-in-transition();
                             background-color: colors-alt.$light-accent-active-bg;
                         }
                     } 

@@ -10,11 +10,14 @@ import { getRouteIcon } from './iconUtils';
 import NavLinkAccordion from './NavLinkAccordion';
 // import ROUTES from '../../../../routes.config';
 
+import useIsScreenMaxWidth from '../../../../custom_hooks/useIsScreenMaxWidth';
+
 import LogoMain from '../../../../../assets/logo-main.png';
 import ROUTES from '../../../../routes.config';
 
-import './styles.scss'
+import { consoleDebug, consoleInfo } from '../../../../console_styles';
 
+import './styles.scss'
 
 
 const NavigationDrawer = forwardRef((props, ref) => {
@@ -22,11 +25,14 @@ const NavigationDrawer = forwardRef((props, ref) => {
     const [drawerState, setDrawerState] = useState('closed');
     // const [drawerState, setDrawerState] = useState('open');
 
+    const isBelowWidthThreshold = useIsScreenMaxWidth(824);
+
     const openTrigger = useRef(false)
 
     const location = useLocation();
     const { pathname } = location;
 
+    consoleInfo(`------ DRAWER: ${drawerState.toUpperCase()} ---------`);
     console.log('location:', location)
 
     
@@ -57,6 +63,11 @@ const NavigationDrawer = forwardRef((props, ref) => {
         }
     }
 
+    function closeDrawer(e) {        
+        consoleDebug('------ closing drawer --------');
+        setDrawerState('closed');
+    }
+
     function isSelected(link) {
 
         if (link == 'dashboard') {
@@ -71,99 +82,109 @@ const NavigationDrawer = forwardRef((props, ref) => {
     }
 
     return (
-        <div
-            className={"navigation-drawer" + " " + drawerState}
-            onMouseOver={onMouseOver}
-            onMouseLeave={onMouseLeave}
-        >
+        <>
+            {
+                isBelowWidthThreshold && 
+                (drawerState == 'open') && 
+                <div className="backdrop" onClick={closeDrawer}></div>
+            }
 
-            {/* ------------------ HEADER -------------- */}
-            <div className="navbar-top-container">
-                <span className="logo-main-container">
-                    <img src={LogoMain} alt="Financely" className="logo-main" />
-                </span>
-                <Button 
-                    className='close-navbar-button'
-                    shape={'circle'}
-                    ghost
-                    onClick={()=>{setDrawerState('closed')}}
-                >
-                    <CloseRounded />
-                </Button>
-            </div>
-            
-            {/* --------------- LIST OF NAVIGABLE LINKS ---------------- */}
-            <ul className="navigation-drawer-list">
+            <div
+                className={"navigation-drawer" + " " + drawerState}
+                {...(!isBelowWidthThreshold && { onMouseOver: onMouseOver })}
+                {...(!isBelowWidthThreshold && { onMouseLeave: onMouseLeave })}
+            >
 
-                {
-                    Object.keys(main_routes).map(
-                        (route_key) => {
+                {/* ------------------ HEADER -------------- */}
+                <div className="navbar-top-container">
+                    <span className="logo-main-container">
+                        <img src={LogoMain} alt="Financely" className="logo-main" />
+                    </span>
 
-                            if (route_key.startsWith('__')) return;
+                    <Button
+                        className='close-navbar-button'
+                        shape={'circle'}
+                        ghost
+                        onClick={closeDrawer}
+                    >
+                        <CloseRounded />
+                    </Button>
+                </div>
 
-                            if (typeof main_routes[route_key] == 'string') {
+                {/* --------------- LIST OF NAVIGABLE LINKS ---------------- */}
+                <ul className="navigation-drawer-list">
 
-                                const route = main_routes[route_key];
+                    {
+                        Object.keys(main_routes).map(
+                            (route_key) => {
 
-                                console.log(route, route_key);
+                                if (route_key.startsWith('__')) return;
 
-                                return (
-                                    <NavLinkItem
-                                        key={route}
-                                        title={route_key}
-                                        route={route}
-                                        showTitle={drawerState == 'open'}
-                                        isSelected={pathname.endsWith(route)}
-                                        defaultIcon={getRouteIcon(route_key, 'default')}
-                                        activeIcon={getRouteIcon(route_key, 'active')}
-                                    />
-                                )
-                            }
-                            else if (typeof main_routes[route_key] == 'object' && main_routes[route_key].emptyCategoryLayout) {
+                                if (typeof main_routes[route_key] == 'string') {
 
-                                const { __index__, emptyCategoryLayout, __route__, ...nested_routes } = main_routes[route_key]
+                                    const route = main_routes[route_key];
 
-                                return (
-                                    <NavLinkAccordion
-                                        key={'nav-link-accordion/' + route_key}
-                                        route_key={route_key}
-                                        title={route_key}
-                                        drawerOpen={drawerState == 'open'}
-                                    >
-                                        {
-                                            Object.keys(nested_routes).map(
-                                                nestedRouteKey => {
+                                    // console.log(route, route_key);
 
-                                                    if (typeof nested_routes[nestedRouteKey] == 'string') {
+                                    return (
+                                        <NavLinkItem
+                                            key={route}
+                                            title={route_key}
+                                            route={route}
+                                            showTitle={drawerState == 'open'}
+                                            isSelected={pathname.endsWith(route)}
+                                            defaultIcon={getRouteIcon(route_key, 'default')}
+                                            activeIcon={getRouteIcon(route_key, 'active')}
+                                            {...(isBelowWidthThreshold && { onClick: closeDrawer })}
+                                        />
+                                    )
+                                }
+                                else if (typeof main_routes[route_key] == 'object' && main_routes[route_key].emptyCategoryLayout) {
 
-                                                        const nestedRoute = nested_routes[nestedRouteKey]
+                                    const { __index__, emptyCategoryLayout, __route__, ...nested_routes } = main_routes[route_key]
 
-                                                        console.log(nestedRoute, nestedRouteKey);
+                                    return (
+                                        <NavLinkAccordion
+                                            key={'nav-link-accordion/' + route_key}
+                                            route_key={route_key}
+                                            title={route_key}
+                                            drawerOpen={drawerState == 'open'}
+                                        >
+                                            {
+                                                Object.keys(nested_routes).map(
+                                                    nestedRouteKey => {
 
-                                                        return (
-                                                            <NavLinkItem
-                                                                key={nestedRoute}
-                                                                title={nestedRouteKey}
-                                                                showTitle={drawerState == 'open'}
-                                                                route={nestedRoute}
-                                                                isSelected={pathname.endsWith(nestedRoute)}
-                                                                defaultIcon={getRouteIcon(nestedRouteKey, 'default')}
-                                                                activeIcon={getRouteIcon(nestedRouteKey, 'active')}
-                                                            />
-                                                        )
+                                                        if (typeof nested_routes[nestedRouteKey] == 'string') {
+
+                                                            const nestedRoute = nested_routes[nestedRouteKey]
+
+                                                            // console.log(nestedRoute, nestedRouteKey);
+
+                                                            return (
+                                                                <NavLinkItem
+                                                                    key={nestedRoute}
+                                                                    title={nestedRouteKey}
+                                                                    showTitle={drawerState == 'open'}
+                                                                    route={nestedRoute}
+                                                                    isSelected={pathname.endsWith(nestedRoute)}
+                                                                    defaultIcon={getRouteIcon(nestedRouteKey, 'default')}
+                                                                    activeIcon={getRouteIcon(nestedRouteKey, 'active')}
+                                                                />
+                                                            )
+                                                        }
                                                     }
-                                                }
-                                            )
-                                        }
-                                    </NavLinkAccordion>
-                                )
+                                                )
+                                            }
+                                        </NavLinkAccordion>
+                                    )
+                                }
                             }
-                        }
-                    )
-                }
+                        )
+                    }
 
-            </ul>
-        </div>
+                </ul>
+            </div>
+        </>
     )
 
 })
